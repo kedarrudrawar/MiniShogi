@@ -36,36 +36,32 @@ public abstract class Piece{
 
 
 
-
-
 //    Abstract methods
     abstract void promote();
     abstract boolean isValidMove(int[] startPos, int[] endPos);
 }
 
 
-class Pawn extends Piece{
-    public Pawn(Player player){
+class Pawn extends Piece {
+    public Pawn(Player player) {
         this.name = "P";
         this.player = player;
     }
 
 
-    public void promote(){}
+    public void promote() {
+    }
 
-    public boolean isValidMove(int[] startPos, int[] endPos){
+    public boolean isValidMove(int[] startPos, int[] endPos) {
 //        This method will check whether the move from start to end is valid
-        if(endPos[0] != startPos[0]){
+        if (endPos[0] != startPos[0]) {
             return false;
         }
-        if(endPos[1] - startPos[1] == 1)
+        if (Math.abs(endPos[1] - startPos[1]) == 1)
             return true;
         return false;
     }
-
-
 }
-
 
 class Bishop extends Piece{
     public Bishop(Player player){
@@ -74,13 +70,17 @@ class Bishop extends Piece{
     }
 
 
+    public void checkPathAvailability(){}
+
     public void promote(){}
 
-    public boolean isValidMove(int[] startPos, int[] endPos){
+    public boolean isValidMove(int[] startPosArr, int[] endPosArr){
 //        This method will check whether the move from start to end is valid
-        if(Math.abs(startPos[0] - endPos[0]) != Math.abs(startPos[1] - endPos[1])){
+        if(Math.abs(startPosArr[0] - endPosArr[0]) != Math.abs(startPosArr[1] - endPosArr[1])){
             return false;
         }
+
+
 
         return true;
     }
@@ -122,7 +122,7 @@ class Rook extends Piece{
 
     public void promote(){}
 
-
+    public void checkPathAvailability(){}
 
     public boolean isValidMove(int[] startPos, int[] endPos){
         if(startPos[0] != endPos[0]){
@@ -165,8 +165,6 @@ class SilverGeneral extends Piece{
                 }
             }
         }
-
-
         return false;
     }
 }
