@@ -3,20 +3,14 @@ import java.util.*;
 
 public abstract class Piece{
 //    Fields
-    public Player player;
-    String name;
-//    public boolean captured = false;
+    protected Player player;
+    protected String name;
 
 
 //    Defined methods
     public String toString(){
         return this.name;
     }
-
-
-//    public void capture(){
-//        this.captured = true;
-//    }
 
     public void drop(String location){
     }
@@ -135,7 +129,7 @@ class Rook extends Piece {
             }
         }
 
-        if(!horizontal){
+        else{
             int startRow = Math.min(startPos.getRow(), endPos.getRow());
             int endRow = Math.max(startPos.getRow(), endPos.getRow());
 

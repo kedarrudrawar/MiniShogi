@@ -66,7 +66,9 @@ public class Board{
         return this.board;
     }
 
-
+    public Piece getPiece(Location pos){
+        return this.board[pos.getCol()][pos.getRow()];
+    }
 
 
 // ACTION methods
@@ -93,7 +95,7 @@ public class Board{
 
         List<Location> positions = startPiece.findValidPath(start, end);
 
-
+//        This for loop iterates through all the positions except the final position to check if they are all empty.
         for (int i = 0; i < positions.size() - 1; i++) {
             Location currLoc = positions.get(i);
             Piece currPiece = this.board[currLoc.getCol()][currLoc.getRow()];
