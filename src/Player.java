@@ -39,9 +39,7 @@ public class Player{
 
 
  public void capture(Piece piece){
-//     piece.capture();
      this.captured.add(piece);
-
      this.incrementTurn();
  }
 

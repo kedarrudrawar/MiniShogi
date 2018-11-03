@@ -68,11 +68,12 @@ public class Board{
 
 
     public boolean capture(int[] startPosArr, int[] endPosArr){
-        Piece captor = this.board[startPosArr[0]][startPosArr[1]];
-        Piece captured = this.board[endPosArr[0]][endPosArr[1]];
-        Player captorPlayer = captor.getPlayer();
-        captorPlayer.capture(captured);
-        this.board[endPosArr[0]][endPosArr[1]] = captor;
+        Piece captorPiece = this.board[startPosArr[0]][startPosArr[1]];
+        Piece capturedPiece = this.board[endPosArr[0]][endPosArr[1]];
+        Player captorPlayer = captorPiece.getPlayer();
+        captorPlayer.capture(capturedPiece);
+
+        this.board[endPosArr[0]][endPosArr[1]] = captorPiece;
 
         return true;
     }
@@ -80,15 +81,22 @@ public class Board{
 
 
     public boolean move(String startPos, String endPos) throws IllegalArgumentException{
+
         int[] startPosArr = getLocation(startPos);
         int[] endPosArr = getLocation(endPos);
 
         Piece piece = this.board[startPosArr[0]][startPosArr[1]];
 
 //        check if target position is empty
+
+        System.out.println(endPosArr[0] + " , " + endPosArr[1]);
+
         if(this.board[endPosArr[0]][endPosArr[1]] != null){
 //            if not empty, check if occupied by opponent's piece or own piece
-            if (this.board[endPosArr[0]][endPosArr[1]].getPlayer() == this.board[startPosArr[0]][startPosArr[1]].getPlayer()) {
+            Player startPosPlayer = this.board[endPosArr[0]][endPosArr[1]].getPlayer();
+            Player endPosPlayer = this.board[startPosArr[0]][startPosArr[1]].getPlayer();
+
+            if (startPosPlayer == endPosPlayer) {
                 System.out.println(this.board[endPosArr[0]][endPosArr[1]]);
                 throw new IllegalArgumentException("Desired position is occupied by your player.");
             }
@@ -98,6 +106,7 @@ public class Board{
                 }
             }
         }
+
 
         if(piece != null){
             if(piece.isValidMove(startPosArr, endPosArr)){
@@ -122,16 +131,16 @@ public class Board{
 //      throwing an IllegalArgumentException.
 
 
-    public void checkPathAvailability(Player owner, int[] startPos, int[] endPos) throws IllegalArgumentException{
+    public void checkPathAvailability(Player owner, int[] startPos, int[] endPos) throws IllegalArgumentException {
         Piece movingPiece = this.board[startPos[0]][startPos[1]];
         boolean rook = false;
 
 //        check if Piece is bishop or rook
-        if(movingPiece instanceof Rook)
+        if (movingPiece instanceof Rook)
             rook = true;
 
 //        If piece is a rook
-        if(rook) {
+        if (rook) {
             int movingIndex = 0;
             int stationaryIndex = 1;
             if (startPos[0] == endPos[0]) {
@@ -148,7 +157,7 @@ public class Board{
 
 
             Piece checkPresence;
-            for (int i = start; i < end; i++) {
+            for (int i = start + 1; i < end; i++) {
 //                if rook is moving horizontally
                 if (horizontalMovement) {
                     checkPresence = this.board[i][startPos[stationaryIndex]];
@@ -170,25 +179,30 @@ public class Board{
 
 //        If piece is a bishop
 
-        else{
+        else {
+            int startColumn = Math.min(startPos[0], endPos[0]);
+            int endColumn = Math.max(startPos[1], endPos[1]);
+            int startRow = Math.min(startPos[0], endPos[0]);
+            int endRow = Math.max(startPos[1], endPos[1]);
+
+            int j = startRow + 1;
 
 
+            for (int i = startColumn + 1; i < endColumn; i++) {
+                Piece checkPresence = this.board[i][j];
+                if (checkPresence == null) {
+                    j++;
+                    continue;
+                } else {
+                    throw new IllegalArgumentException("Obstruction in path: " + checkPresence.getName());
+                }
 
 
+            }
 
         }
-
-
-
-
-
-
-
-
-
-
-
     }
+
 
     public boolean isValidMove(int[] startPos, int[] endPos){
         if(startPos[0] != endPos[0]){
@@ -238,12 +252,12 @@ public class Board{
         String[] m1 = {"e4", "e3"};
         moves.add(m1);
 
-        String[] m2 = {"e1", "e3"};
+        String[] m2 = {"e3", "e2"};
         moves.add(m2);
-//        String[] m3 = {"d3", "d2"};
-//        moves.add(m3);
-//        String[] m4 = {"c1", "c2"};
-//        moves.add(m1);
+
+        String[] m3 = {"d1", "e2"};
+        moves.add(m3);
+
 
 
 
@@ -255,18 +269,25 @@ public class Board{
                 System.out.println(e);
             }
 
-            System.out.println(Utils.stringifyBoard(board.getBoard()));
-            System.out.print("Lower's captured: ");
-            for(Piece p : lower.getCaptured()){
-                System.out.print(p.getName());
-            }
-            System.out.println();
 
-            System.out.print("UPPER'S captured: ");
-            for(Piece p : UPPER.getCaptured()){
-                System.out.print(p.getName());
-            }
-            System.out.println();
+            System.out.println(Utils.stringifyBoard(board.getBoard()));
+
+            System.out.println("lower length : " + lower.getCaptured().size());
+            System.out.println("upper length : " + UPPER.getCaptured().size());
+
+
+
+//            System.out.print("Lower's captured: ");
+//            for(Piece p : lower.getCaptured()){
+//                System.out.print(p.getName());
+//            }
+//            System.out.println();
+//
+//            System.out.print("UPPER'S captured: ");
+//            for(Piece p : UPPER.getCaptured()){
+//                System.out.print(p.getName());
+//            }
+//            System.out.println();
 
         }
 
