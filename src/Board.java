@@ -93,16 +93,12 @@ public class Board{
 
         List<Location> positions = startPiece.findValidPath(start, end);
 
-        System.out.println(startPiece.getClass());
-
-        System.out.println("LENGTH OF POSITIONS ARRAY FOR PAWN: " + positions.size());
-
 
         for (int i = 0; i < positions.size() - 1; i++) {
             Location currLoc = positions.get(i);
             Piece currPiece = this.board[currLoc.getCol()][currLoc.getRow()];
             if (currPiece != null) {
-                throw new IllegalArgumentException("Obstruction detection: " + currPiece.getName());
+                throw new IllegalArgumentException("Obstruction detection - " + currPiece.getName());
             }
         }
 
@@ -116,25 +112,6 @@ public class Board{
 
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public void drop(Player player, String pieceName, String position) throws IllegalArgumentException{
 
@@ -150,9 +127,6 @@ public class Board{
                 player.getCaptured().remove(p);
             }
         }
-
-
-
     }
 
     public static void main(String[] args){
