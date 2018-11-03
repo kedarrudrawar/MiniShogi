@@ -26,6 +26,9 @@ public class Player{
      return this.turnCounter;
  }
 
+ public List<Piece> getCaptured(){ return this.captured; }
+
+
  public void capture(Piece piece){
      piece.capture();
      this.captured.add(piece);

@@ -55,9 +55,11 @@ class Pawn extends Piece{
 
     public boolean isValidMove(int[] startPos, int[] endPos){
 //        This method will check whether the move from start to end is valid
+        if(endPos[0] != startPos[0]){
+            return false;
+        }
         if(endPos[1] - startPos[1] == 1)
             return true;
-
         return false;
     }
 
@@ -76,7 +78,11 @@ class Bishop extends Piece{
 
     public boolean isValidMove(int[] startPos, int[] endPos){
 //        This method will check whether the move from start to end is valid
-        return false;
+        if(Math.abs(startPos[0] - endPos[0]) != Math.abs(startPos[1] - endPos[1])){
+            return false;
+        }
+
+        return true;
     }
 }
 
@@ -92,33 +98,46 @@ class King extends Piece{
 
     public void promote(){}
 
+
+
+//    This method will check whether the move from start to end is valid
     public boolean isValidMove(int[] startPos, int[] endPos){
-//        This method will check whether the move from start to end is valid
+
 //        The king can move in any direction, so the absolute value
 //          of difference between startPos and endPos for each position must be 1 or 0.
         if(Math.abs(startPos[0] - endPos[0]) <= 1 && Math.abs(startPos[1] - endPos[1]) <= 1)
             return true;
-
-
-
         return false;
     }
 }
 
 
 class Rook extends Piece{
+
     public Rook(Player player){
         this.name = "R";
         this.player = player;
     }
 
 
-
     public void promote(){}
+
+
+
     public boolean isValidMove(int[] startPos, int[] endPos){
-//        This method will check whether the move from start to end is valid
+        if(startPos[0] != endPos[0]){
+            if(startPos[1] == endPos[1]){
+                return true;
+            }
+        }
+        else if(startPos[0] == endPos[0]){
+            if(startPos[1] != endPos[1]){
+                return true;
+            }
+        }
         return false;
     }
+
 }
 
 
@@ -131,8 +150,23 @@ class SilverGeneral extends Piece{
 
 
     public void promote(){}
+
+
+
     public boolean isValidMove(int[] startPos, int[] endPos){
 //        This method will check whether the move from start to end is valid
+        if(Math.abs(startPos[0] - endPos[0]) == 1 && Math.abs(startPos[1] - endPos[1]) == 1){
+            return true;
+        }
+        else{
+            if(endPos[1] - startPos[1] == 1){
+                if(endPos[0] - startPos[0] == 0){
+                    return true;
+                }
+            }
+        }
+
+
         return false;
     }
 }
