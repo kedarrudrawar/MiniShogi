@@ -17,24 +17,29 @@ public class Board{
 
     public static Piece[][] initializeBoard(){
         Piece[][] board = new Piece[5][5];
-        board[0][4] = new Rook(new Player("UPPER"));
-        board[4][0] = new Rook(new Player("lower"));
+
+        Player lower = new Player("lower");
+        Player UPPER = new Player("UPPER");
 
 
-        board[1][4] = new Bishop(new Player("UPPER"));
-        board[3][0] = new Bishop(new Player("lower"));
+        board[0][4] = new Rook(UPPER);
+        board[4][0] = new Rook(lower);
 
-        board[2][4] = new SilverGeneral(new Player("UPPER"));
-        board[2][0] = new SilverGeneral(new Player("lower"));
 
-        board[3][4] = new GoldGeneral(new Player("UPPER"));
-        board[1][0] = new GoldGeneral(new Player("lower"));
+        board[1][4] = new Bishop(UPPER);
+        board[3][0] = new Bishop(lower);
 
-        board[4][4] = new King(new Player("UPPER"));
-        board[0][0] = new King(new Player("lower"));
+        board[2][4] = new SilverGeneral(UPPER);
+        board[2][0] = new SilverGeneral(lower);
 
-        board[4][3] = new Pawn(new Player("UPPER"));
-        board[0][1] = new Pawn(new Player("lower"));
+        board[3][4] = new GoldGeneral(UPPER);
+        board[1][0] = new GoldGeneral(lower);
+
+        board[4][4] = new King(UPPER);
+        board[0][0] = new King(lower);
+
+        board[4][3] = new Pawn(UPPER);
+        board[0][1] = new Pawn(lower);
 
 
         String b = Utils.stringifyBoard(board);
@@ -80,7 +85,7 @@ public class Board{
 
 
 
-    public boolean move(String startPos, String endPos) throws IllegalArgumentException{
+    public boolean move(Player lower, String startPos, String endPos) throws IllegalArgumentException{
 
         int[] startPosArr = getLocation(startPos);
         int[] endPosArr = getLocation(endPos);
@@ -104,8 +109,16 @@ public class Board{
                 if(piece.isValidMove(startPosArr, endPosArr)) {
                     this.capture(startPosArr, endPosArr);
                 }
+
+
+//                -------------------------------------------------------------------------------------------------------------
+                System.out.println(lower.getCaptured());
+                System.out.println(piece.getPlayer().getCaptured());
+//                -------------------------------------------------------------------------------------------------------------
+
             }
         }
+
 
 
         if(piece != null){
@@ -264,30 +277,30 @@ public class Board{
         for(String[] move : moves) {
             try {
                 System.out.println("moving from " + move[0] + " to " + move[1]);
-                board.move(move[0], move[1]);
+                board.move(lower, move[0], move[1]);
             } catch (IllegalArgumentException e) {
                 System.out.println(e);
             }
 
 
             System.out.println(Utils.stringifyBoard(board.getBoard()));
-
-            System.out.println("lower length : " + lower.getCaptured().size());
-            System.out.println("upper length : " + UPPER.getCaptured().size());
-
-
-
-//            System.out.print("Lower's captured: ");
-//            for(Piece p : lower.getCaptured()){
-//                System.out.print(p.getName());
-//            }
-//            System.out.println();
 //
-//            System.out.print("UPPER'S captured: ");
-//            for(Piece p : UPPER.getCaptured()){
-//                System.out.print(p.getName());
-//            }
-//            System.out.println();
+//            System.out.println("lower length : " + lower.getCaptured().size());
+//            System.out.println("upper length : " + UPPER.getCaptured().size());
+//
+
+
+            System.out.print("Lower's captured: ");
+            for(Piece p : lower.getCaptured()){
+                System.out.print(p.getName());
+            }
+            System.out.println();
+
+            System.out.print("UPPER'S captured: ");
+            for(Piece p : UPPER.getCaptured()){
+                System.out.print(p.getName());
+            }
+            System.out.println();
 
         }
 
