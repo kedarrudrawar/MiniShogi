@@ -2,9 +2,9 @@ import java.*;
 import java.util.*;
 
 public class Player{
-    public String name;
-    public int turnCounter = 0;
-    List<Piece> captured;
+    private String name;
+    private int turnCounter = 0;
+    private List<Piece> captured;
 
 
  public Player(String name){

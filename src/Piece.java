@@ -22,7 +22,7 @@ public abstract class Piece{
     }
 
     public String getName(){
-        if(this.player.name.equals("UPPER"))
+        if(this.player.getName().equals("UPPER"))
             return this.name;
         else
             return this.name.toLowerCase();
@@ -41,8 +41,116 @@ public abstract class Piece{
 
 //    Abstract methods
     abstract void promoteMovement();
-    abstract boolean isValidMove(int[] startPos, int[] endPos);
+//    abstract boolean isValidMove(Location startPos, Location endPos);
+    abstract List<Location> findValidPath(Location startPos, Location endPos);
+
+
 }
+
+class Bishop extends Piece{
+    public Bishop(Player player){
+        this.name = "B";
+        this.player = player;
+    }
+
+
+    public void promoteMovement() {
+
+
+
+        this.promoteName();
+    }
+
+//    public boolean isValidMove(Location startPos, Location endPos){
+////        This method will check whether the move from start to end is valid
+//        if(Math.abs(startPos.getCol() - endPos.getCol()) != Math.abs(startPos.getRow() - endPos.getCol())){
+//            return false;
+//        }
+//
+//        return true;
+//    }
+    public List<Location> findValidPath(Location startPos, Location endPos){
+
+
+        return new ArrayList<Location>();
+    }
+}
+
+
+class Rook extends Piece {
+
+    public Rook(Player player) {
+        this.name = "R";
+        this.player = player;
+    }
+
+
+    public void promoteMovement() {
+
+        this.promoteName();
+    }
+
+
+
+//    public boolean isValidMove(Location startPos, Location endPos){
+//        if(startPos.getCol() != endPos.getCol()){
+//            if(startPos.getRow() == endPos.getRow()){
+//                return true;
+//            }
+//        }
+//        else if(startPos.getCol() == endPos.getCol()){
+//            if(startPos.getRow() != endPos.getRow()){
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+
+
+
+    public List<Location> findValidPath(Location startPos, Location endPos){
+        List<Location> retList = new ArrayList<Location>();
+
+        if(startPos.getCol() != endPos.getCol()){
+            if(startPos.getRow() != endPos.getRow()){
+                return retList;
+            }
+        }
+
+        boolean horizontal = false;
+//        Check if movement is horizontal or vertical:
+        if(startPos.getRow() == endPos.getRow()){
+            horizontal = true;
+        }
+
+        if(horizontal){
+            int startCol = Math.min(startPos.getCol(), endPos.getCol());
+            int endCol = Math.max(startPos.getCol(), endPos.getCol());
+
+            int row = startPos.getRow();
+
+            for(int col = startCol; col < endCol; col++){
+                retList.add(new Location(col, row));
+            }
+        }
+
+        if(!horizontal){
+            int startRow = Math.min(startPos.getRow(), endPos.getRow());
+            int endRow = Math.max(startPos.getRow(), endPos.getRow());
+
+            int col = startPos.getCol();
+
+            for(int row = startRow; row < endRow; row++){
+                retList.add(new Location(col, row));
+            }
+        }
+        return retList;
+    }
+
+}
+
+
 
 
 class Pawn extends Piece {
@@ -59,44 +167,36 @@ class Pawn extends Piece {
         this.promoteName();
     }
 
-    public boolean isValidMove(int[] startPos, int[] endPos) {
-//        This method will check whether the move from start to end is valid
-        if (endPos[0] != startPos[0]) {
-            return false;
+//    public boolean isValidMove(Location startPos, Location endPos) {
+////        This method will check whether the move from start to end is valid
+//        if (endPos.getCol() != startPos.getCol()) {
+//            return false;
+//        }
+//        if (Math.abs(endPos.getRow() - startPos.getRow()) == 1)
+//            return true;
+//        return false;
+//    }
+
+
+    public List<Location> findValidPath(Location startPos, Location endPos){
+        List<Location> retList = new ArrayList<Location>();
+
+        System.out.println("start col: " + startPos.getCol());
+        System.out.println("start row: " + startPos.getRow());
+
+        if (endPos.getCol() != startPos.getCol()) {
+            return retList;
         }
-        if (Math.abs(endPos[1] - startPos[1]) == 1)
-            return true;
-        return false;
+
+        if (Math.abs(endPos.getRow() - startPos.getRow()) == 1)
+            retList.add(endPos);
+
+        return retList;
+
     }
 }
 
-class Bishop extends Piece{
-    public Bishop(Player player){
-        this.name = "B";
-        this.player = player;
-    }
 
-
-    public void checkPathAvailability(){}
-
-    public void promoteMovement() {
-
-
-
-        this.promoteName();
-    }
-
-    public boolean isValidMove(int[] startPosArr, int[] endPosArr){
-//        This method will check whether the move from start to end is valid
-        if(Math.abs(startPosArr[0] - endPosArr[0]) != Math.abs(startPosArr[1] - endPosArr[1])){
-            return false;
-        }
-
-
-
-        return true;
-    }
-}
 
 
 
@@ -118,47 +218,29 @@ class King extends Piece{
 
 
 //    This method will check whether the move from start to end is valid
-    public boolean isValidMove(int[] startPos, int[] endPos){
+//    public boolean isValidMove(Location startPos, Location endPos){
+//
+////        The king can move in any direction, so the absolute value
+////          of difference between startPos and endPos for each position must be 1 or 0.
+//        if(Math.abs(startPos.getCol() - endPos.getCol()) <= 1 && Math.abs(startPos.getRow() - endPos.getRow()) <= 1)
+//            return true;
+//        return false;
+//    }
 
-//        The king can move in any direction, so the absolute value
-//          of difference between startPos and endPos for each position must be 1 or 0.
-        if(Math.abs(startPos[0] - endPos[0]) <= 1 && Math.abs(startPos[1] - endPos[1]) <= 1)
-            return true;
-        return false;
+
+
+    public List<Location> findValidPath(Location startPos, Location endPos){
+        List<Location> retList = new ArrayList<Location>();
+        if(Math.abs(startPos.getCol() - endPos.getCol()) <= 1 && Math.abs(startPos.getRow() - endPos.getRow()) <= 1){
+            retList.add(endPos);
+        }
+        return retList;
+
     }
 }
 
 
-class Rook extends Piece {
 
-    public Rook(Player player) {
-        this.name = "R";
-        this.player = player;
-    }
-
-
-    public void promoteMovement() {
-
-
-
-        this.promoteName();
-    }
-
-    public boolean isValidMove(int[] startPos, int[] endPos){
-        if(startPos[0] != endPos[0]){
-            if(startPos[1] == endPos[1]){
-                return true;
-            }
-        }
-        else if(startPos[0] == endPos[0]){
-            if(startPos[1] != endPos[1]){
-                return true;
-            }
-        }
-        return false;
-    }
-
-}
 
 
 class SilverGeneral extends Piece {
@@ -176,18 +258,32 @@ class SilverGeneral extends Piece {
     }
 
 
-    public boolean isValidMove(int[] startPos, int[] endPos) {
-//        This method will check whether the move from start to end is valid
-        if (Math.abs(startPos[0] - endPos[0]) == 1 && Math.abs(startPos[1] - endPos[1]) == 1) {
-            return true;
-        } else {
-            if (endPos[1] - startPos[1] == 1) {
-                if (endPos[0] - startPos[0] == 0) {
-                    return true;
+//    public boolean isValidMove(Location startPos, Location endPos) {
+////        This method will check whether the move from start to end is valid
+//        if (Math.abs(startPos.getCol() - endPos.getCol()) == 1 && Math.abs(startPos.getRow() - endPos.getRow()) == 1) {
+//            return true;
+//        } else {
+//            if (endPos.getRow() - startPos.getRow() == 1) {
+//                if (endPos.getCol() - startPos.getCol() == 0) {
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
+//    }
+    public List<Location> findValidPath(Location startPos, Location endPos){
+        List<Location> retList = new ArrayList<Location>();
+        if (Math.abs(startPos.getCol() - endPos.getCol()) == 1 && Math.abs(startPos.getRow() - endPos.getRow()) == 1) {
+            retList.add(endPos);
+        }
+        else {
+            if (endPos.getRow() - startPos.getRow() == 1) {
+                if (endPos.getCol() - startPos.getCol() == 0) {
+                    retList.add(endPos);
                 }
             }
         }
-        return false;
+        return retList;
     }
 }
 
@@ -203,9 +299,12 @@ class GoldGeneral extends Piece {
 
         this.promoteName();
     }
-
-    public boolean isValidMove(int[] startPos, int[] endPos) {
-//        This method will check whether the move from start to end is valid
-        return false;
+//
+//    public boolean isValidMove(Location startPos, Location endPos) {
+////        This method will check whether the move from start to end is valid
+//        return false;
+//    }
+    public List<Location> findValidPath(Location startPos, Location endPos){
+        return new ArrayList<Location>();
     }
 }

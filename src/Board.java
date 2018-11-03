@@ -72,169 +72,68 @@ public class Board{
 // ACTION methods
 
 
-    public boolean capture(int[] startPosArr, int[] endPosArr){
-        Piece captorPiece = this.board[startPosArr[0]][startPosArr[1]];
-        Piece capturedPiece = this.board[endPosArr[0]][endPosArr[1]];
+    public void capture(Location startPos, Location endPos){
+        Piece captorPiece = this.board[startPos.getCol()][startPos.getRow()];
+        Piece capturedPiece = this.board[endPos.getCol()][endPos.getRow()];
         Player captorPlayer = captorPiece.getPlayer();
         captorPlayer.capture(capturedPiece);
 
-        this.board[endPosArr[0]][endPosArr[1]] = captorPiece;
-
-        return true;
+        this.board[endPos.getCol()][endPos.getRow()] = captorPiece;
+        this.board[startPos.getCol()][startPos.getRow()] = null;
     }
 
 
 
-    public boolean move(Player lower, String startPos, String endPos) throws IllegalArgumentException{
+    public void move(String startPos, String endPos) throws IllegalArgumentException {
 
-        int[] startPosArr = getLocation(startPos);
-        int[] endPosArr = getLocation(endPos);
+        Location start = new Location(startPos);
+        Location end = new Location(endPos);
 
-        Piece piece = this.board[startPosArr[0]][startPosArr[1]];
+        Piece startPiece = this.board[start.getCol()][start.getRow()];
 
-//        If piece is a bishop or rook, it can move multiple spaces
-//        We must check whether its path is empty or not, before checking whether the target position is empty
-        if(piece instanceof Bishop || piece instanceof Rook) {
-            try {
-                checkPathAvailability(piece.getPlayer(), startPosArr, endPosArr);
-            } catch (IllegalArgumentException e) {
-                System.out.println(e);
-                System.exit(1);
+        List<Location> positions = startPiece.findValidPath(start, end);
+
+        System.out.println(startPiece.getClass());
+
+        System.out.println("LENGTH OF POSITIONS ARRAY FOR PAWN: " + positions.size());
+
+
+        for (int i = 0; i < positions.size() - 1; i++) {
+            Location currLoc = positions.get(i);
+            Piece currPiece = this.board[currLoc.getCol()][currLoc.getRow()];
+            if (currPiece != null) {
+                throw new IllegalArgumentException("Obstruction detection: " + currPiece.getName());
             }
         }
 
-
-
-
-//        check if target position is empty
-        if(this.board[endPosArr[0]][endPosArr[1]] != null){
-//            if not empty, check if occupied by opponent's piece or own piece
-            Player startPosPlayer = this.board[endPosArr[0]][endPosArr[1]].getPlayer();
-            Player endPosPlayer = this.board[startPosArr[0]][startPosArr[1]].getPlayer();
-
-            if (startPosPlayer == endPosPlayer) {
-                System.out.println(this.board[endPosArr[0]][endPosArr[1]]);
-                throw new IllegalArgumentException("Desired position is occupied by your player.");
-            }
-            else{
-                if(piece.isValidMove(startPosArr, endPosArr)) {
-                    this.capture(startPosArr, endPosArr);
-                }
-
-            }
+        Piece endPiece = this.board[end.getCol()][end.getRow()];
+        if (endPiece == null) {
+            this.board[end.getCol()][end.getRow()] = startPiece;
+            this.board[start.getCol()][start.getRow()] = null;
         }
-
-
-
-        if(piece != null){
-            if(piece.isValidMove(startPosArr, endPosArr)){
-                this.board[endPosArr[0]][endPosArr[1]] = piece;
-                this.board[startPosArr[0]][startPosArr[1]] = null;
-            }
-            else{
-                throw new IllegalArgumentException("Illegal move attempted with " + piece.getName() + "."
-                        + System.getProperty("line.separator"));
-            }
-            piece.getPlayer().incrementTurn();
-            return true;
-        }
-        return false;
-    }
-
-
-
-
-//    method will be called after Piece.isValidMove() is called
-//    This method checks whether there is an obstruction in the path intended by the player. If there is, it returns false,
-//      throwing an IllegalArgumentException.
-
-
-    public void checkPathAvailability(Player owner, int[] startPos, int[] endPos) throws IllegalArgumentException {
-        Piece movingPiece = this.board[startPos[0]][startPos[1]];
-        boolean rook = false;
-
-//        check if Piece is bishop or rook
-        if (movingPiece instanceof Rook)
-            rook = true;
-
-//        If piece is a rook
-        if (rook) {
-            int movingIndex = 0;
-            int stationaryIndex = 1;
-            if (startPos[0] == endPos[0]) {
-                movingIndex = 1;
-                stationaryIndex = 0;
-            }
-
-            int start = Math.min(startPos[movingIndex], endPos[movingIndex]);
-            int end = Math.max(startPos[movingIndex], endPos[movingIndex]);
-
-            boolean horizontalMovement = false;
-            if (movingIndex == 0)
-                horizontalMovement = true;
-
-
-            Piece checkPresence;
-            for (int i = start + 1; i < end; i++) {
-//                if rook is moving horizontally
-                if (horizontalMovement) {
-                    checkPresence = this.board[i][startPos[stationaryIndex]];
-                }
-//                if rook is moving vertically
-                else {
-                    checkPresence = this.board[startPos[stationaryIndex]][i];
-                }
-
-                if (checkPresence == null)
-                    continue;
-
-                else {
-                    throw new IllegalArgumentException("Obstruction in path: " + checkPresence.getName());
-                }
-            }
-        }
-
-
-//        If piece is a bishop
-
         else {
-            int startColumn = Math.min(startPos[0], endPos[0]);
-            int endColumn = Math.max(startPos[1], endPos[1]);
-            int startRow = Math.min(startPos[0], endPos[0]);
-            int endRow = Math.max(startPos[1], endPos[1]);
-
-            int j = startRow + 1;
-
-
-            for (int i = startColumn + 1; i < endColumn; i++) {
-                Piece checkPresence = this.board[i][j];
-                if (checkPresence == null) {
-                    j++;
-                    continue;
-                } else {
-                    throw new IllegalArgumentException("Obstruction in path: " + checkPresence.getName());
-                }
-
-
-            }
+            this.capture(start, end);
 
         }
     }
 
 
-    public boolean isValidMove(int[] startPos, int[] endPos){
-        if(startPos[0] != endPos[0]){
-            if(startPos[1] == endPos[1]){
-                return true;
-            }
-        }
-        else if(startPos[0] == endPos[0]){
-            if(startPos[1] != endPos[1]){
-                return true;
-            }
-        }
-        return false;
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public void drop(Player player, String pieceName, String position) throws IllegalArgumentException{
@@ -272,9 +171,9 @@ public class Board{
 
         String[] m2 = {"e3", "e2"};
         moves.add(m2);
-//
-//        String[] m3 = {"d1", "e2"};
-//        moves.add(m3);
+
+        String[] m3 = {"d1", "e2"};
+        moves.add(m3);
 
         String[] m4 = {"e1", "e3"};
         moves.add(m4);
@@ -285,7 +184,7 @@ public class Board{
         for(String[] move : moves) {
             try {
                 System.out.println("moving from " + move[0] + " to " + move[1]);
-                board.move(lower, move[0], move[1]);
+                board.move(move[0], move[1]);
             } catch (IllegalArgumentException e) {
                 System.out.println(e);
             }
