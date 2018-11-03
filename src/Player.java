@@ -13,6 +13,20 @@ public class Player{
      this.captured = new ArrayList<Piece>();
  }
 
+
+
+// GETTER methods
+
+
+ public int getTurnCount(){ return this.turnCounter; }
+
+ public List<Piece> getCaptured(){ return this.captured; }
+
+ public String getName(){ return this.name; }
+
+
+
+
  public boolean dropPiece(){
     return false;
  }
@@ -22,15 +36,10 @@ public class Player{
      System.out.println(this.captured.toString());
  }
 
- public int getTurnCount(){
-     return this.turnCounter;
- }
-
- public List<Piece> getCaptured(){ return this.captured; }
 
 
  public void capture(Piece piece){
-     piece.capture();
+//     piece.capture();
      this.captured.add(piece);
 
      this.incrementTurn();

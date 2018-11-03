@@ -115,6 +115,96 @@ public class Board{
     }
 
 
+
+
+//    method will be called after Piece.isValidMove() is called
+//    This method checks whether there is an obstruction in the path intended by the player. If there is, it returns false,
+//      throwing an IllegalArgumentException.
+
+
+    public void checkPathAvailability(Player owner, int[] startPos, int[] endPos) throws IllegalArgumentException{
+        Piece movingPiece = this.board[startPos[0]][startPos[1]];
+        boolean rook = false;
+
+//        check if Piece is bishop or rook
+        if(movingPiece instanceof Rook)
+            rook = true;
+
+//        If piece is a rook
+        if(rook) {
+            int movingIndex = 0;
+            int stationaryIndex = 1;
+            if (startPos[0] == endPos[0]) {
+                movingIndex = 1;
+                stationaryIndex = 0;
+            }
+
+            int start = Math.min(startPos[movingIndex], endPos[movingIndex]);
+            int end = Math.max(startPos[movingIndex], endPos[movingIndex]);
+
+            boolean horizontalMovement = false;
+            if (movingIndex == 0)
+                horizontalMovement = true;
+
+
+            Piece checkPresence;
+            for (int i = start; i < end; i++) {
+//                if rook is moving horizontally
+                if (horizontalMovement) {
+                    checkPresence = this.board[i][startPos[stationaryIndex]];
+                }
+//                if rook is moving vertically
+                else {
+                    checkPresence = this.board[startPos[stationaryIndex]][i];
+                }
+
+                if (checkPresence == null)
+                    continue;
+
+                else {
+                    throw new IllegalArgumentException("Obstruction in path: " + checkPresence.getName());
+                }
+            }
+        }
+
+
+//        If piece is a bishop
+
+        else{
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    public boolean isValidMove(int[] startPos, int[] endPos){
+        if(startPos[0] != endPos[0]){
+            if(startPos[1] == endPos[1]){
+                return true;
+            }
+        }
+        else if(startPos[0] == endPos[0]){
+            if(startPos[1] != endPos[1]){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     public void drop(Player player, String pieceName, String position) throws IllegalArgumentException{
 
         int[] posArr = this.getLocation(position);

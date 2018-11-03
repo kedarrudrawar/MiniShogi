@@ -5,7 +5,7 @@ public abstract class Piece{
 //    Fields
     public Player player;
     String name;
-    public boolean captured = false;
+//    public boolean captured = false;
 
 
 //    Defined methods
@@ -14,9 +14,9 @@ public abstract class Piece{
     }
 
 
-    public void capture(){
-        this.captured = true;
-    }
+//    public void capture(){
+//        this.captured = true;
+//    }
 
     public void drop(String location){
     }
@@ -112,17 +112,16 @@ class King extends Piece{
 }
 
 
-class Rook extends Piece{
+class Rook extends Piece {
 
-    public Rook(Player player){
+    public Rook(Player player) {
         this.name = "R";
         this.player = player;
     }
 
 
-    public void promote(){}
-
-    public void checkPathAvailability(){}
+    public void promote() {
+    }
 
     public boolean isValidMove(int[] startPos, int[] endPos){
         if(startPos[0] != endPos[0]){
@@ -141,26 +140,24 @@ class Rook extends Piece{
 }
 
 
-class SilverGeneral extends Piece{
-    public SilverGeneral(Player player){
+class SilverGeneral extends Piece {
+    public SilverGeneral(Player player) {
         this.name = "S";
         this.player = player;
     }
 
 
+    public void promote() {
+    }
 
-    public void promote(){}
 
-
-
-    public boolean isValidMove(int[] startPos, int[] endPos){
+    public boolean isValidMove(int[] startPos, int[] endPos) {
 //        This method will check whether the move from start to end is valid
-        if(Math.abs(startPos[0] - endPos[0]) == 1 && Math.abs(startPos[1] - endPos[1]) == 1){
+        if (Math.abs(startPos[0] - endPos[0]) == 1 && Math.abs(startPos[1] - endPos[1]) == 1) {
             return true;
-        }
-        else{
-            if(endPos[1] - startPos[1] == 1){
-                if(endPos[0] - startPos[0] == 0){
+        } else {
+            if (endPos[1] - startPos[1] == 1) {
+                if (endPos[0] - startPos[0] == 0) {
                     return true;
                 }
             }
@@ -169,14 +166,16 @@ class SilverGeneral extends Piece{
     }
 }
 
-class GoldGeneral extends Piece{
-    public GoldGeneral(Player player){
+class GoldGeneral extends Piece {
+    public GoldGeneral(Player player) {
         this.name = "G";
         this.player = player;
     }
 
-    public void promote(){}
-    public boolean isValidMove(int[] startPos, int[] endPos){
+    public void promote() {
+    }
+
+    public boolean isValidMove(int[] startPos, int[] endPos) {
 //        This method will check whether the move from start to end is valid
         return false;
     }
