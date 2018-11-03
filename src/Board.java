@@ -62,10 +62,13 @@ public class Board{
 
 
 
-    public boolean capture(Player captor, int[] endPosArr){
+    public boolean capture(int[] startPosArr, int[] endPosArr){
+        Piece captor = this.board[startPosArr[0]][startPosArr[1]];
         Piece captured = this.board[endPosArr[0]][endPosArr[1]];
-        captor.capture(captured);
-        this.board[endPosArr[0]][endPosArr[1]] = null;
+        Player captorPlayer = captor.getPlayer();
+        captorPlayer.capture(captured);
+        this.board[endPosArr[0]][endPosArr[1]] = captor;
+
         return true;
     }
 
@@ -85,7 +88,7 @@ public class Board{
                 throw new IllegalArgumentException("Desired position is occupied by your player.");
             }
             else{
-//                insert capture function call here
+               this.capture(startPosArr, endPosArr);
             }
 
         }
