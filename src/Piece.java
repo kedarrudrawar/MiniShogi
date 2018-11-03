@@ -34,10 +34,13 @@ public abstract class Piece{
     }
 
 
+    public void promoteName(){
+        this.name = "+" + this.name;
+    }
 
 
 //    Abstract methods
-    abstract void promote();
+    abstract void promoteMovement();
     abstract boolean isValidMove(int[] startPos, int[] endPos);
 }
 
@@ -49,7 +52,11 @@ class Pawn extends Piece {
     }
 
 
-    public void promote() {
+    public void promoteMovement() {
+
+
+
+        this.promoteName();
     }
 
     public boolean isValidMove(int[] startPos, int[] endPos) {
@@ -72,7 +79,12 @@ class Bishop extends Piece{
 
     public void checkPathAvailability(){}
 
-    public void promote(){}
+    public void promoteMovement() {
+
+
+
+        this.promoteName();
+    }
 
     public boolean isValidMove(int[] startPosArr, int[] endPosArr){
 //        This method will check whether the move from start to end is valid
@@ -96,7 +108,12 @@ class King extends Piece{
 
 
 
-    public void promote(){}
+    public void promoteMovement() {
+
+
+
+        this.promoteName();
+    }
 
 
 
@@ -120,7 +137,11 @@ class Rook extends Piece {
     }
 
 
-    public void promote() {
+    public void promoteMovement() {
+
+
+
+        this.promoteName();
     }
 
     public boolean isValidMove(int[] startPos, int[] endPos){
@@ -147,7 +168,11 @@ class SilverGeneral extends Piece {
     }
 
 
-    public void promote() {
+    public void promoteMovement() {
+
+
+
+        this.promoteName();
     }
 
 
@@ -172,7 +197,11 @@ class GoldGeneral extends Piece {
         this.player = player;
     }
 
-    public void promote() {
+    public void promoteMovement() {
+
+
+
+        this.promoteName();
     }
 
     public boolean isValidMove(int[] startPos, int[] endPos) {

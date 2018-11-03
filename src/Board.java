@@ -92,10 +92,21 @@ public class Board{
 
         Piece piece = this.board[startPosArr[0]][startPosArr[1]];
 
+//        If piece is a bishop or rook, it can move multiple spaces
+//        We must check whether its path is empty or not, before checking whether the target position is empty
+        if(piece instanceof Bishop || piece instanceof Rook) {
+            try {
+                checkPathAvailability(piece.getPlayer(), startPosArr, endPosArr);
+            } catch (IllegalArgumentException e) {
+                System.out.println(e);
+                System.exit(1);
+            }
+        }
+
+
+
+
 //        check if target position is empty
-
-        System.out.println(endPosArr[0] + " , " + endPosArr[1]);
-
         if(this.board[endPosArr[0]][endPosArr[1]] != null){
 //            if not empty, check if occupied by opponent's piece or own piece
             Player startPosPlayer = this.board[endPosArr[0]][endPosArr[1]].getPlayer();
@@ -109,12 +120,6 @@ public class Board{
                 if(piece.isValidMove(startPosArr, endPosArr)) {
                     this.capture(startPosArr, endPosArr);
                 }
-
-
-//                -------------------------------------------------------------------------------------------------------------
-                System.out.println(lower.getCaptured());
-                System.out.println(piece.getPlayer().getCaptured());
-//                -------------------------------------------------------------------------------------------------------------
 
             }
         }
@@ -256,7 +261,7 @@ public class Board{
         Board board = new Board();
         Piece[][] boardArray = board.getBoard();
 
-//        Initialize players
+//        Initialize players (all pieces of one team are initialized to same player)
         Player lower = boardArray[4][0].getPlayer();
         Player UPPER = boardArray[0][4].getPlayer();
 
@@ -267,9 +272,12 @@ public class Board{
 
         String[] m2 = {"e3", "e2"};
         moves.add(m2);
+//
+//        String[] m3 = {"d1", "e2"};
+//        moves.add(m3);
 
-        String[] m3 = {"d1", "e2"};
-        moves.add(m3);
+        String[] m4 = {"e1", "e3"};
+        moves.add(m4);
 
 
 
@@ -284,10 +292,6 @@ public class Board{
 
 
             System.out.println(Utils.stringifyBoard(board.getBoard()));
-//
-//            System.out.println("lower length : " + lower.getCaptured().size());
-//            System.out.println("upper length : " + UPPER.getCaptured().size());
-//
 
 
             System.out.print("Lower's captured: ");
