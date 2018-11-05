@@ -2,7 +2,9 @@ import java.util.*;
 
 
 public class Board {
-    public Piece[][] board;
+    private Piece[][] board;
+    private Location upperKingPos;
+    private Location lowerKingPos;
 
 
     public Board() {
@@ -16,8 +18,8 @@ public class Board {
         Player lower = new Player("lower");
         Player upper = new Player("UPPER");
 
-        board[0][4] = new Rook(upper);
-        board[4][0] = new Rook(lower);
+        board[0][4] = new Rook(upper, new Location(0,4));
+        board[4][0] = new Rook(lower, new Location(4,0));
 
 
         board[1][4] = new Bishop(upper);
@@ -35,9 +37,6 @@ public class Board {
         board[4][3] = new Pawn(upper);
         board[0][1] = new Pawn(lower);
 
-
-//        String b = Utils.stringifyBoard(board);
-//        System.out.println(b);
         return board;
     }
 
@@ -68,6 +67,23 @@ public class Board {
     }
 
 
+//  HELPER methods
+    public void canPromote(Location endPos) throws IllegalArgumentException{
+        Piece piece = this.getPiece(endPos);
+        if(piece.getPlayer().getName() == "UPPER"){
+            if(endPos.getRow() != 0)
+                throw new IllegalArgumentException("Cannot promote.");
+        }
+        else{
+            if(endPos.getRow() != 1)
+                throw new IllegalArgumentException("Cannot promote.");
+        }
+
+        piece.promote();
+    }
+
+
+
 
 // ACTION methods
 
@@ -75,6 +91,7 @@ public class Board {
         Piece captorPiece = this.getPiece(startPos);
         Piece capturedPiece = this.getPiece(endPos);
         Player captorPlayer = captorPiece.getPlayer();
+        capturedPiece.setPlayer(captorPlayer);
         captorPlayer.capture(capturedPiece);
 
 
@@ -101,7 +118,7 @@ public class Board {
             Location currLoc = positions.get(i);
             Piece currPiece = this.getPiece(currLoc);
             if (currPiece != null) {
-                throw new IllegalArgumentException("Obstruction detection - " + currPiece.getName());
+                throw new IllegalArgumentException("Obstructed by: " + currPiece.getName());
             }
         }
 
@@ -110,11 +127,31 @@ public class Board {
             this.setPiece(end, startPiece);
             this.setPiece(start, null);
         } else {
+            if(endPiece.getPlayer() == startPiece.getPlayer()) {
+                if(endPiece.getPlayer().getName().equals("UPPER"))
+                    System.out.println("lower player wins. Illegal move.");
+                else
+                    System.out.println("UPPER player wins. Illegal move.");
+                System.exit(0);
+            }
+            if(endPiece.isPromoted())
+                endPiece.demote();
             this.capture(start, end);
         }
+
+//        Check whether own player is in check
+
+
+
+//        Check whether opponent player is in check
+
+
+
+
+        startPiece.setPosition(end);
     }
 
-    public void drop(Player player, String pieceName, String position) throws IllegalArgumentException {
+    public void drop(Player captor, String pieceName, String position) throws IllegalArgumentException {
         Location dropPos = new Location(position);
         Piece checkPiece = this.getPiece(dropPos);
 
@@ -123,10 +160,59 @@ public class Board {
                     checkPiece.getName());
         }
 
-        Map<String, Piece> capturedMap = player.getCaptured();
+        if(captor.getName().equals("UPPER")){
+            if(dropPos.getRow() == 0)
+                throw new IllegalArgumentException("Cannot drop into promotion zone.");
+        }
+        else{
+            if(dropPos.getRow() == 4)
+                throw new IllegalArgumentException("Cannot drop into promotion zone");
+        }
+
+
+
+        Map<String, Piece> capturedMap = captor.getCaptured();
+
+        Piece dropPiece = capturedMap.get(pieceName);
+
+        if(dropPiece == null)
+            throw new IllegalArgumentException("You have not captured this piece.");
+
+//        Check for dropping validity here (pawns cannot be in same column)
+        if(! dropPiece.canDrop(dropPos)){
+
+        }
+
+
+
+        this.setPiece(dropPos, dropPiece);
+
         if (capturedMap.containsKey(pieceName))
-            player.getCaptured().remove(pieceName);
+            captor.getCaptured().remove(pieceName);
     }
+
+    public void promote(String position){
+        Location promPos = new Location(position);
+        Piece piece = this.getPiece(promPos);
+        if(piece.getPlayer().getName() == "UPPER"){
+            if(promPos.getRow() != 0)
+                throw new IllegalArgumentException("Cannot promote.");
+        }
+        else{
+            if(promPos.getRow() != 4)
+                throw new IllegalArgumentException("Cannot promote.");
+        }
+
+        piece.promote();
+    }
+
+
+    public void inCheck(){
+
+    }
+
+
+
 
 
 

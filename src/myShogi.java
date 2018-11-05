@@ -37,9 +37,13 @@ public class myShogi{
 
         String input = sc.nextLine();
 
-        while(!input.equals("quit")){
+        while(upper.getTurnCount() < 200 || lower.getTurnCount() < 200){
             String[] inputSplit = input.split(" ");
             String action = inputSplit[0];
+
+            if(action.equals("quit"))
+                System.exit(0);
+
 
             if(action.equals("move")) {
                 String startPos = inputSplit[1];
@@ -55,12 +59,18 @@ public class myShogi{
 
 
                 board.move(startPos, endPos);
+
+                if(promote){
+                    System.out.println("about to promote");
+                    board.promote(endPos);
+                }
+
             }
 
             else if(action.equals("drop")){
                 String dropPiece = inputSplit[1];
                 String dropPos = inputSplit[2];
-
+                board.drop(currPlayer, dropPiece, dropPos);
 
             }
             else{
@@ -80,8 +90,6 @@ public class myShogi{
                 currPlayer = upper;
 
 
-
-
 //            Print output:
             boardString = Utils.stringifyBoard(board.getBoard());
             System.out.println(boardString);
@@ -96,7 +104,6 @@ public class myShogi{
             System.out.println();
 
             System.out.print(currPlayer.getName() + ">");
-
 
 
             input = sc.nextLine();

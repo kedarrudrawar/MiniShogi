@@ -7,6 +7,7 @@ public abstract class Piece {
     protected Player player;
     protected String name;
     protected Piece promotionPiece;
+    protected Location currPos;
 
 
     //    Defined methods
@@ -32,16 +33,41 @@ public abstract class Piece {
         this.name = "+" + this.name;
     }
 
+    public void demote(){
+        this.name = this.name.split("\\+")[1];
+    }
+
+    public boolean isPromoted(){
+        if(this.name.charAt(0) == '+')
+            return true;
+        return false;
+    }
+
+    public void setPlayer(Player newPlayer){
+        this.player = newPlayer;
+    }
+
+    public void setPosition(Location pos){
+        this.currPos = pos;
+    }
 
     //    Abstract methods
     abstract List<Location> findValidPath(Location startPos, Location endPos);
+    abstract boolean canDrop(Location dropPos);
 }
 
 class Bishop extends Piece {
-    public Bishop(Player player) {
+    public Bishop(Player player){
         this.name = "B";
         this.player = player;
         this.promotionPiece = new King(player);
+    }
+
+    public Bishop(Player player, Location pos) {
+        this.name = "B";
+        this.player = player;
+        this.promotionPiece = new King(player);
+        this.currPos = pos;
     }
 
     public List<Location> findValidPath(Location startPos, Location endPos) {
@@ -72,15 +98,28 @@ class Bishop extends Piece {
 
         return retList;
     }
+
+
+
+
+    public boolean canDrop(Location dropPos){
+        return false;
+    }
 }
 
 
 class Rook extends Piece {
-
-    public Rook(Player player) {
+    public Rook(Player player){
         this.name = "R";
         this.player = player;
         this.promotionPiece = new King(player);
+    }
+
+    public Rook(Player player, Location pos) {
+        this.name = "R";
+        this.player = player;
+        this.promotionPiece = new King(player);
+        this.currPos = pos;
     }
 
     public List<Location> findValidPath(Location startPos, Location endPos) {
@@ -128,6 +167,9 @@ class Rook extends Piece {
         }
         return retList;
     }
+    public boolean canDrop(Location dropPos){
+        return false;
+    }
 }
 
 
@@ -136,6 +178,13 @@ class Pawn extends Piece {
         this.name = "P";
         this.player = player;
         this.promotionPiece = new GoldGeneral(player);
+    }
+
+    public Pawn(Player player, Location pos){
+        this.name = "P";
+        this.player = player;
+        this.promotionPiece = new GoldGeneral(player);
+        this.currPos = pos;
     }
 
 
@@ -155,6 +204,9 @@ class Pawn extends Piece {
             retList.add(endPos);
         return retList;
     }
+    public boolean canDrop(Location dropPos){
+        return false;
+    }
 }
 
 
@@ -163,6 +215,13 @@ class King extends Piece {
         this.name = "K";
         this.player = player;
         this.promotionPiece = null;
+    }
+
+    public King(Player player, Location pos) {
+        this.name = "K";
+        this.player = player;
+        this.promotionPiece = null;
+        this.currPos = pos;
     }
 
 
@@ -179,6 +238,9 @@ class King extends Piece {
         return retList;
 
     }
+    public boolean canDrop(Location dropPos){
+        return false;
+    }
 }
 
 
@@ -186,6 +248,14 @@ class SilverGeneral extends Piece {
     public SilverGeneral(Player player) {
         this.name = "S";
         this.player = player;
+        this.promotionPiece = new GoldGeneral(player);
+    }
+
+    public SilverGeneral(Player player, Location pos){
+        this.name = "S";
+        this.player = player;
+        this.promotionPiece = new GoldGeneral(player);
+        this.currPos = pos;
     }
 
     public List<Location> findValidPath(Location startPos, Location endPos) {
@@ -215,10 +285,6 @@ class SilverGeneral extends Piece {
         if (this.player.getName().equals("UPPER"))
             multiplier = -1;
 
-        System.out.println("MULTIPLIER : " + multiplier);
-        System.out.println("start pos : " + startPos.getCol() + " , " + startPos.getRow());
-        System.out.println("end pos : " + endPos.getCol() + " , " + endPos.getRow());
-
         if (multiplier * (endPos.getRow() - startPos.getRow()) > 0) {
             retList.add(endPos);
             return retList;
@@ -226,13 +292,27 @@ class SilverGeneral extends Piece {
             throw new IllegalArgumentException("Illegal move");
         }
     }
+    public boolean canDrop(Location dropPos){
+        return false;
+    }
 }
 
 class GoldGeneral extends Piece {
     public GoldGeneral(Player player) {
         this.name = "G";
         this.player = player;
+        this.promotionPiece = null;
     }
+
+    public GoldGeneral(Player player, Location pos) {
+        this.name = "G";
+        this.player = player;
+        this.promotionPiece = null;
+        this.currPos = pos;
+    }
+
+
+
 
     @Override
     public void promote() throws IllegalArgumentException {
@@ -262,5 +342,8 @@ class GoldGeneral extends Piece {
             }
         }
         return retList;
+    }
+    public boolean canDrop(Location dropPos){
+        return false;
     }
 }

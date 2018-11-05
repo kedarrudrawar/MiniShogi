@@ -5,6 +5,7 @@ public class Player{
     private String name;
     private int turnCounter = 0;
     private Map<String, Piece> captured;
+    private Map<String, Piece> onBoard;
 
 
  public Player(String name){
@@ -43,12 +44,6 @@ public class Player{
      this.incrementTurn();
  }
 
- public void move(Piece piece, String location) {
-//     piece.move(location);
-
-     this.incrementTurn();
-
- }
 
  public void incrementTurn(){
      this.turnCounter += 1;
