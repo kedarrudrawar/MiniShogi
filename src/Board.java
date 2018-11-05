@@ -72,15 +72,29 @@ public class Board {
     }
 
 
+// Setter method
+    public void setPiece(Location pos, Piece piece){
+        this.board[pos.getCol()][endPos.getRow()] = captorPiece;
+    }
+
+
+
+
+
+
+
+
 // ACTION methods
 
 
     public void capture(Location startPos, Location endPos) {
-        Piece captorPiece = this.board[startPos.getCol()][startPos.getRow()];
-        Piece capturedPiece = this.board[endPos.getCol()][endPos.getRow()];
+        Piece captorPiece = this.getPiece(startPos);
+        Piece capturedPiece = this.getPiece(endPos);
         Player captorPlayer = captorPiece.getPlayer();
         captorPlayer.capture(capturedPiece);
 
+
+        this.getPiece(endPos) = captorPiece;
         this.board[endPos.getCol()][endPos.getRow()] = captorPiece;
         this.board[startPos.getCol()][startPos.getRow()] = null;
     }

@@ -13,16 +13,16 @@ public class Runner {
 
         List<String[]> moves = new ArrayList<String[]>();
 
-        String[] m1 = {"c1", "c2"};
+        String[] m1 = {"c5", "d4"};
         moves.add(m1);
 
-        String[] mnew = {"c2", "b3"};
+        String[] mnew = {"d4", "c3"};
         moves.add(mnew);
 
-        String[] m2 = {"b3", "b2"};
+        String[] m2 = {"c3", "c4"};
         moves.add(m2);
 
-//        String[] m3 = {"c4", "b3"};
+//        String[] m3 = {"b2", "c1"};
 //        moves.add(m3);
 
 
@@ -55,6 +55,7 @@ public class Runner {
             for(String key : upper.getCaptured().keySet()){
                 System.out.print(key);
             }
+            System.out.println();
             System.out.println();
 
         }
