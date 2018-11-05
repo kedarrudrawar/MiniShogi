@@ -13,14 +13,16 @@ public class Runner {
 
         List<String[]> moves = new ArrayList<String[]>();
 
-        String[] m1 = {"c5", "d4"};
+        String[] m1 = {"c1", "c2"};
         moves.add(m1);
 
-        String[] mnew = {"d4", "c3"};
+        String[] mnew = {"c2", "c1"};
         moves.add(mnew);
 
-        String[] m2 = {"c3", "c4"};
-        moves.add(m2);
+
+
+//        String[] m2 = {"c3", "c4"};
+//        moves.add(m2);
 
 //        String[] m3 = {"b2", "c1"};
 //        moves.add(m3);

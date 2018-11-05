@@ -55,12 +55,12 @@ public class Board {
 
 
     //    helper method to convert position string to index array (a2 --> [0][1])
-    public int[] getLocation(String location) {
-        int row = location.charAt(0) - 97;
-        int col = Character.getNumericValue(location.charAt(1)) - 1;
-        int[] pos = {row, col};
-        return pos;
-    }
+//    public int[] getLocation(String location) {
+//        int row = location.charAt(0) - 97;
+//        int col = Character.getNumericValue(location.charAt(1)) - 1;
+//        int[] pos = {row, col};
+//        return pos;
+//    }
 
 
     public Piece[][] getBoard() {
@@ -74,13 +74,8 @@ public class Board {
 
 // Setter method
     public void setPiece(Location pos, Piece piece){
-        this.board[pos.getCol()][endPos.getRow()] = captorPiece;
+        this.board[pos.getCol()][pos.getRow()] = piece;
     }
-
-
-
-
-
 
 
 
@@ -94,9 +89,8 @@ public class Board {
         captorPlayer.capture(capturedPiece);
 
 
-        this.getPiece(endPos) = captorPiece;
-        this.board[endPos.getCol()][endPos.getRow()] = captorPiece;
-        this.board[startPos.getCol()][startPos.getRow()] = null;
+        this.setPiece(endPos, captorPiece);
+        this.setPiece(startPos, null);
     }
 
 
@@ -105,7 +99,7 @@ public class Board {
         Location start = new Location(startPos);
         Location end = new Location(endPos);
 
-        Piece startPiece = this.board[start.getCol()][start.getRow()];
+        Piece startPiece = this.getPiece(start);
 
         if(startPiece == null)
             throw new IllegalArgumentException("Illegal move.");
@@ -116,30 +110,29 @@ public class Board {
 //        This for loop iterates through all the positions except the final position to check if they are all empty.
         for (int i = 0; i < positions.size() - 1; i++) {
             Location currLoc = positions.get(i);
-            Piece currPiece = this.board[currLoc.getCol()][currLoc.getRow()];
+            Piece currPiece = this.getPiece(currLoc);
             if (currPiece != null) {
                 throw new IllegalArgumentException("Obstruction detection - " + currPiece.getName());
             }
         }
 
-        Piece endPiece = this.board[end.getCol()][end.getRow()];
+        Piece endPiece = this.getPiece(end);
         if (endPiece == null) {
-            this.board[end.getCol()][end.getRow()] = startPiece;
-            this.board[start.getCol()][start.getRow()] = null;
+            this.setPiece(end, startPiece);
+            this.setPiece(start, null);
         } else {
             this.capture(start, end);
-
         }
     }
 
     public void drop(Player player, String pieceName, String position) throws IllegalArgumentException {
-        int[] posArr = this.getLocation(position);
+        Location dropPos = new Location(position);
+        Piece checkPiece = this.getPiece(dropPos);
 
-        if (this.board[posArr[0]][posArr[1]] != null) {
-            throw new IllegalArgumentException("Desired position to drop piece is currently occupied by: "
-                    + this.board[posArr[0]][posArr[1]].getName());
+        if (checkPiece != null) {
+            throw new IllegalArgumentException("Desired position to drop piece is currently occupied by: " +
+                    checkPiece.getName());
         }
-
 
         Map<String, Piece> capturedMap = player.getCaptured();
         if (capturedMap.containsKey(pieceName))

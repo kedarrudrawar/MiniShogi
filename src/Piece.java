@@ -212,7 +212,11 @@ class SilverGeneral extends Piece {
         if (this.player.getName().equals("UPPER"))
             multiplier = -1;
 
-        if (endPos.getRow() > (multiplier * startPos.getRow())) {
+        System.out.println("MULTIPLIER : " + multiplier);
+        System.out.println("start pos : " + startPos.getCol() + " , " + startPos.getRow());
+        System.out.println("end pos : " + endPos.getCol() + " , " + endPos.getRow());
+
+        if (multiplier * (endPos.getRow() - startPos.getRow()) > 0) {
             retList.add(endPos);
             return retList;
         } else {
