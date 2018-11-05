@@ -104,7 +104,7 @@ class Rook extends Piece {
 
 
         if (horizontal) {
-            int startCol = Math.min(startPos.getCol(), endPos.getCol());
+            int startCol = Math.min(startPos.getCol(), endPos.getCol()) + 1;
             int endCol = Math.max(startPos.getCol(), endPos.getCol());
 
             int row = startPos.getRow();
@@ -113,7 +113,7 @@ class Rook extends Piece {
                 retList.add(new Location(col, row));
             }
         } else {
-            int startRow = Math.min(startPos.getRow(), endPos.getRow());
+            int startRow = Math.min(startPos.getRow(), endPos.getRow()) + 1;
             int endRow = Math.max(startPos.getRow(), endPos.getRow());
 
             int col = startPos.getCol();
@@ -136,14 +136,13 @@ class Pawn extends Piece {
 
 
     public List<Location> findValidPath(Location startPos, Location endPos) {
-        List<Location> retList = new ArrayList<>();
 //        Check if promoted:
         if (this.name.charAt(0) == '+') {
             List<Location> validPromotedMoves = this.promotionPiece.findValidPath(startPos, endPos);
-            for (Location l : validPromotedMoves)
-                retList.add(l);
+            return validPromotedMoves;
         }
 
+        List<Location> retList = new ArrayList<>();
 
         if (endPos.getCol() != startPos.getCol()) {
             return retList;
