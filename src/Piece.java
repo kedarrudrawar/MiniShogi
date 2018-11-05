@@ -54,8 +54,8 @@ class Bishop extends Piece {
             return retList;
         }
 
-        int startCol = Math.min(startPos.getCol(), endPos.getCol());
-        int startRow = Math.min(startPos.getRow(), endPos.getRow());
+        int startCol = Math.min(startPos.getCol(), endPos.getCol()) + 1;
+        int startRow = Math.min(startPos.getRow(), endPos.getRow()) + 1;
 
         int endCol = Math.max(startPos.getCol(), endPos.getCol());
 
@@ -65,6 +65,10 @@ class Bishop extends Piece {
             j++;
         }
 
+
+        for(Location loc : retList){
+            System.out.println(loc.getCol() + " , " + loc.getRow());
+        }
 
         return retList;
     }

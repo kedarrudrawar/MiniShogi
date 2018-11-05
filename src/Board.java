@@ -36,8 +36,8 @@ public class Board {
         board[0][1] = new Pawn(lower);
 
 
-        String b = Utils.stringifyBoard(board);
-        System.out.println(b);
+//        String b = Utils.stringifyBoard(board);
+//        System.out.println(b);
         return board;
     }
 
@@ -51,16 +51,6 @@ public class Board {
     public Player getUpper(){
         return this.board[0][4].getPlayer();
     }
-
-
-
-    //    helper method to convert position string to index array (a2 --> [0][1])
-//    public int[] getLocation(String location) {
-//        int row = location.charAt(0) - 97;
-//        int col = Character.getNumericValue(location.charAt(1)) - 1;
-//        int[] pos = {row, col};
-//        return pos;
-//    }
 
 
     public Piece[][] getBoard() {
@@ -80,7 +70,6 @@ public class Board {
 
 
 // ACTION methods
-
 
     public void capture(Location startPos, Location endPos) {
         Piece captorPiece = this.getPiece(startPos);
