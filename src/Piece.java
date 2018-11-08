@@ -306,19 +306,34 @@ class King extends Piece {
     }
 
     public List<Location> getValidMoves(Location pos) {
-        System.out.println("called getValidMoves on : " + pos.toString());
         int row = pos.getRow();
         int col = pos.getCol();
         List<Location> possibleMoves = new ArrayList<>();
-        for (int i = Math.max(0, col - 1); i < Math.min(col + 2, 4); i++) {
-            for (int j = Math.max(0, row - 1); j < Math.min(row + 2, 4); j++) {
-                if(i == pos.getCol()){
-                    if(j == pos.getRow())
-                        continue;
-                }
-                possibleMoves.add(new Location(i, j));
+        for(int i = col - 1; i < col + 2; i++){
+            for(int j = row - 1; j < row + 2; j++){
+                if(i < 0 || i >= 5)
+                    break;
+                if(j < 0 || j >= 5)
+                    continue;
+                possibleMoves.add(new Location(j, i));
             }
         }
+
+
+
+
+
+
+
+//        for (int i = Math.max(0, col - 1); i < Math.min(col + 2, 4); i++) {
+//            for (int j = Math.max(0, row - 1); j < Math.min(row + 2, 4); j++) {
+//                if(i == pos.getCol()){
+//                    if(j == pos.getRow())
+//                        continue;
+//                }
+//                possibleMoves.add(new Location(i, j));
+//            }
+//        }
         return possibleMoves;
 
     }

@@ -147,9 +147,18 @@ public class Board {
         Player owner = king.getPlayer();
         String movesString = "";
         List<Location> moves = king.getValidMoves(kingPos);
+
+
+
         for(Location l : moves){
-            if(this.getPiece(l).getPlayer() != owner) {
-                if(! isInCheck())
+            if(this.getPiece(l) != null) {
+                if (this.getPiece(l).getPlayer() != owner) {
+//                    test whether king will be in check at position L: if(isInCheck(kingPos)){}
+                    movesString += " " + l.toString();
+                }
+            }
+            else{
+//                test whether king will be in check at position L:  if(isInCheck(kingPos)){}
                 movesString += " " + l.toString();
             }
         }
