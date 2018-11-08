@@ -1,5 +1,3 @@
-import javafx.util.*;
-
 import java.util.*;
 
 public abstract class Piece {
@@ -24,10 +22,24 @@ public abstract class Piece {
 
     }
 
+
+//    Getter methods
+
+    /**
+     *
+     * @return player
+     */
     public Player getPlayer() {
         return this.player;
     }
 
+    public Location getLocation(){
+        return this.currPos;
+    }
+
+
+
+//    Setter methods
 
     public void promote() {
         this.name = "+" + this.name;
@@ -43,18 +55,21 @@ public abstract class Piece {
         return false;
     }
 
+
     public void setPlayer(Player newPlayer){
         this.player = newPlayer;
     }
 
-    public void setPosition(Location pos){
+    public void setLocation(Location pos){
         this.currPos = pos;
     }
 
     //    Abstract methods
     abstract List<Location> findValidPath(Location startPos, Location endPos);
+    abstract List<Location> getValidMoves(Location pos);
     abstract boolean canDrop(Location dropPos);
 }
+
 
 class Bishop extends Piece {
     public Bishop(Player player){
@@ -71,7 +86,6 @@ class Bishop extends Piece {
     }
 
     public List<Location> findValidPath(Location startPos, Location endPos) {
-
         List<Location> retList = new ArrayList<Location>();
 
         int colDiff = Math.abs(startPos.getCol() - endPos.getCol());
@@ -80,15 +94,24 @@ class Bishop extends Piece {
             return retList;
         }
 
-        int startCol = Math.min(startPos.getCol(), endPos.getCol()) + 1;
-        int startRow = Math.min(startPos.getRow(), endPos.getRow()) + 1;
+        int startCol = startPos.getCol();
+        int startRow = startPos.getRow();
 
-        int endCol = Math.max(startPos.getCol(), endPos.getCol());
+        int endCol = endPos.getCol();
 
-        int j = startRow;
-        for (int i = startCol; i < endCol; i++) {
-            retList.add(new Location(i, j));
-            j++;
+
+        int colAdder = 1;
+        int rowAdder = 1;
+        if(startPos.getCol() > endPos.getCol())
+            colAdder= -1;
+        if(startPos.getRow() > endPos.getRow())
+            rowAdder = -1;
+
+
+        while(startCol != endCol){
+            startCol += colAdder;
+            startRow += rowAdder;
+            retList.add(new Location(startCol, startRow));
         }
 
 
@@ -100,10 +123,13 @@ class Bishop extends Piece {
     }
 
 
-
-
     public boolean canDrop(Location dropPos){
         return false;
+    }
+
+
+    public List<Location> getValidMoves(Location pos){
+        return new ArrayList<Location>();
     }
 }
 
@@ -138,37 +164,70 @@ class Rook extends Piece {
             }
         }
 
+
 //        Check if movement is horizontal or vertical:
 
         boolean horizontal = false;
-        if (startPos.getRow() == endPos.getRow()) {
+        if (startPos.getRow() == endPos.getRow())
             horizontal = true;
+
+
+        /**
+         * TODO: Maybe modularize the code below and create a method?
+         */
+
+        int adder = 1;
+
+        if(horizontal){
+            int startCol = startPos.getCol();
+            int endCol = endPos.getCol();
+            if(startCol > endCol)
+                adder = -1;
+
+            while(startCol != endCol){
+                startCol += adder;
+                retList.add(new Location(startCol, startPos.getRow()));
+            }
+        }
+        else{
+            int startRow = startPos.getRow();
+            int endRow = endPos.getRow();
+            if(startRow > endRow)
+                adder = -1;
+            while(startRow != endRow){
+                startRow += adder;
+                retList.add(new Location(startPos.getCol(), startRow));
+            }
         }
 
 
-        if (horizontal) {
-            int startCol = Math.min(startPos.getCol(), endPos.getCol()) + 1;
-            int endCol = Math.max(startPos.getCol(), endPos.getCol());
 
-            int row = startPos.getRow();
-
-            for (int col = startCol; col < endCol; col++) {
-                retList.add(new Location(col, row));
-            }
-        } else {
-            int startRow = Math.min(startPos.getRow(), endPos.getRow()) + 1;
-            int endRow = Math.max(startPos.getRow(), endPos.getRow());
-
-            int col = startPos.getCol();
-
-            for (int row = startRow; row < endRow; row++) {
-                retList.add(new Location(col, row));
-            }
-        }
+//        if (horizontal) {
+//            int startCol = Math.min(startPos.getCol(), endPos.getCol()) + 1;
+//            int endCol = Math.max(startPos.getCol(), endPos.getCol());
+//
+//            int row = startPos.getRow();
+//
+//            for (int col = startCol; col <= endCol; col++) {
+//                retList.add(new Location(col, row));
+//            }
+//        } else {
+//            int startRow = Math.min(startPos.getRow(), endPos.getRow()) + 1;
+//            int endRow = Math.max(startPos.getRow(), endPos.getRow());
+//
+//            int col = startPos.getCol();
+//
+//            for (int row = startRow; row <= endRow; row++) {
+//                retList.add(new Location(col, row));
+//            }
+//        }
         return retList;
     }
     public boolean canDrop(Location dropPos){
         return false;
+    }
+    public List<Location> getValidMoves(Location pos){
+        return new ArrayList<Location>();
     }
 }
 
@@ -207,6 +266,9 @@ class Pawn extends Piece {
     public boolean canDrop(Location dropPos){
         return false;
     }
+    public List<Location> getValidMoves(Location pos){
+        return new ArrayList<Location>();
+    }
 }
 
 
@@ -238,10 +300,30 @@ class King extends Piece {
         return retList;
 
     }
-    public boolean canDrop(Location dropPos){
+
+    public boolean canDrop(Location dropPos) {
         return false;
     }
+
+    public List<Location> getValidMoves(Location pos) {
+        System.out.println("called getValidMoves on : " + pos.toString());
+        int row = pos.getRow();
+        int col = pos.getCol();
+        List<Location> possibleMoves = new ArrayList<>();
+        for (int i = Math.max(0, col - 1); i < Math.min(col + 2, 4); i++) {
+            for (int j = Math.max(0, row - 1); j < Math.min(row + 2, 4); j++) {
+                if(i == pos.getCol()){
+                    if(j == pos.getRow())
+                        continue;
+                }
+                possibleMoves.add(new Location(i, j));
+            }
+        }
+        return possibleMoves;
+
+    }
 }
+
 
 
 class SilverGeneral extends Piece {
@@ -271,7 +353,7 @@ class SilverGeneral extends Piece {
 
 //        if movement is more than 1 unit, move is illegal
         if (columnDiff > 1 || rowDiff > 1)
-            throw new IllegalArgumentException("Illegal move");
+            return retList;
 
 //        this indicates diagonal movement, which is okay in any direction
         if (columnDiff != 0) {
@@ -285,15 +367,17 @@ class SilverGeneral extends Piece {
         if (this.player.getName().equals("UPPER"))
             multiplier = -1;
 
-        if (multiplier * (endPos.getRow() - startPos.getRow()) > 0) {
+        if (multiplier * (endPos.getRow() - startPos.getRow()) > 0)
             retList.add(endPos);
-            return retList;
-        } else {
-            throw new IllegalArgumentException("Illegal move");
-        }
+
+        return retList;
+
     }
     public boolean canDrop(Location dropPos){
         return false;
+    }
+    public List<Location> getValidMoves(Location pos){
+        return new ArrayList<Location>();
     }
 }
 
@@ -320,11 +404,12 @@ class GoldGeneral extends Piece {
     }
 
     public List<Location> findValidPath(Location startPos, Location endPos) throws IllegalArgumentException {
+        List<Location> retList = new ArrayList<Location>();
 //        check if end position is greater than one unit away from start
         int columnDiff = Math.abs(startPos.getCol() - endPos.getCol());
         int rowDiff = Math.abs(startPos.getRow() - endPos.getRow());
         if (columnDiff > 1 || rowDiff > 1)
-            throw new IllegalArgumentException("Illegal move");
+            return retList;
 
 //        if player is UPPER, their piece's forward movement is vertically negative, so we will use a negative multipler
 //          to identify validity of the move
@@ -332,18 +417,17 @@ class GoldGeneral extends Piece {
         if (this.player.getName().equals("UPPER"))
             multiplier = -1;
 
-        List<Location> retList = new ArrayList<Location>();
 
         if (columnDiff != 0) {
-            if ((multiplier * (endPos.getRow() - startPos.getRow())) < 0) {
-                throw new IllegalArgumentException("Illegal move");
-            } else {
+            if ((multiplier * (endPos.getRow() - startPos.getRow())) > 0)
                 retList.add(endPos);
-            }
         }
         return retList;
     }
     public boolean canDrop(Location dropPos){
         return false;
+    }
+    public List<Location> getValidMoves(Location pos){
+        return new ArrayList<Location>();
     }
 }

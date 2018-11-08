@@ -20,5 +20,15 @@ public class Location {
     public int getRow(){
         return this.row;
     }
+
+    @Override
+    public String toString(){
+        String loc = "";
+        loc += (char)(this.getCol() + 97);
+        loc += Integer.toString(this.getRow() + 1);
+
+        return loc;
+    }
+
 }
 

@@ -12,24 +12,35 @@ public class Player{
      this.name = name;
      this.turnCounter = 0;
      this.captured = new HashMap<String, Piece>();
+     this.onBoard = new HashMap<String, Piece>();
  }
 
 
 
 // GETTER methods
-
+ public String getName(){ return this.name; }
 
  public int getTurnCount(){ return this.turnCounter; }
 
  public Map<String, Piece> getCaptured(){ return this.captured; }
 
- public String getName(){ return this.name; }
+ public Map<String, Piece> getOnBoard(){ return this.onBoard; }
 
+ public boolean isUpper(){
+     if(this.getName().equals("UPPER"))
+         return true;
+     else
+         return false;
+ }
+// SETTER methods
 
+ public void moveToBoard(Piece piece){
+     this.getCaptured().remove(piece.getName());
+     this.onBoard.put(piece.getName(), piece);
+ }
 
-
- public boolean dropPiece(){
-    return false;
+ public void addToBoard(Piece piece){
+     this.onBoard.put(piece.getName(), piece);
  }
 
 
@@ -38,9 +49,9 @@ public class Player{
  }
 
 
-
  public void capture(Piece piece){
      this.captured.put(piece.getName(), piece);
+     this.onBoard.remove(piece.getName());
      this.incrementTurn();
  }
 
@@ -48,6 +59,13 @@ public class Player{
  public void incrementTurn(){
      this.turnCounter += 1;
  }
+
+
+@Override
+ public String toString() {
+    return this.getName();
+ }
+
 
 
 }

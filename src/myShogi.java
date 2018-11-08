@@ -2,8 +2,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class myShogi{
-    public static void main(String[] args){
+public class myShogi {
+    public static void main(String[] args) {
 //        Initialize board
         Board board = new Board();
         Piece[][] boardArray = board.getBoard();
@@ -25,27 +25,32 @@ public class myShogi{
         System.out.println(boardString);
         System.out.println();
         System.out.print("Captures UPPER: ");
-        for(String name : upper.getCaptured().keySet())
+        for (String name : upper.getCaptured().keySet())
             System.out.print(name + " ");
         System.out.println();
         System.out.print("Captures lower: ");
-        for(String name : lower.getCaptured().keySet())
+        for (String name : lower.getCaptured().keySet())
             System.out.print(name + " ");
         System.out.println();
         System.out.print(currPlayer.getName() + ">");
 
 
+//        Piece lowerKing = board.getPiece(new Location(0, 0));
+
+//        lowerKing.getValidMoves(new Location(2, 2));
+
+
         String input = sc.nextLine();
 
-        while(upper.getTurnCount() < 200 || lower.getTurnCount() < 200){
+        while(upper.getTurnCount() < 200 || lower.getTurnCount() < 200) {
             String[] inputSplit = input.split(" ");
             String action = inputSplit[0];
 
-            if(action.equals("quit"))
+            if (action.equals("quit"))
                 System.exit(0);
 
 
-            if(action.equals("move")) {
+            if (action.equals("move")) {
                 String startPos = inputSplit[1];
                 String endPos = inputSplit[2];
 
@@ -54,37 +59,33 @@ public class myShogi{
                 if (inputSplit.length == 4)
                     promote = true;
 
-                if(board.getPiece(new Location(startPos)).getPlayer() != currPlayer)
+                if (board.getPiece(new Location(startPos)).getPlayer() != currPlayer)
                     throw new IllegalArgumentException("Illegal move");
 
 
                 board.move(startPos, endPos);
 
-                if(promote){
+                if (promote) {
                     System.out.println("about to promote");
                     board.promote(endPos);
                 }
 
-            }
-
-            else if(action.equals("drop")){
+            } else if (action.equals("drop")) {
                 String dropPiece = inputSplit[1];
                 String dropPos = inputSplit[2];
                 board.drop(currPlayer, dropPiece, dropPos);
 
-            }
-            else{
+            } else {
                 throw new IllegalArgumentException("Illegal input.");
             }
 
 
-
             currPlayer.incrementTurn();
 //            Flip turn:
-            lowerTurn = ! lowerTurn;
+            lowerTurn = !lowerTurn;
 
 
-            if(lowerTurn)
+            if (lowerTurn)
                 currPlayer = lower;
             else
                 currPlayer = upper;
@@ -95,11 +96,11 @@ public class myShogi{
             System.out.println(boardString);
             System.out.println();
             System.out.print("Captures UPPER: ");
-            for(String name : upper.getCaptured().keySet())
+            for (String name : upper.getCaptured().keySet())
                 System.out.print(name + " ");
             System.out.println();
             System.out.print("Captures lower: ");
-            for(String name : lower.getCaptured().keySet())
+            for (String name : lower.getCaptured().keySet())
                 System.out.print(name + " ");
             System.out.println();
 
@@ -107,13 +108,13 @@ public class myShogi{
 
 
             input = sc.nextLine();
-
         }
-
-
 
     }
 
 
-
 }
+
+
+
+
