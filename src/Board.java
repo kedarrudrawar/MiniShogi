@@ -241,6 +241,9 @@ public class Board {
 //            System.out.println(s);
 //        System.exit(0);
 
+        //TODO: need to check for every single available move, including killing their pieces or blocking their paths.
+        //TODO: need to also take into account that we can drop pieces back into the game to block checks
+
 
 //        Check whether lower player is in check
         if (isInCheck(lowerKing)) {
