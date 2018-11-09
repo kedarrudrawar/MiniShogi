@@ -7,6 +7,8 @@ public class Board {
     private Location lowerKingPos;
     private Player upper;
     private Player lower;
+    private boolean upperInCheck;
+    private boolean lowerInCheck;
 
     public Board() {
         this.board = this.initializeBoard();
@@ -99,21 +101,23 @@ public class Board {
 
     /**
      * TODO: Implement so I only have to feed in the location of the king, so I can use it in listValidMoves method on the other positions.
-     * @param king
-     * @return
      */
 
-    public boolean isInCheck(Piece king) {
-        System.out.println("checking for : " + king.getPlayer().getName());
-        Player opponent;
-        if (king.getPlayer().getName().equals("UPPER")) {
-            opponent = this.getLower();
-        }
-        else {
-            opponent = this.getUpper();
-        }
+    /**
+     *
+     * @param owner
+     * @param kingLoc
+     * @return
+     */
+    public boolean isInCheck(Player owner, Location kingLoc){
 
-        Location kingLoc = king.getLocation();
+//    public boolean isInCheck(Piece king) {
+        Player opponent;
+        if (owner.getName().equals("UPPER"))
+            opponent = this.getLower();
+        else
+            opponent = this.getUpper();
+
 
         for(Piece p : opponent.getOnBoard().values()){
             List<Location> moves = p.findValidPath(p.getLocation(), kingLoc);
@@ -174,7 +178,7 @@ public class Board {
         Player captorPlayer = captorPiece.getPlayer();
         capturedPiece.setPlayer(captorPlayer);
         captorPlayer.capture(capturedPiece);
-
+//        capturedPiece.setLocation(null);
 
         this.setPiece(endPos, captorPiece);
         this.setPiece(startPos, null);
@@ -187,7 +191,6 @@ public class Board {
      * @throws IllegalArgumentException
      */
     public void move(String startPos, String endPos) throws IllegalArgumentException {
-
         Location start = new Location(startPos);
         Location end = new Location(endPos);
 
@@ -245,8 +248,8 @@ public class Board {
         //TODO: need to also take into account that we can drop pieces back into the game to block checks
 
 //        Check whether lower player is in check
-        if (isInCheck(lowerKing)) {
-            System.out.println("calling listValidMoves on lowerKingPos");
+        if (isInCheck(lower, lowerKingPos)) {
+//            System.out.println("calling listValidMoves on lowerKingPos");
             String movesString =  listValidMoves(lowerKing, lowerKingPos);
             if(movesString.length() == 0){
                 System.out.println("upper player has won.");
@@ -260,8 +263,8 @@ public class Board {
 
 
 //        Check whether upper player is in check
-        if (isInCheck(this.getPiece(upperKingPos))) {
-            System.out.println("calling listValidMoves on upperKingPos");
+        if (isInCheck(upper, upperKingPos)) {
+//            System.out.println("calling listValidMoves on upperKingPos");
             String movesString =  listValidMoves(upperKing, upperKingPos);
             if(movesString.length() == 0){
                 System.out.println("lower player has won.");

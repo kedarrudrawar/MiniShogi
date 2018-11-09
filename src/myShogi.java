@@ -35,11 +35,6 @@ public class myShogi {
         System.out.print(currPlayer.getName() + ">");
 
 
-//        Piece lowerKing = board.getPiece(new Location(0, 0));
-
-//        lowerKing.getValidMoves(new Location(2, 2));
-
-
         String input = sc.nextLine();
 
         while(upper.getTurnCount() < 200 || lower.getTurnCount() < 200) {
@@ -62,7 +57,6 @@ public class myShogi {
                 if (board.getPiece(new Location(startPos)).getPlayer() != currPlayer)
                     throw new IllegalArgumentException("Illegal move");
 
-
                 board.move(startPos, endPos);
 
                 if (promote) {
@@ -84,12 +78,10 @@ public class myShogi {
 //            Flip turn:
             lowerTurn = !lowerTurn;
 
-
             if (lowerTurn)
                 currPlayer = lower;
             else
                 currPlayer = upper;
-
 
 //            Print output:
             boardString = Utils.stringifyBoard(board.getBoard());
