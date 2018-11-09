@@ -8,7 +8,6 @@ public class Board {
     private Player upper;
     private Player lower;
 
-
     public Board() {
         this.board = this.initializeBoard();
     }
@@ -26,7 +25,6 @@ public class Board {
         upper.addToBoard(board[0][4]);
         board[4][0] = new Rook(lower, new Location(4, 0));
         lower.addToBoard(board[4][0]);
-
 
         board[1][4] = new Bishop(upper, new Location(1,4));
         upper.addToBoard(board[1][4]);
@@ -99,13 +97,11 @@ public class Board {
         piece.promote();
     }
 
-
     /**
      * TODO: Implement so I only have to feed in the location of the king, so I can use it in listValidMoves method on the other positions.
      * @param king
      * @return
      */
-
 
     public boolean isInCheck(Piece king) {
         System.out.println("checking for : " + king.getPlayer().getName());
@@ -119,16 +115,22 @@ public class Board {
 
         Location kingLoc = king.getLocation();
 
-        for (Piece p : opponent.getOnBoard().values()) {
+        for(Piece p : opponent.getOnBoard().values()){
             List<Location> moves = p.findValidPath(p.getLocation(), kingLoc);
-            System.out.println("Moves for " + p.getName() + " : " + moves.toString());
-            for(Location move : moves){
-                if(move == kingLoc)
-                    continue;
-                if(this.getPiece(move) != null)
-                    return true;
+            System.out.println(p.toString() + " : " + moves.toString());
+            if(moves.size() == 0)
+                continue;
+//            Check whether there is a piece in the way of the king and the attacking piece
+//            If there is, the king will not be in check from this piece, regardless of the type of piece blocking it.
+            boolean blocked = false;
+            for(int i = 0; i < moves.size() - 1; i++){
+                if(moves.get(i) != null)
+                    blocked = true;
             }
+            if(!blocked)
+                return true;
         }
+
         return false;
     }
 
@@ -147,8 +149,6 @@ public class Board {
         Player owner = king.getPlayer();
         String movesString = "";
         List<Location> moves = king.getValidMoves(kingPos);
-
-
 
         for(Location l : moves){
             if(this.getPiece(l) != null) {
@@ -180,7 +180,12 @@ public class Board {
         this.setPiece(startPos, null);
     }
 
-
+    /**
+     *
+     * @param startPos
+     * @param endPos
+     * @throws IllegalArgumentException
+     */
     public void move(String startPos, String endPos) throws IllegalArgumentException {
 
         Location start = new Location(startPos);
@@ -226,24 +231,18 @@ public class Board {
 
 
 //        UPDATE KINGS' LOCATIONS
-        if (start == upperKingPos)
+        if (start.equals(upperKingPos))
             upperKingPos = end;
-        else if (start == lowerKingPos)
+        else if (start.equals(lowerKingPos))
             lowerKingPos = end;
 
-        Player movingPlayer = startPiece.getPlayer();
 
         Piece lowerKing = this.getPiece(lowerKingPos);
         Piece upperKing = this.getPiece(upperKingPos);
-//
-//        Player upper = this.getLower();
-//        for(String s : upper.getOnBoard().keySet())
-//            System.out.println(s);
-//        System.exit(0);
+
 
         //TODO: need to check for every single available move, including killing their pieces or blocking their paths.
         //TODO: need to also take into account that we can drop pieces back into the game to block checks
-
 
 //        Check whether lower player is in check
         if (isInCheck(lowerKing)) {
@@ -273,7 +272,6 @@ public class Board {
             System.out.print("Available moves: ");
             System.out.println(movesString);
         }
-
     }
 
     public void drop(Player captor, String pieceName, String position) throws IllegalArgumentException {
@@ -301,11 +299,14 @@ public class Board {
         if (dropPiece == null)
             throw new IllegalArgumentException("You have not captured this piece.");
 
+        /**
+         * TODO: Check for droppability
+         */
+
 //        Check for dropping validity here (pawns cannot be in same column)
         if (!dropPiece.canDrop(dropPos)) {
-
+//
         }
-
 
         this.setPiece(dropPos, dropPiece);
 

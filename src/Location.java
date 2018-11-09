@@ -30,5 +30,15 @@ public class Location {
         return loc;
     }
 
+    @Override
+    public boolean equals(Object location){
+        Location l = (Location) location;
+        if(this.getRow() == l.getRow()){
+            if(this.getCol() == l.getCol())
+                return true;
+        }
+        return false;
+    }
+
 }
 

@@ -11,7 +11,7 @@ public abstract class Piece {
     //    Defined methods
     @Override
     public String toString() {
-        return this.name;
+        return this.getName();
     }
 
     public String getName() {
