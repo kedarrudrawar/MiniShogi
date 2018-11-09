@@ -117,22 +117,31 @@ public class Board {
         else
             opponent = this.getUpper();
 
-        System.out.println("about to iterate through " + opponent.getName() + "'s board.");
+
+//        System.out.println(opponent.getName() + "'s on board : " + opponent.printOnBoard());
+//        System.out.println(opponent.getName() + "'s captured : " + opponent.printCaptured());
+
 
         for (Piece p : opponent.getOnBoard().values()) {
             List<Location> moves = p.findValidPath(p.getLocation(), kingLoc);
-            System.out.println(p.toString() + " : " + moves.toString());
+//            System.out.println(p.toString() + " - " + p.getLocation().toString() + " : " + moves.toString());
             if (moves.size() == 0)
                 continue;
 //            Check whether there is a piece in the way of the king and the attacking piece
 //            If there is, the king will not be in check from this piece, regardless of the type of piece blocking it.
             boolean blocked = false;
-            for (int i = 0; i < moves.size() - 1; i++) {
-                if (moves.get(i) != null)
+            for (int i = 0; i < moves.size(); i++) {
+                if(moves.get(i).equals(kingLoc))
+                    continue; // We can continue, because we already know the king's location can be accessed. This is why it's in check.
+                if (this.getPiece(moves.get(i)) != null) {
+//                    System.out.println("currently blocked by : " + this.getPiece(moves.get(i)).toString());
                     blocked = true;
+                }
             }
-            if (!blocked)
+            if (!blocked) {
+                System.out.println("in check by piece: " + p.getName() + " at location: " + p.getLocation().toString());
                 return true;
+            }
         }
 
         return false;
@@ -143,31 +152,40 @@ public class Board {
      * TODO: Maybe call isInCheck on each position returned by getValidMoves?
      */
     /**
+     * This method will return all valid moves the king can make to remove himself from check.
+     *
      * @param king
      * @param kingPos
-     * @return
+     * @return List - all locations the king can move to
      */
 
     public List<Location> listValidMoves(Piece king, Location kingPos) {
+
         Player owner = king.getPlayer();
+        System.out.println("called listValidMoves() on " + owner.getName());
+
         String movesString = "";
         List<Location> moves = king.getValidMoves(kingPos);
         List<Location> retList = new ArrayList<>();
+
+        System.out.println("valid moves before checking: " + moves.toString());
+
         for (Location l : moves) {
             if (this.getPiece(l) != null) {
                 if (this.getPiece(l).getPlayer() == owner) {
+                    System.out.println("Continuing on position: " + l.toString() + " because owned by same piece");
                     continue;
                 }
             }
             if (isInCheck(owner, l)) {
+                System.out.println("Continuing on position: " + l.toString() + " because puts king in check");
                 continue;
             }
-
             retList.add(l);
         }
+        System.out.println("valid moves after checking: " + retList.toString());
         return retList;
     }
-
 
 
 // ACTION methods
@@ -176,24 +194,37 @@ public class Board {
         Piece captorPiece = this.getPiece(startPos);
         Piece capturedPiece = this.getPiece(endPos);
         Player captorPlayer = captorPiece.getPlayer();
+        Player opponentPlayer;
+
+        if(captorPlayer.isUpper())
+            opponentPlayer = this.getLower();
+        else
+            opponentPlayer = this.getUpper();
+
         capturedPiece.setPlayer(captorPlayer);
-        captorPlayer.capture(capturedPiece);
-//        capturedPiece.setLocation(null);
+        capturedPiece.setLocation(null);
+        captorPlayer.addToCaptured(capturedPiece);
+        opponentPlayer.removeFromBoard(capturedPiece);
+
+
+//        System.out.println(captorPlayer.getName() + "'s on board : " + captorPlayer.printOnBoard());
+//        System.out.println(captorPlayer.getName() + "'s captured: " + captorPlayer.printCaptured());
+//        System.out.println(opponentPlayer.getName() + "'s on board : " + opponentPlayer.printOnBoard());
+//        System.out.println(opponentPlayer.getName() + "'s captured: " + opponentPlayer.printCaptured());
+
+
 
         this.setPiece(endPos, captorPiece);
         this.setPiece(startPos, null);
     }
 
     /**
-     *
-     * @param startPos
-     * @param endPos
+     * @param start
+     * @param end
+     * @return boolean - to check whether moving the piece puts a piece in check
      * @throws IllegalArgumentException
      */
-    public void move(String startPos, String endPos) throws IllegalArgumentException {
-        Location start = new Location(startPos);
-        Location end = new Location(endPos);
-
+    public void move(Location start, Location end) throws IllegalArgumentException {
         Piece startPiece = this.getPiece(start);
 
         if (startPiece == null)
@@ -247,40 +278,14 @@ public class Board {
         //TODO: need to check for every single available move, including killing their pieces or blocking their paths.
         //TODO: need to also take into account that we can drop pieces back into the game to block checks
 
-//        Check whether lower player is in check
-        if (isInCheck(lower, lowerKingPos)) {
-//            System.out.println("calling listValidMoves on lowerKingPos");
-            List<Location> movesList =  listValidMoves(lowerKing, lowerKingPos);
-            if(movesList.size() == 0){
-                System.out.println("upper player has won.");
-                System.exit(0);
-            }
 
-            System.out.println("lower player is in check!");
-            System.out.print("Available moves: ");
-            System.out.println(movesList.toString());
-//            System.out.println(movesString);
-        }
-
-//        Check whether upper player is in check
-        if (isInCheck(upper, upperKingPos)) {
-//            System.out.println("calling listValidMoves on upperKingPos");
-            List<Location> movesList  =  listValidMoves(upperKing, upperKingPos);
-            if(movesList.size() == 0){
-                System.out.println("lower player has won.");
-                System.exit(0);
-            }
-
-            System.out.println("UPPER player is in check!");
-            System.out.print("Available moves: ");
-            System.out.println(movesList.toString());
-//            System.out.println(movesString);
-        }
     }
 
-    public void drop(Player captor, String pieceName, String position) throws IllegalArgumentException {
-        Location dropPos = new Location(position);
-        Piece checkPiece = this.getPiece(dropPos);
+
+    //TODO: need to implement drop so that the piece gets correctly pushed back into the onBoard map, and taken out of captured.
+
+    public void drop(Player captor, String pieceName, Location dropLoc) throws IllegalArgumentException {
+        Piece checkPiece = this.getPiece(dropLoc);
 
         if (checkPiece != null) {
             throw new IllegalArgumentException("Desired position to drop piece is currently occupied by: " +
@@ -288,10 +293,10 @@ public class Board {
         }
 
         if (captor.getName().equals("UPPER")) {
-            if (dropPos.getRow() == 0)
+            if (dropLoc.getRow() == 0)
                 throw new IllegalArgumentException("Cannot drop into promotion zone.");
         } else {
-            if (dropPos.getRow() == 4)
+            if (dropLoc.getRow() == 4)
                 throw new IllegalArgumentException("Cannot drop into promotion zone");
         }
 
@@ -308,11 +313,11 @@ public class Board {
          */
 
 //        Check for dropping validity here (pawns cannot be in same column)
-        if (!dropPiece.canDrop(dropPos)) {
+        if (!dropPiece.canDrop(dropLoc)) {
 //
         }
 
-        this.setPiece(dropPos, dropPiece);
+        this.setPiece(dropLoc, dropPiece);
 
         captor.moveToBoard(dropPiece);
     }

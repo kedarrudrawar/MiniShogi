@@ -26,6 +26,13 @@ public class Player{
 
  public Map<String, Piece> getOnBoard(){ return this.onBoard; }
 
+ public Piece getKing(){
+     if(this.isUpper())
+        return this.onBoard.get("K");
+     else
+         return this.onBoard.get("k");
+ }
+
  public boolean isUpper(){
      if(this.getName().equals("UPPER"))
          return true;
@@ -44,15 +51,28 @@ public class Player{
  }
 
 
- public void printCaptured(){
-     System.out.println(this.captured.toString());
+ public String printCaptured(){
+     return this.captured.toString();
+ }
+
+ public String printOnBoard(){
+     return this.onBoard.toString();
  }
 
 
- public void capture(Piece piece){
+ public void addToCaptured(Piece piece){
      this.captured.put(piece.getName(), piece);
-     this.onBoard.remove(piece.getName());
      this.incrementTurn();
+ }
+
+ public void removeFromBoard(Piece piece){
+     String name = piece.getName();
+     if(this.isUpper())
+         name = name.toUpperCase();
+     else
+         name = name.toLowerCase();
+
+     this.onBoard.remove(name);
  }
 
 

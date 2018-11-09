@@ -17,13 +17,11 @@ public class myShogi {
 
         boolean lowerTurn = true;
         Player currPlayer = lower;
-
+        Player opponentPlayer = upper;
 
 //        Initial printing
-
         String boardString = Utils.stringifyBoard(board.getBoard());
         System.out.println(boardString);
-        System.out.println();
         System.out.print("Captures UPPER: ");
         for (String name : upper.getCaptured().keySet())
             System.out.print(name + " ");
@@ -31,8 +29,8 @@ public class myShogi {
         System.out.print("Captures lower: ");
         for (String name : lower.getCaptured().keySet())
             System.out.print(name + " ");
-        System.out.println();
-        System.out.print(currPlayer.getName() + ">");
+        System.out.println("\n");
+        System.out.print(currPlayer.getName() + "> ");
 
 
         String input = sc.nextLine();
@@ -44,49 +42,149 @@ public class myShogi {
             if (action.equals("quit"))
                 System.exit(0);
 
+            System.out.println(currPlayer.getName() + " player action: " + input);
 
             if (action.equals("move")) {
                 String startPos = inputSplit[1];
                 String endPos = inputSplit[2];
+
+                Location startLoc = new Location(startPos);
+                Location endLoc = new Location(endPos);
 
                 boolean promote = false;
 
                 if (inputSplit.length == 4)
                     promote = true;
 
-                if (board.getPiece(new Location(startPos)).getPlayer() != currPlayer)
-                    throw new IllegalArgumentException("Illegal move");
+                if (board.getPiece(startLoc).getPlayer() != currPlayer) {
+                    System.out.println("Moving piece that is not yours. Illegal move.");
+                    System.exit(0);
+                }
 
-                board.move(startPos, endPos);
+
+
+//                TODO: utilize the check method in here rather than in board.java: move()
+
+                /**
+
+//        Check whether lower player is in check
+
+
+
+
+                if (isInCheck(lower, lowerKingPos)) {
+//            System.out.println("calling listValidMoves on lowerKingPos");
+                    List<Location> movesList = listValidMoves(lowerKing, lowerKingPos);
+                    if (movesList.size() == 0) {
+                        System.out.println("UPPER player has won.");
+                        System.exit(0);
+                    }
+
+                    System.out.println("lower player is in check!");
+                    System.out.print("Available moves: ");
+                    for (Location move : movesList) {
+                        System.out.println(String.format("move %s %s", lowerKingPos.toString(), move.toString()));
+                    }
+//            System.out.println(movesString);
+                }
+
+//        Check whether upper player is in check
+                if (board.isInCheck(upper, upperKingPos)) {
+//            System.out.println("calling listValidMoves on upperKingPos");
+                    List<Location> movesList = listValidMoves(upperKing, upperKingPos);
+                    if (movesList.size() == 0) {
+                        System.out.println("lower player has won.");
+                        System.exit(0);
+                    }
+
+                    System.out.println("UPPER player is in check!\n");
+                    System.out.println("Available moves: ");
+                    for (Location move : movesList) {
+                        System.out.println(String.format("move %s %s", upperKingPos.toString(), move.toString()));
+                    }
+                    System.out.println();
+                }
+                return false;
+
+                */
+
+
+
+
+                Piece currKing = currPlayer.getKing();
+
+//                This is to check whether the piece that's moving is the king. If it is, we need to check whether the destination
+//                of the king will put it in check. If it is not, then we just need to check the original position of the king.
+                if(startLoc.equals(currKing.getLocation())) {
+                    boolean currKingCheck = board.isInCheck(currPlayer, endLoc);
+
+//                    If moving the king to this location puts king in check, this is illegal.
+                    if(currKingCheck) {
+                        System.out.println("Moving your piece into check. Illegal move.");
+                        System.exit(0);
+                    }
+                    board.move(startLoc, endLoc);
+                }
+                else{
+                    board.move(startLoc, endLoc);
+                    boolean currKingCheck = board.isInCheck(currPlayer, currKing.getLocation());
+                    if(currKingCheck){
+                        System.out.println("Moving your piece into check. Illegal move.");
+                        System.exit(0);
+                    }
+                }
 
                 if (promote) {
                     System.out.println("about to promote");
                     board.promote(endPos);
                 }
 
+                Piece opponentKing = opponentPlayer.getKing();
+                Location opponentKingLoc = opponentKing.getLocation();
+
+                boolean opponentKingCheck = board.isInCheck(opponentPlayer, opponentKingLoc);
+                if(opponentKingCheck){
+//                    System.out.println("calling listValidMoves on opponent's king");
+                    List<Location> movesList = board.listValidMoves(opponentKing, opponentKing.getLocation());
+                    if (movesList.size() == 0) {
+                        System.out.println(currPlayer.getName() + " player has won.");
+                        System.exit(0);
+                    }
+                    System.out.println(opponentPlayer.getName() + " player is in check!");
+                    System.out.print("Available moves: ");
+                    for (Location move : movesList) {
+                        System.out.println(String.format("move %s %s", opponentKingLoc.toString(), move.toString()));
+                    }
+                }
+
+
+
             } else if (action.equals("drop")) {
                 String dropPiece = inputSplit[1];
                 String dropPos = inputSplit[2];
-                board.drop(currPlayer, dropPiece, dropPos);
+
+                Location dropLoc = new Location(dropPos);
+
+                board.drop(currPlayer, dropPiece, dropLoc);
 
             } else {
                 throw new IllegalArgumentException("Illegal input.");
             }
 
-
             currPlayer.incrementTurn();
 //            Flip turn:
             lowerTurn = !lowerTurn;
 
-            if (lowerTurn)
+            if (lowerTurn) {
                 currPlayer = lower;
-            else
+                opponentPlayer = upper;
+            }
+            else {
                 currPlayer = upper;
+                opponentPlayer = lower;
+            }
 
-//            Print output:
-            boardString = Utils.stringifyBoard(board.getBoard());
-            System.out.println(boardString);
-            System.out.println();
+            System.out.println(Utils.stringifyBoard(board.getBoard()) + "\n");
             System.out.print("Captures UPPER: ");
             for (String name : upper.getCaptured().keySet())
                 System.out.print(name + " ");
@@ -94,10 +192,9 @@ public class myShogi {
             System.out.print("Captures lower: ");
             for (String name : lower.getCaptured().keySet())
                 System.out.print(name + " ");
-            System.out.println();
+            System.out.println("\n");
 
-            System.out.print(currPlayer.getName() + ">");
-
+            System.out.print(currPlayer.getName() + "> ");
 
             input = sc.nextLine();
         }

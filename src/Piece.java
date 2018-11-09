@@ -115,10 +115,6 @@ class Bishop extends Piece {
         }
 
 
-        for(Location loc : retList){
-            System.out.println(loc.getCol() + " , " + loc.getRow());
-        }
-
         return retList;
     }
 
@@ -247,20 +243,20 @@ class Pawn extends Piece {
     }
 
 
-    public List<Location> findValidPath(Location startPos, Location endPos) {
+    public List<Location> findValidPath(Location startLoc, Location endLoc) {
 //        Check if promoted:
         if (this.name.charAt(0) == '+') {
-            List<Location> validPromotedMoves = this.promotionPiece.findValidPath(startPos, endPos);
+            List<Location> validPromotedMoves = this.promotionPiece.findValidPath(startLoc, endLoc);
             return validPromotedMoves;
         }
 
         List<Location> retList = new ArrayList<>();
 
-        if (endPos.getCol() != startPos.getCol()) {
+        if (endLoc.getCol() != startLoc.getCol()) {
             return retList;
         }
-        if (Math.abs(endPos.getRow() - startPos.getRow()) == 1)
-            retList.add(endPos);
+        if (Math.abs(endLoc.getRow() - startLoc.getRow()) == 1)
+            retList.add(endLoc);
         return retList;
     }
     public boolean canDrop(Location dropPos){
@@ -315,7 +311,7 @@ class King extends Piece {
                     break;
                 if(j < 0 || j >= 5)
                     continue;
-                possibleMoves.add(new Location(j, i));
+                possibleMoves.add(new Location(i,j));
             }
         }
 
@@ -396,14 +392,13 @@ class GoldGeneral extends Piece {
         this.currPos = pos;
     }
 
-
-
     @Override
-    public void promote() throws IllegalArgumentException {
-        throw new IllegalArgumentException("Gold General cannot be promoted. Illegal Move");
+    public void promote(){
+        System.out.println("Gold General cannot be promoted. Illegal Move");
+        System.exit(0);
     }
 
-    public List<Location> findValidPath(Location startPos, Location endPos) throws IllegalArgumentException {
+    public List<Location> findValidPath(Location startPos, Location endPos){
         List<Location> retList = new ArrayList<Location>();
 //        check if end position is greater than one unit away from start
         int columnDiff = Math.abs(startPos.getCol() - endPos.getCol());
@@ -418,16 +413,12 @@ class GoldGeneral extends Piece {
         if (this.player.getName().equals("UPPER"))
             multiplier = -1;
 
-
         if (columnDiff != 0) {
-            System.out.println("ENTERED COLUMN DIFF != 0");
-            if ((multiplier * (endPos.getRow() - startPos.getRow())) > 0) {
-                System.out.println("adding");
+            if ((multiplier * (endPos.getRow() - startPos.getRow())) >= 0) {
                 retList.add(endPos);
             }
         }
         else{
-            System.out.println("ENTERED ROW DIFF != 0");
             retList.add(endPos);
         }
         return retList;
