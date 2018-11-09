@@ -28,22 +28,22 @@ public class Board {
         board[4][0] = new Rook(lower, new Location(4, 0));
         lower.addToBoard(board[4][0]);
 
-        board[1][4] = new Bishop(upper, new Location(1,4));
+        board[1][4] = new Bishop(upper, new Location(1, 4));
         upper.addToBoard(board[1][4]);
-        board[3][0] = new Bishop(lower, new Location(3,0));
+        board[3][0] = new Bishop(lower, new Location(3, 0));
         lower.addToBoard(board[3][0]);
 
-        board[2][4] = new SilverGeneral(upper, new Location(2,4));
+        board[2][4] = new SilverGeneral(upper, new Location(2, 4));
         upper.addToBoard(board[2][4]);
-        board[2][0] = new SilverGeneral(lower, new Location(2,0));
+        board[2][0] = new SilverGeneral(lower, new Location(2, 0));
         lower.addToBoard(board[2][0]);
 
-        board[3][4] = new GoldGeneral(upper, new Location(3,4));
+        board[3][4] = new GoldGeneral(upper, new Location(3, 4));
         upper.addToBoard(board[3][4]);
-        board[1][0] = new GoldGeneral(lower, new Location(1,0));
+        board[1][0] = new GoldGeneral(lower, new Location(1, 0));
         lower.addToBoard(board[1][0]);
 
-        board[4][4] = new King(upper, new Location(4,4));
+        board[4][4] = new King(upper, new Location(4, 4));
         upper.addToBoard(board[4][4]);
         this.upperKingPos = board[4][4].getLocation();
 
@@ -51,9 +51,9 @@ public class Board {
         lower.addToBoard(board[0][0]);
         this.lowerKingPos = board[0][0].getLocation();
 
-        board[4][3] = new Pawn(upper, new Location(4,3));
+        board[4][3] = new Pawn(upper, new Location(4, 3));
         upper.addToBoard(board[4][3]);
-        board[0][1] = new Pawn(lower, new Location(0,1));
+        board[0][1] = new Pawn(lower, new Location(0, 1));
         lower.addToBoard(board[0][1]);
 
         return board;
@@ -104,12 +104,11 @@ public class Board {
      */
 
     /**
-     *
      * @param owner
      * @param kingLoc
      * @return
      */
-    public boolean isInCheck(Player owner, Location kingLoc){
+    public boolean isInCheck(Player owner, Location kingLoc) {
 
 //    public boolean isInCheck(Piece king) {
         Player opponent;
@@ -118,20 +117,21 @@ public class Board {
         else
             opponent = this.getUpper();
 
+        System.out.println("about to iterate through " + opponent.getName() + "'s board.");
 
-        for(Piece p : opponent.getOnBoard().values()){
+        for (Piece p : opponent.getOnBoard().values()) {
             List<Location> moves = p.findValidPath(p.getLocation(), kingLoc);
             System.out.println(p.toString() + " : " + moves.toString());
-            if(moves.size() == 0)
+            if (moves.size() == 0)
                 continue;
 //            Check whether there is a piece in the way of the king and the attacking piece
 //            If there is, the king will not be in check from this piece, regardless of the type of piece blocking it.
             boolean blocked = false;
-            for(int i = 0; i < moves.size() - 1; i++){
-                if(moves.get(i) != null)
+            for (int i = 0; i < moves.size() - 1; i++) {
+                if (moves.get(i) != null)
                     blocked = true;
             }
-            if(!blocked)
+            if (!blocked)
                 return true;
         }
 
@@ -143,31 +143,31 @@ public class Board {
      * TODO: Maybe call isInCheck on each position returned by getValidMoves?
      */
     /**
-     *
      * @param king
      * @param kingPos
      * @return
      */
 
-    public String listValidMoves(Piece king, Location kingPos){
+    public List<Location> listValidMoves(Piece king, Location kingPos) {
         Player owner = king.getPlayer();
         String movesString = "";
         List<Location> moves = king.getValidMoves(kingPos);
-
-        for(Location l : moves){
-            if(this.getPiece(l) != null) {
-                if (this.getPiece(l).getPlayer() != owner) {
-//                    test whether king will be in check at position L: if(isInCheck(kingPos)){}
-                    movesString += " " + l.toString();
+        List<Location> retList = new ArrayList<>();
+        for (Location l : moves) {
+            if (this.getPiece(l) != null) {
+                if (this.getPiece(l).getPlayer() == owner) {
+                    continue;
                 }
             }
-            else{
-//                test whether king will be in check at position L:  if(isInCheck(kingPos)){}
-                movesString += " " + l.toString();
+            if (isInCheck(owner, l)) {
+                continue;
             }
+
+            retList.add(l);
         }
-        return movesString;
+        return retList;
     }
+
 
 
 // ACTION methods
@@ -250,30 +250,31 @@ public class Board {
 //        Check whether lower player is in check
         if (isInCheck(lower, lowerKingPos)) {
 //            System.out.println("calling listValidMoves on lowerKingPos");
-            String movesString =  listValidMoves(lowerKing, lowerKingPos);
-            if(movesString.length() == 0){
+            List<Location> movesList =  listValidMoves(lowerKing, lowerKingPos);
+            if(movesList.size() == 0){
                 System.out.println("upper player has won.");
                 System.exit(0);
             }
 
             System.out.println("lower player is in check!");
             System.out.print("Available moves: ");
-            System.out.println(movesString);
+            System.out.println(movesList.toString());
+//            System.out.println(movesString);
         }
-
 
 //        Check whether upper player is in check
         if (isInCheck(upper, upperKingPos)) {
 //            System.out.println("calling listValidMoves on upperKingPos");
-            String movesString =  listValidMoves(upperKing, upperKingPos);
-            if(movesString.length() == 0){
+            List<Location> movesList  =  listValidMoves(upperKing, upperKingPos);
+            if(movesList.size() == 0){
                 System.out.println("lower player has won.");
                 System.exit(0);
             }
 
             System.out.println("UPPER player is in check!");
             System.out.print("Available moves: ");
-            System.out.println(movesString);
+            System.out.println(movesList.toString());
+//            System.out.println(movesString);
         }
     }
 

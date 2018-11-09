@@ -320,20 +320,6 @@ class King extends Piece {
         }
 
 
-
-
-
-
-
-//        for (int i = Math.max(0, col - 1); i < Math.min(col + 2, 4); i++) {
-//            for (int j = Math.max(0, row - 1); j < Math.min(row + 2, 4); j++) {
-//                if(i == pos.getCol()){
-//                    if(j == pos.getRow())
-//                        continue;
-//                }
-//                possibleMoves.add(new Location(i, j));
-//            }
-//        }
         return possibleMoves;
 
     }
@@ -412,7 +398,6 @@ class GoldGeneral extends Piece {
 
 
 
-
     @Override
     public void promote() throws IllegalArgumentException {
         throw new IllegalArgumentException("Gold General cannot be promoted. Illegal Move");
@@ -423,8 +408,9 @@ class GoldGeneral extends Piece {
 //        check if end position is greater than one unit away from start
         int columnDiff = Math.abs(startPos.getCol() - endPos.getCol());
         int rowDiff = Math.abs(startPos.getRow() - endPos.getRow());
-        if (columnDiff > 1 || rowDiff > 1)
+        if (columnDiff > 1 || rowDiff > 1) {
             return retList;
+        }
 
 //        if player is UPPER, their piece's forward movement is vertically negative, so we will use a negative multipler
 //          to identify validity of the move
@@ -434,8 +420,15 @@ class GoldGeneral extends Piece {
 
 
         if (columnDiff != 0) {
-            if ((multiplier * (endPos.getRow() - startPos.getRow())) > 0)
+            System.out.println("ENTERED COLUMN DIFF != 0");
+            if ((multiplier * (endPos.getRow() - startPos.getRow())) > 0) {
+                System.out.println("adding");
                 retList.add(endPos);
+            }
+        }
+        else{
+            System.out.println("ENTERED ROW DIFF != 0");
+            retList.add(endPos);
         }
         return retList;
     }
