@@ -4,6 +4,30 @@ import java.util.Scanner;
 
 public class myShogi {
     public static void main(String[] args) {
+//        INITIALIZE GAME MODE.
+
+//        File mode:
+        if(args[0].equals("-f")){
+            Utils.TestCase tc = null;
+            System.out.println("path : " + args[1]);
+            try {
+                tc = Utils.parseTestCase(args[1]);
+            }
+            catch(Exception e) {
+                System.out.println("caught exception");
+            }
+            Board board = new Board(tc.initialPieces);
+
+            board.movePieces(tc.moves);
+
+
+            System.exit(0);
+        }
+
+
+
+
+
 //        Initialize board
         Board board = new Board();
         Piece[][] boardArray = board.getBoard();
@@ -34,6 +58,9 @@ public class myShogi {
 
 
         String input = sc.nextLine();
+
+
+//        main loop
 
         while(upper.getTurnCount() < 200 || lower.getTurnCount() < 200) {
             String[] inputSplit = input.split(" ");
@@ -151,13 +178,11 @@ public class myShogi {
                         System.exit(0);
                     }
                     System.out.println(opponentPlayer.getName() + " player is in check!");
-                    System.out.print("Available moves: ");
+                    System.out.println("Available moves: ");
                     for (Location move : movesList) {
                         System.out.println(String.format("move %s %s", opponentKingLoc.toString(), move.toString()));
                     }
                 }
-
-
 
             } else if (action.equals("drop")) {
                 String dropPiece = inputSplit[1];
@@ -168,7 +193,8 @@ public class myShogi {
                 board.drop(currPlayer, dropPiece, dropLoc);
 
             } else {
-                throw new IllegalArgumentException("Illegal input.");
+                System.out.println("Illegal move. " + opponentPlayer.toString() + " has won.");
+                System.exit(0);
             }
 
             currPlayer.incrementTurn();
@@ -184,7 +210,7 @@ public class myShogi {
                 opponentPlayer = lower;
             }
 
-            System.out.println(Utils.stringifyBoard(board.getBoard()) + "\n");
+            System.out.println(Utils.stringifyBoard(board.getBoard()));
             System.out.print("Captures UPPER: ");
             for (String name : upper.getCaptured().keySet())
                 System.out.print(name + " ");

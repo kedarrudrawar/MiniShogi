@@ -3,8 +3,8 @@ import java.util.*;
 
 public class Board {
     private Piece[][] board;
-    private Location upperKingPos;
-    private Location lowerKingPos;
+    //    private Location upperKingPos;
+//    private Location lowerKingPos;
     private Player upper;
     private Player lower;
     private boolean upperInCheck;
@@ -12,6 +12,26 @@ public class Board {
 
     public Board() {
         this.board = this.initializeBoard();
+    }
+
+    public Board(List<Utils.InitialPosition> positions) {
+        this.board = this.initializeBoard(positions);
+    }
+
+    private Piece[][] initializeBoard(List<Utils.InitialPosition> positions) {
+        Piece[][] board = new Piece[5][5];
+        Player lower = new Player("lower");
+        Player upper = new Player("UPPER");
+        this.lower = lower;
+        this.upper = upper;
+
+        for (Utils.InitialPosition position : positions) {
+            String pieceName = position.piece;
+            Location loc = new Location(position.position);
+            board[loc.getCol()][loc.getRow()] = this.createPiece(pieceName, loc);
+        }
+        System.out.println(Utils.stringifyBoard(board));
+        return board;
     }
 
 
@@ -45,11 +65,11 @@ public class Board {
 
         board[4][4] = new King(upper, new Location(4, 4));
         upper.addToBoard(board[4][4]);
-        this.upperKingPos = board[4][4].getLocation();
+//        this.upperKingPos = board[4][4].getLocation();
 
         board[0][0] = new King(lower, new Location(0, 0));
         lower.addToBoard(board[0][0]);
-        this.lowerKingPos = board[0][0].getLocation();
+//        this.lowerKingPos = board[0][0].getLocation();
 
         board[4][3] = new Pawn(upper, new Location(4, 3));
         upper.addToBoard(board[4][3]);
@@ -70,6 +90,13 @@ public class Board {
         return this.upper;
     }
 
+    public Player getOpponent(Player player) {
+        if (player.isUpper())
+            return this.getLower();
+        else
+            return this.getUpper();
+
+    }
 
     public Piece[][] getBoard() {
         return this.board;
@@ -80,12 +107,12 @@ public class Board {
     }
 
 
-    // Setter method
+    //    Setter method
     public void setPiece(Location pos, Piece piece) {
         this.board[pos.getCol()][pos.getRow()] = piece;
     }
 
-    //  HELPER methods
+    //    HELPER methods
     public void canPromote(Location endPos) throws IllegalArgumentException {
         Piece piece = this.getPiece(endPos);
         if (piece.getPlayer().getName() == "UPPER") {
@@ -98,6 +125,7 @@ public class Board {
 
         piece.promote();
     }
+
 
     /**
      * TODO: Implement so I only have to feed in the location of the king, so I can use it in listValidMoves method on the other positions.
@@ -124,6 +152,7 @@ public class Board {
 
         for (Piece p : opponent.getOnBoard().values()) {
             List<Location> moves = p.findValidPath(p.getLocation(), kingLoc);
+
 //            System.out.println(p.toString() + " - " + p.getLocation().toString() + " : " + moves.toString());
             if (moves.size() == 0)
                 continue;
@@ -131,7 +160,7 @@ public class Board {
 //            If there is, the king will not be in check from this piece, regardless of the type of piece blocking it.
             boolean blocked = false;
             for (int i = 0; i < moves.size(); i++) {
-                if(moves.get(i).equals(kingLoc))
+                if (moves.get(i).equals(kingLoc))
                     continue; // We can continue, because we already know the king's location can be accessed. This is why it's in check.
                 if (this.getPiece(moves.get(i)) != null) {
 //                    System.out.println("currently blocked by : " + this.getPiece(moves.get(i)).toString());
@@ -148,9 +177,6 @@ public class Board {
     }
 
 
-    /**
-     * TODO: Maybe call isInCheck on each position returned by getValidMoves?
-     */
     /**
      * This method will return all valid moves the king can make to remove himself from check.
      *
@@ -187,19 +213,13 @@ public class Board {
         return retList;
     }
 
-
 // ACTION methods
 
     public void capture(Location startPos, Location endPos) {
         Piece captorPiece = this.getPiece(startPos);
         Piece capturedPiece = this.getPiece(endPos);
         Player captorPlayer = captorPiece.getPlayer();
-        Player opponentPlayer;
-
-        if(captorPlayer.isUpper())
-            opponentPlayer = this.getLower();
-        else
-            opponentPlayer = this.getUpper();
+        Player opponentPlayer = this.getOpponent(captorPlayer);
 
         capturedPiece.setPlayer(captorPlayer);
         capturedPiece.setLocation(null);
@@ -211,7 +231,6 @@ public class Board {
 //        System.out.println(captorPlayer.getName() + "'s captured: " + captorPlayer.printCaptured());
 //        System.out.println(opponentPlayer.getName() + "'s on board : " + opponentPlayer.printOnBoard());
 //        System.out.println(opponentPlayer.getName() + "'s captured: " + opponentPlayer.printCaptured());
-
 
 
         this.setPiece(endPos, captorPiece);
@@ -226,15 +245,19 @@ public class Board {
      */
     public void move(Location start, Location end) throws IllegalArgumentException {
         Piece startPiece = this.getPiece(start);
-
-        if (startPiece == null)
-            throw new IllegalArgumentException("Illegal move.");
+        Player opponent = this.getOpponent(startPiece.getPlayer());
+        if (startPiece == null) {
+            System.out.println("Illegal move. " + opponent.toString() + " wins.");
+            System.exit(1);
+        }
 
         List<Location> positions = startPiece.findValidPath(start, end);
-        if (positions.size() == 0)
-            throw new IllegalArgumentException("Illegal move.");
+        if (positions.size() == 0) {
+            System.out.println("Illegal move. " + opponent.toString() + " wins.");
+            System.exit(1);
+        }
 
-//        This for loop iterates through all the positions except the final position to check if they are all empty.
+//        This for loop iterates through all the positions except the final position (destination) to check if they are all empty.
         for (int i = 0; i < positions.size() - 1; i++) {
             Location currLoc = positions.get(i);
             Piece currPiece = this.getPiece(currLoc);
@@ -248,11 +271,8 @@ public class Board {
             this.setPiece(end, startPiece);
             this.setPiece(start, null);
         } else {
-            if (endPiece.getPlayer() == startPiece.getPlayer()) {
-                if (endPiece.getPlayer().getName().equals("UPPER"))
-                    System.out.println("lower player wins. Illegal move.");
-                else
-                    System.out.println("UPPER player wins. Illegal move.");
+            if (endPiece.getPlayer() != opponent) {
+                System.out.println(opponent.getName() + " player wins. Illegal move.");
                 System.exit(0);
             }
             if (endPiece.isPromoted())
@@ -260,19 +280,7 @@ public class Board {
             this.capture(start, end);
         }
 
-
         startPiece.setLocation(end);
-
-
-//        UPDATE KINGS' LOCATIONS
-        if (start.equals(upperKingPos))
-            upperKingPos = end;
-        else if (start.equals(lowerKingPos))
-            lowerKingPos = end;
-
-
-        Piece lowerKing = this.getPiece(lowerKingPos);
-        Piece upperKing = this.getPiece(upperKingPos);
 
 
         //TODO: need to check for every single available move, including killing their pieces or blocking their paths.
@@ -282,24 +290,142 @@ public class Board {
     }
 
 
+    /**
+     * THIS METHOD NEEDS TO BE FIXED. This is for taking in files from -f mode, and running the moves within them. 
+     * @param moves
+     */
+
+
+    public void movePieces(List<String> moves) {
+        boolean lowerTurn = true;
+        Player currPlayer = this.lower;
+        Player opponentPlayer = this.upper;
+
+//        System.out.println("curr player is null : " + currPlayer == null);
+
+        for (String move : moves) {
+            String[] inputSplit = move.split(" ");
+            if (inputSplit[0].equals("move")) {
+
+                String startPos = inputSplit[1];
+                String endPos = inputSplit[2];
+
+                Location startLoc = new Location(startPos);
+                Location endLoc = new Location(endPos);
+
+                boolean promote = false;
+
+                if (inputSplit.length == 4)
+                    promote = true;
+
+                if (this.getPiece(startLoc).getPlayer() != currPlayer) {
+                    System.out.println("Moving piece that is not yours. Illegal move.");
+                    System.exit(0);
+                }
+
+//                TODO: utilize the check method in here rather than in board.java: move()
+
+
+                Piece currKing = currPlayer.getKing();
+
+//                This is to check whether the piece that's moving is the king. If it is, we need to check whether the destination
+//                of the king will put it in check. If it is not, then we just need to check the original position of the king.
+                if (startLoc.equals(currKing.getLocation())) {
+                    boolean currKingCheck = this.isInCheck(currPlayer, endLoc);
+
+//                    If moving the king to this location puts king in check, this is illegal.
+                    if (currKingCheck) {
+                        System.out.println("Moving your piece into check. Illegal move.");
+                        System.exit(0);
+                    }
+                    this.move(startLoc, endLoc);
+                } else {
+                    this.move(startLoc, endLoc);
+                    boolean currKingCheck = this.isInCheck(currPlayer, currKing.getLocation());
+                    if (currKingCheck) {
+                        System.out.println("Moving your piece into check. Illegal move.");
+                        System.exit(0);
+                    }
+                }
+
+                if (promote) {
+                    System.out.println("about to promote");
+                    this.promote(endPos);
+                }
+
+                Piece opponentKing = opponentPlayer.getKing();
+                Location opponentKingLoc = opponentKing.getLocation();
+
+                boolean opponentKingCheck = this.isInCheck(opponentPlayer, opponentKingLoc);
+                if (opponentKingCheck) {
+//                    System.out.println("calling listValidMoves on opponent's king");
+                    List<Location> movesList = this.listValidMoves(opponentKing, opponentKing.getLocation());
+                    if (movesList.size() == 0) {
+                        System.out.println(currPlayer.getName() + " player has won.");
+                        System.exit(0);
+                    }
+                    System.out.println(opponentPlayer.getName() + " player is in check!");
+                    System.out.println("Available moves: ");
+                    for (Location loc : movesList) {
+                        System.out.println(String.format("move %s %s", opponentKingLoc.toString(), loc.toString()));
+                    }
+                }
+            } else if (inputSplit[0].equals("drop")) {
+                String dropPiece = inputSplit[1];
+                String dropPos = inputSplit[2];
+
+                Location dropLoc = new Location(dropPos);
+
+                this.drop(currPlayer, dropPiece, dropLoc);
+
+            } else {
+                System.out.println("Illegal move. " + opponentPlayer.toString() + " has won.");
+                System.exit(0);
+            }
+
+            currPlayer.incrementTurn();
+//            Flip turn:
+            lowerTurn = !lowerTurn;
+
+            if (lowerTurn) {
+                currPlayer = lower;
+                opponentPlayer = upper;
+            } else {
+                currPlayer = upper;
+                opponentPlayer = lower;
+            }
+        }
+    }
+
     //TODO: need to implement drop so that the piece gets correctly pushed back into the onBoard map, and taken out of captured.
 
-    public void drop(Player captor, String pieceName, Location dropLoc) throws IllegalArgumentException {
+    public void drop(Player captor, String pieceName, Location dropLoc) {
         Piece checkPiece = this.getPiece(dropLoc);
 
+        Player opponent = this.getOpponent(captor);
+
+        if (pieceName.equals("p") || pieceName.equals("P")) {
+            if (dropLoc.getCol() == captor.getPawn().getLocation().getCol()) {
+                System.out.println("Cannot have multiple pawns in same column. Illegal move.");
+                System.exit(1);
+            }
+        }
+
+
         if (checkPiece != null) {
-            throw new IllegalArgumentException("Desired position to drop piece is currently occupied by: " +
+            System.out.println("Desired position to drop piece is currently occupied by: " +
                     checkPiece.getName());
+            System.out.println("Illegal move. " + opponent.getName() + " wins.");
         }
 
-        if (captor.getName().equals("UPPER")) {
-            if (dropLoc.getRow() == 0)
-                throw new IllegalArgumentException("Cannot drop into promotion zone.");
-        } else {
-            if (dropLoc.getRow() == 4)
-                throw new IllegalArgumentException("Cannot drop into promotion zone");
-        }
+        int promotionRow = 0;
+        if (captor.isUpper())
+            promotionRow = 4;
 
+        if (dropLoc.getRow() == promotionRow) {
+            System.out.println("Illegal move. Cannot drop into promotion zone.");
+            System.exit(0);
+        }
 
         Map<String, Piece> capturedMap = captor.getCaptured();
 
@@ -314,7 +440,9 @@ public class Board {
 
 //        Check for dropping validity here (pawns cannot be in same column)
         if (!dropPiece.canDrop(dropLoc)) {
-//
+            System.out.println("Cannot drop piece. Illegal move.");
+            System.out.println(opponent.getName() + " wins.");
+            System.exit(0);
         }
 
         this.setPiece(dropLoc, dropPiece);
@@ -336,5 +464,55 @@ public class Board {
         piece.promote();
     }
 
+    public Piece createPiece(String pieceName, Location loc) {
+        if (pieceName.equalsIgnoreCase("p")) {
+            Player curr;
+            if (pieceName.equals("p"))
+                curr = lower;
+            else
+                curr = upper;
+            return new Pawn(curr, loc);
+        }
 
+        if (pieceName.equalsIgnoreCase("b")) {
+            Player curr;
+            if (pieceName.equals("b"))
+                curr = lower;
+            else
+                curr = upper;
+            return new Bishop(curr, loc);
+        }
+        if (pieceName.equalsIgnoreCase("r")) {
+            Player curr;
+            if (pieceName.equals("r"))
+                curr = lower;
+            else
+                curr = upper;
+            return new Rook(curr, loc);
+        }
+        if (pieceName.equalsIgnoreCase("g")) {
+            Player curr;
+            if (pieceName.equals("g"))
+                curr = lower;
+            else
+                curr = upper;
+            return new GoldGeneral(curr, loc);
+        }
+
+        if (pieceName.equalsIgnoreCase("s")) {
+            Player curr;
+            if (pieceName.equals("p"))
+                curr = lower;
+            else
+                curr = upper;
+            return new SilverGeneral(curr, loc);
+        } else {
+            Player curr;
+            if (pieceName.equals("k"))
+                curr = lower;
+            else
+                curr = upper;
+            return new King(curr, loc);
+        }
+    }
 }

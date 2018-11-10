@@ -28,10 +28,19 @@ public class Player{
 
  public Piece getKing(){
      if(this.isUpper())
-        return this.onBoard.get("K");
+         return this.onBoard.get("K");
      else
          return this.onBoard.get("k");
  }
+
+ public Piece getPawn(){
+     if(this.isUpper())
+         return this.onBoard.get("P");
+     else
+         return this.onBoard.get("p");
+ }
+
+
 
  public boolean isUpper(){
      if(this.getName().equals("UPPER"))
@@ -39,6 +48,7 @@ public class Player{
      else
          return false;
  }
+
 // SETTER methods
 
  public void moveToBoard(Piece piece){
