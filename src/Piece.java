@@ -55,11 +55,22 @@ public abstract class Piece {
 
     public void setPlayer(Player newPlayer){
         this.player = newPlayer;
+        if(player.isUpper()){
+            this.setName(this.getName().toUpperCase());
+        }
+        else{
+            this.setName(this.getName().toLowerCase());
+        }
     }
 
     public void setLocation(Location pos){
         this.currPos = pos;
     }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
 
     //    Abstract methods
     abstract List<Location> findValidPath(Location startLoc, Location endLoc);

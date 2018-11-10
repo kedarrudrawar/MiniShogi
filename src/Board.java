@@ -41,37 +41,37 @@ public class Board {
         this.upper = upper;
 
         board[0][4] = new Rook(upper, new Location(0, 4));
-        upper.addToBoard(board[0][4]);
+        upper.addToBoardList(board[0][4]);
         board[4][0] = new Rook(lower, new Location(4, 0));
-        lower.addToBoard(board[4][0]);
+        lower.addToBoardList(board[4][0]);
 
         board[1][4] = new Bishop(upper, new Location(1, 4));
-        upper.addToBoard(board[1][4]);
+        upper.addToBoardList(board[1][4]);
         board[3][0] = new Bishop(lower, new Location(3, 0));
-        lower.addToBoard(board[3][0]);
+        lower.addToBoardList(board[3][0]);
 
         board[2][4] = new SilverGeneral(upper, new Location(2, 4));
-        upper.addToBoard(board[2][4]);
+        upper.addToBoardList(board[2][4]);
         board[2][0] = new SilverGeneral(lower, new Location(2, 0));
-        lower.addToBoard(board[2][0]);
+        lower.addToBoardList(board[2][0]);
 
         board[3][4] = new GoldGeneral(upper, new Location(3, 4));
-        upper.addToBoard(board[3][4]);
+        upper.addToBoardList(board[3][4]);
         board[1][0] = new GoldGeneral(lower, new Location(1, 0));
-        lower.addToBoard(board[1][0]);
+        lower.addToBoardList(board[1][0]);
 
         board[4][4] = new King(upper, new Location(4, 4));
-        upper.addToBoard(board[4][4]);
+        upper.addToBoardList(board[4][4]);
 //        this.upperKingPos = board[4][4].getLocation();
 
         board[0][0] = new King(lower, new Location(0, 0));
-        lower.addToBoard(board[0][0]);
+        lower.addToBoardList(board[0][0]);
 //        this.lowerKingPos = board[0][0].getLocation();
 
         board[4][3] = new Pawn(upper, new Location(4, 3));
-        upper.addToBoard(board[4][3]);
+        upper.addToBoardList(board[4][3]);
         board[0][1] = new Pawn(lower, new Location(0, 1));
-        lower.addToBoard(board[0][1]);
+        lower.addToBoardList(board[0][1]);
 
         return board;
     }
@@ -148,8 +148,10 @@ public class Board {
 //        System.out.println(opponent.getName() + "'s on board : " + opponent.printOnBoard());
 //        System.out.println(opponent.getName() + "'s captured : " + opponent.printCaptured());
 
-
-        for (Piece p : opponent.getOnBoard().values()) {
+        System.out.println("OPPONENT : " + opponent.getName());
+        for (Piece p : opponent.getOnBoard()) {
+            System.out.println("Calling findValidPath: Board.java: line 153 on Piece : " + p.getName());
+            System.out.println("Piece location: " + p.getLocation());
             List<Location> moves = p.findValidPath(p.getLocation(), kingLoc);
 
 //            System.out.println(p.toString() + " - " + p.getLocation().toString() + " : " + moves.toString());
@@ -224,11 +226,32 @@ public class Board {
 
         if(actionSplit[0].equals("move")){
             Location startLoc = new Location(actionSplit[1]);
+            Piece target = this.getPiece(endLoc);
+            boolean empty = true;
+            if(target != null){
+                empty = false;
+            }
+
             this.move(startLoc, endLoc);
             boolean currKingCheck = this.isInCheckBoolean(player, player.getKing().getLocation());
 
 //          REVERSE MOVES MADE TO TEST.
-            this.move(endLoc, startLoc);
+            this.forceMove(endLoc, startLoc);
+
+            if(! empty){
+                System.out.println("After moving : \n" + Utils.stringifyBoard(this.board));
+                Player originalOwner = this.getOpponent(player);
+
+                player.removeFromCaptured(target);
+                target.setPlayer(originalOwner);
+                this.setPiece(endLoc, target);
+                target.setLocation(endLoc);
+                originalOwner.addToBoardList(target);
+
+
+                System.out.println("After supposedly fixing: \n" + Utils.stringifyBoard(this.board));
+                System.out.println("Target's new location : " + target.getLocation());
+            }
 
             if(currKingCheck){
                 return true;
@@ -239,7 +262,8 @@ public class Board {
         }
         else if(actionSplit[0].equals("drop")){
             String pieceName = actionSplit[1];
-            Piece dropPiece = player.getCaptured().get(pieceName);
+            Piece dropPiece = player.getPieceFromCaptured(pieceName);
+
         }
 
         return false;
@@ -255,8 +279,8 @@ public class Board {
             for(Location position : positions){
                 if(position.equals(kingLoc))
                     continue;
-                for(String dropPiece : owner.getCaptured().keySet()){
-                    String action = String.format("drop %s %s", dropPiece, position.toString());
+                for(Piece dropPiece : owner.getCaptured()){
+                    String action = String.format("drop %s %s", dropPiece.getName(), position.toString());
                     if(! testCheckAfterAction(owner, action)) {
                         dropStrings.add(action);
                     }
@@ -270,18 +294,34 @@ public class Board {
         List<String> moves = new ArrayList<>();
         for(Piece threateningPiece : threateningPieces){
             Location start = threateningPiece.getLocation();
+//            This is the path that the threatening Piece can take to capture the King
             List<Location> positions = threateningPiece.findValidPath(start, kingLoc);
-            for(Piece ownerPiece: owner.getOnBoard().values()){
+//            We will add the start location of the threatening piece as well, because the owner's pieces may
+//              be able to capture this piece to protect the king. However, findValidPath does not include start position
+//              in its return list.
+            positions.add(start);
+
+            List<Piece> onBoardPieces = new ArrayList<>(owner.getOnBoard());
+//            These are the pieces that the owner may be able to move to protect the King
+            for(Piece ownerPiece: onBoardPieces){
+                if(ownerPiece.getName().equalsIgnoreCase("k"))
+                    continue;
+//
                 Location ownerPieceLoc = ownerPiece.getLocation();
                 for(Location position : positions){
+//                    This is to check whether the owner's piece can move to any of the positions in the threatening
+//                      piece's path to block or capture the threatening piece
                     List<Location> path = ownerPiece.findValidPath(ownerPieceLoc, position);
-//                    If valid path exists:
+//                    If valid path exists from owner's piece to one of these positions,
+//                      we need to check if it can be blocked by another piece:
                     if(path.size() != 0){
                         boolean obstructed = false;
                         for(Location l : path){
 //                          If the path is obstructed by another piece, the owner is not allowed to move their piece
 //                              there to save their king.
-                            if(this.getPiece(l) != null){
+//                           However, if the piece obstructing it is the threatening piece, it does not matter. The
+//                              owner's piece can just capture it
+                            if(this.getPiece(l) != null && ! this.getPiece(l).equals(threateningPiece)){
                                 obstructed = true;
                                 break;
                             }
@@ -304,8 +344,14 @@ public class Board {
 
 
 // ACTION methods
+    private void convertOwner(Player captor, Location endLoc){
+        Piece capturedPiece = this.getPiece(endLoc);
+    }
+
+
 
     public void capture(Location startPos, Location endPos) {
+//        Initialize variables
         Piece captorPiece = this.getPiece(startPos);
         Piece capturedPiece = this.getPiece(endPos);
         Player captorPlayer = captorPiece.getPlayer();
@@ -313,7 +359,7 @@ public class Board {
 
         capturedPiece.setPlayer(captorPlayer);
         capturedPiece.setLocation(null);
-        captorPlayer.addToCaptured(capturedPiece);
+        captorPlayer.addToCapturedList(capturedPiece);
         opponentPlayer.removeFromBoard(capturedPiece);
 
 
@@ -328,6 +374,22 @@ public class Board {
     }
 
     /**
+     * This method is only to be used for moving pieces back to original positions. They would have been moved for
+     *  testing (in method testCheckAfterAction()). This method ignores regular conventions of moving pieces.
+     * @param start
+     * @param end
+     */
+
+    private void forceMove(Location start, Location end){
+        Piece startPiece = this.getPiece(start);
+        this.setPiece(end, startPiece);
+        this.setPiece(start, null);
+        startPiece.setLocation(end);
+    }
+
+
+
+    /**
      * @param start
      * @param end
      * @return boolean - to check whether moving the piece puts a piece in check
@@ -337,14 +399,18 @@ public class Board {
         Piece startPiece = this.getPiece(start);
         Player opponent = this.getOpponent(startPiece.getPlayer());
         if (startPiece == null) {
+            System.out.println("Cannot move piece that doesn't exist.");
             System.out.println("Illegal move. " + opponent.toString() + " wins.");
-            System.exit(1);
+            throw new IllegalArgumentException();
+//            System.exit(1);
         }
 
         List<Location> positions = startPiece.findValidPath(start, end);
         if (positions.size() == 0) {
+            System.out.println("Called findValidPath on piece : " + startPiece.getName() + " from pos : " + start.toString() + " to " + end.toString());
             System.out.println("Illegal move. " + opponent.toString() + " wins.");
-            System.exit(1);
+            throw new IllegalArgumentException();
+//            System.exit(1);
         }
 
 //        This for loop iterates through all the positions except the final position (destination) to check if they are all empty.
@@ -371,10 +437,6 @@ public class Board {
         }
 
         startPiece.setLocation(end);
-
-
-        //TODO: need to check for every single available move, including killing their pieces or blocking their paths.
-        //TODO: need to also take into account that we can drop pieces back into the game to block checks
 
 
     }
@@ -510,7 +572,6 @@ public class Board {
             }
         }
 
-
         if (checkPiece != null) {
             System.out.println("Desired position to drop piece is currently occupied by: " +
                     checkPiece.getName());
@@ -526,9 +587,7 @@ public class Board {
             System.exit(0);
         }
 
-        Map<String, Piece> capturedMap = captor.getCaptured();
-
-        Piece dropPiece = capturedMap.get(pieceName);
+        Piece dropPiece = captor.getPieceFromCaptured(pieceName);
 
         if (dropPiece == null)
             throw new IllegalArgumentException("You have not captured this piece.");
@@ -545,8 +604,8 @@ public class Board {
         }
 
         this.setPiece(dropLoc, dropPiece);
-
-        captor.moveToBoard(dropPiece);
+        dropPiece.setLocation(dropLoc);
+        captor.moveToBoardList(dropPiece);
     }
 
     public void promote(String position) {

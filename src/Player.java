@@ -1,101 +1,135 @@
 import java.*;
 import java.util.*;
 
-public class Player{
+public class Player {
     private String name;
     private int turnCounter = 0;
-    private Map<String, Piece> captured;
-    private Map<String, Piece> onBoard;
+    //    private Map<String, Piece> captured;
+//    private Map<String, Piece> onBoard;
+    private List<Piece> capturedList;
+    private List<Piece> onBoardList;
+
+    public Player(String name) {
+        this.name = name;
+        this.turnCounter = 0;
+//     this.captured = new HashMap<String, Piece>();
+//     this.onBoard = new HashMap<String, Piece>();
+        this.capturedList = new ArrayList<>();
+        this.onBoardList = new ArrayList<>();
+    }
 
 
- public Player(String name){
-     this.name = name;
-     this.turnCounter = 0;
-     this.captured = new HashMap<String, Piece>();
-     this.onBoard = new HashMap<String, Piece>();
- }
+    // GETTER methods
+    public String getName() {
+        return this.name;
+    }
+
+    public int getTurnCount() {
+        return this.turnCounter;
+    }
+
+    public List<Piece> getCaptured() {
+        return this.capturedList;
+    }
+
+    public List<Piece> getOnBoard() {
+        return this.onBoardList;
+    }
+
+    public Piece getKing() {
+        for (Piece piece : this.onBoardList) {
+            if (piece.getName().equalsIgnoreCase("k")) {
+                return piece;
+            }
+        }
+        return null;
+    }
+
+    public Piece getPawn() {
+        for (Piece piece : this.onBoardList) {
+            if (piece.getName().equalsIgnoreCase("p")) {
+                return piece;
+            }
+        }
+        return null;
+    }
+
+    public Piece getPieceFromBoard(String pieceName) {
+        for (Piece piece : this.onBoardList) {
+            if (piece.getName().equalsIgnoreCase(pieceName)) {
+                return piece;
+            }
+        }
+        return null;
+    }
+
+    public Piece getPieceFromCaptured(String pieceName) {
+        for (Piece piece : this.capturedList) {
+            if (piece.getName().equalsIgnoreCase(pieceName)) {
+                return piece;
+            }
+        }
+        return null;
+    }
 
 
-
-// GETTER methods
- public String getName(){ return this.name; }
-
- public int getTurnCount(){ return this.turnCounter; }
-
- public Map<String, Piece> getCaptured(){ return this.captured; }
-
- public Map<String, Piece> getOnBoard(){ return this.onBoard; }
-
- public Piece getKing(){
-     if(this.isUpper())
-         return this.onBoard.get("K");
-     else
-         return this.onBoard.get("k");
- }
-
- public Piece getPawn(){
-     if(this.isUpper())
-         return this.onBoard.get("P");
-     else
-         return this.onBoard.get("p");
- }
-
-
-
- public boolean isUpper(){
-     if(this.getName().equals("UPPER"))
-         return true;
-     else
-         return false;
- }
+    public boolean isUpper() {
+        if (this.getName().equals("UPPER"))
+            return true;
+        else
+            return false;
+    }
 
 // SETTER methods
 
- public void moveToBoard(Piece piece){
-     this.getCaptured().remove(piece.getName());
-     this.onBoard.put(piece.getName(), piece);
- }
+    public void moveToBoardList(Piece piece) {
+        this.capturedList.remove(piece);
+        this.onBoardList.add(piece);
+    }
 
- public void addToBoard(Piece piece){
-     this.onBoard.put(piece.getName(), piece);
- }
+    public void addToBoardList(Piece piece) {
+        this.onBoardList.add(piece);
+        if(this.isUpper()){
+            piece.setName(piece.getName().toUpperCase());
+        }
+        else{
+            piece.setName(piece.getName().toLowerCase());
+        }
+
+        piece.setPlayer(this);
+
+    }
+
+    public String printCaptured() {
+        return this.capturedList.toString();
+    }
+
+    public String printOnBoard() {
+        return this.onBoardList.toString();
+    }
+
+    public void addToCapturedList(Piece piece) {
+        this.capturedList.add(piece);
+        piece.setPlayer(this);
+    }
+
+    public void removeFromBoard(Piece piece) {
+        this.onBoardList.remove(piece);
+    }
+
+    public void removeFromCaptured(Piece piece){
+        this.capturedList.remove(piece);
+    }
+
+    public void incrementTurn() {
+        this.turnCounter += 1;
+    }
 
 
- public String printCaptured(){
-     return this.captured.toString();
- }
-
- public String printOnBoard(){
-     return this.onBoard.toString();
- }
-
-
- public void addToCaptured(Piece piece){
-     this.captured.put(piece.getName(), piece);
-     this.incrementTurn();
- }
-
- public void removeFromBoard(Piece piece){
-     String name = piece.getName();
-     if(this.isUpper())
-         name = name.toUpperCase();
-     else
-         name = name.toLowerCase();
-
-     this.onBoard.remove(name);
- }
-
-
- public void incrementTurn(){
-     this.turnCounter += 1;
- }
-
-
-@Override
- public String toString() {
-    return this.getName();
- }
-
+    @Override
+    public String toString() {
+        return this.getName();
+    }
 
 
 }

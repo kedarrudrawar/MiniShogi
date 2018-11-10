@@ -47,12 +47,12 @@ public class myShogi {
             String boardString = Utils.stringifyBoard(board.getBoard());
             System.out.println(boardString);
             System.out.print("Captures UPPER: ");
-            for (String name : upper.getCaptured().keySet())
-                System.out.print(name + " ");
+            for (Piece piece : upper.getCaptured())
+                System.out.print(piece.toString() + " ");
             System.out.println();
             System.out.print("Captures lower: ");
-            for (String name : lower.getCaptured().keySet())
-                System.out.print(name + " ");
+            for (Piece piece : lower.getCaptured())
+                System.out.print(piece.toString() + " ");
             System.out.println("\n");
             System.out.print(currPlayer.getName() + "> ");
 
@@ -172,12 +172,12 @@ public class myShogi {
 
                 System.out.println(Utils.stringifyBoard(board.getBoard()));
                 System.out.print("Captures UPPER: ");
-                for (String name : upper.getCaptured().keySet())
-                    System.out.print(name + " ");
+                for (Piece piece: upper.getCaptured())
+                    System.out.print(piece.toString() + " ");
                 System.out.println();
                 System.out.print("Captures lower: ");
-                for (String name : lower.getCaptured().keySet())
-                    System.out.print(name + " ");
+                for (Piece piece: lower.getCaptured())
+                    System.out.print(piece.toString() + " ");
                 System.out.println("\n");
 
                 System.out.print(currPlayer.getName() + "> ");
