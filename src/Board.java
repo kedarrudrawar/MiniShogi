@@ -34,7 +34,6 @@ public class Board {
         return board;
     }
 
-
     private Piece[][] initializeBoard() {
         Piece[][] board = new Piece[5][5];
 
@@ -79,7 +78,6 @@ public class Board {
         return board;
     }
 
-
 // GETTER methods
 
     public Player getLower() {
@@ -106,13 +104,12 @@ public class Board {
         return this.board[pos.getCol()][pos.getRow()];
     }
 
-
     //    Setter method
     public void setPiece(Location pos, Piece piece) {
         this.board[pos.getCol()][pos.getRow()] = piece;
     }
 
-    //    HELPER methods
+//    HELPER methods
     public void canPromote(Location endPos) throws IllegalArgumentException {
         Piece piece = this.getPiece(endPos);
         if (piece.getPlayer().getName() == "UPPER") {
@@ -126,19 +123,13 @@ public class Board {
         piece.promote();
     }
 
-
-    /**
-     * TODO: Implement so I only have to feed in the location of the king, so I can use it in listValidMoves method on the other positions.
-     */
-
     /**
      * @param owner
      * @param kingLoc
      * @return
      */
-    public boolean isInCheck(Player owner, Location kingLoc) {
-
-//    public boolean isInCheck(Piece king) {
+    public List<Piece> isInCheck(Player owner, Location kingLoc) {
+        List<Piece> threateningPieces = new ArrayList<>();
         Player opponent;
         if (owner.getName().equals("UPPER"))
             opponent = this.getLower();
@@ -156,26 +147,26 @@ public class Board {
 //            System.out.println(p.toString() + " - " + p.getLocation().toString() + " : " + moves.toString());
             if (moves.size() == 0)
                 continue;
-//            Check whether there is a piece in the way of the king and the attacking piece
-//            If there is, the king will not be in check from this piece, regardless of the type of piece blocking it.
+//  Check whether there is a piece in the way of the king and the attacking piece
+//  If there is, the king will not be in check from this piece, regardless of the type of piece blocking it.
             boolean blocked = false;
-            for (int i = 0; i < moves.size(); i++) {
-                if (moves.get(i).equals(kingLoc))
+            for (Location move : moves) {
+                if (move.equals(kingLoc))
                     continue; // We can continue, because we already know the king's location can be accessed. This is why it's in check.
-                if (this.getPiece(moves.get(i)) != null) {
+                if (this.getPiece(move) != null) {
 //                    System.out.println("currently blocked by : " + this.getPiece(moves.get(i)).toString());
                     blocked = true;
+                    break;
                 }
             }
             if (!blocked) {
                 System.out.println("in check by piece: " + p.getName() + " at location: " + p.getLocation().toString());
-                return true;
+                threateningPieces.add(p);
             }
         }
-
-        return false;
+//  If the size of threateningPieces returned by isInCheck is 0, that means the king is not in check.
+        return threateningPieces;
     }
-
 
     /**
      * This method will return all valid moves the king can make to remove himself from check.
@@ -203,7 +194,7 @@ public class Board {
                     continue;
                 }
             }
-            if (isInCheck(owner, l)) {
+            if (isInCheck(owner, l).size() != 0) {
                 System.out.println("Continuing on position: " + l.toString() + " because puts king in check");
                 continue;
             }
@@ -212,6 +203,32 @@ public class Board {
         System.out.println("valid moves after checking: " + retList.toString());
         return retList;
     }
+
+    public List<String> getDropMoves(Player owner, Location kingLoc, List<Piece> threateningPieces){
+        List<String> dropStrings = new ArrayList<>();
+        for(Piece piece : threateningPieces){
+            Location start = piece.getLocation();
+            List<Location> positions = piece.findValidPath(start, kingLoc);
+            for(Location position : positions){
+                if(position.equals(kingLoc))
+                    continue;
+                for(String dropPiece : owner.getCaptured().keySet()){
+                    dropStrings.add(String.format("drop %s %s", dropPiece, position.toString()));
+                }
+            }
+        }
+        return dropStrings;
+    }
+
+    public List<String> listSacrificeMoves(Player owner, Location kingLoc, List<Piece> threateningPieces){
+        List<String> moves = new ArrayList<>();
+
+        return moves;
+    }
+
+
+
+
 
 // ACTION methods
 
@@ -291,7 +308,7 @@ public class Board {
 
 
     /**
-     * THIS METHOD NEEDS TO BE FIXED. This is for taking in files from -f mode, and running the moves within them. 
+     * THIS METHOD NEEDS TO BE FIXED. This is for taking in files from -f mode, and running the moves within them.
      * @param moves
      */
 
@@ -306,7 +323,6 @@ public class Board {
         for (String move : moves) {
             String[] inputSplit = move.split(" ");
             if (inputSplit[0].equals("move")) {
-
                 String startPos = inputSplit[1];
                 String endPos = inputSplit[2];
 
@@ -315,25 +331,24 @@ public class Board {
 
                 boolean promote = false;
 
-                if (inputSplit.length == 4)
-                    promote = true;
+                if (inputSplit.length == 4) {
+                    if(inputSplit[3].equals("promote"))
+                        promote = true;
+                }
 
                 if (this.getPiece(startLoc).getPlayer() != currPlayer) {
                     System.out.println("Moving piece that is not yours. Illegal move.");
                     System.exit(0);
                 }
 
-//                TODO: utilize the check method in here rather than in board.java: move()
-
-
                 Piece currKing = currPlayer.getKing();
 
-//                This is to check whether the piece that's moving is the king. If it is, we need to check whether the destination
-//                of the king will put it in check. If it is not, then we just need to check the original position of the king.
+//  This is to check whether the piece that's moving is the king. If it is, we need to check whether the destination
+//  of the king will put it in check. If it is not, then we just need to check the original position of the king.
                 if (startLoc.equals(currKing.getLocation())) {
-                    boolean currKingCheck = this.isInCheck(currPlayer, endLoc);
+                    boolean currKingCheck = (this.isInCheck(currPlayer, endLoc).size() != 0);
 
-//                    If moving the king to this location puts king in check, this is illegal.
+//  If moving the king to this location puts king in check, this is illegal.
                     if (currKingCheck) {
                         System.out.println("Moving your piece into check. Illegal move.");
                         System.exit(0);
@@ -341,7 +356,7 @@ public class Board {
                     this.move(startLoc, endLoc);
                 } else {
                     this.move(startLoc, endLoc);
-                    boolean currKingCheck = this.isInCheck(currPlayer, currKing.getLocation());
+                    boolean currKingCheck = (this.isInCheck(currPlayer, currKing.getLocation()).size() != 0);
                     if (currKingCheck) {
                         System.out.println("Moving your piece into check. Illegal move.");
                         System.exit(0);
@@ -355,19 +370,30 @@ public class Board {
 
                 Piece opponentKing = opponentPlayer.getKing();
                 Location opponentKingLoc = opponentKing.getLocation();
+                List<Piece> threateningPieces = this.isInCheck(opponentPlayer, opponentKingLoc);
 
-                boolean opponentKingCheck = this.isInCheck(opponentPlayer, opponentKingLoc);
+                boolean opponentKingCheck = (this.isInCheck(opponentPlayer, opponentKingLoc).size() != 0);
                 if (opponentKingCheck) {
 //                    System.out.println("calling listValidMoves on opponent's king");
-                    List<Location> movesList = this.listValidMoves(opponentKing, opponentKing.getLocation());
-                    if (movesList.size() == 0) {
+                    List<Location> kingMovesList = this.listValidMoves(opponentKing, opponentKing.getLocation());
+                    List<String> dropList = this.getDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+                    List<String> sacrificeMoves = this.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+
+
+                    if (kingMovesList.size() == 0) {
                         System.out.println(currPlayer.getName() + " player has won.");
                         System.exit(0);
                     }
                     System.out.println(opponentPlayer.getName() + " player is in check!");
                     System.out.println("Available moves: ");
-                    for (Location loc : movesList) {
+                    for (Location loc : kingMovesList) {
                         System.out.println(String.format("move %s %s", opponentKingLoc.toString(), loc.toString()));
+                    }
+                    for(String dropMove : dropList){
+                        System.out.println(dropMove);
+                    }
+                    for(String sacrifice : sacrificeMoves){
+                        System.out.println(sacrifice);
                     }
                 }
             } else if (inputSplit[0].equals("drop")) {
