@@ -90,59 +90,12 @@ public class myShogi {
                         System.exit(0);
                     }
 
-
-//                TODO: utilize the check method in here rather than in board.java: move()
-
-                    /**
-
-                     //        Check whether lower player is in check
-
-
-
-
-                     if (isInCheck(lower, lowerKingPos)) {
-                     //            System.out.println("calling listValidMoves on lowerKingPos");
-                     List<Location> movesList = listValidMoves(lowerKing, lowerKingPos);
-                     if (movesList.size() == 0) {
-                     System.out.println("UPPER player has won.");
-                     System.exit(0);
-                     }
-
-                     System.out.println("lower player is in check!");
-                     System.out.print("Available moves: ");
-                     for (Location move : movesList) {
-                     System.out.println(String.format("move %s %s", lowerKingPos.toString(), move.toString()));
-                     }
-                     //            System.out.println(movesString);
-                     }
-
-                     //        Check whether upper player is in check
-                     if (board.isInCheck(upper, upperKingPos)) {
-                     //            System.out.println("calling listValidMoves on upperKingPos");
-                     List<Location> movesList = listValidMoves(upperKing, upperKingPos);
-                     if (movesList.size() == 0) {
-                     System.out.println("lower player has won.");
-                     System.exit(0);
-                     }
-
-                     System.out.println("UPPER player is in check!\n");
-                     System.out.println("Available moves: ");
-                     for (Location move : movesList) {
-                     System.out.println(String.format("move %s %s", upperKingPos.toString(), move.toString()));
-                     }
-                     System.out.println();
-                     }
-                     return false;
-
-                     */
-
-
                     Piece currKing = currPlayer.getKing();
 
 //                This is to check whether the piece that's moving is the king. If it is, we need to check whether the destination
 //                of the king will put it in check. If it is not, then we just need to check the original position of the king.
                     if (startLoc.equals(currKing.getLocation())) {
-                        boolean currKingCheck = (board.isInCheck(currPlayer, endLoc).size() != 0);
+                        boolean currKingCheck = board.isInCheckBoolean(currPlayer, endLoc);
 
 //                    If moving the king to this location puts king in check, this is illegal.
                         if (currKingCheck) {
@@ -152,7 +105,7 @@ public class myShogi {
                         board.move(startLoc, endLoc);
                     } else {
                         board.move(startLoc, endLoc);
-                        boolean currKingCheck = (board.isInCheck(currPlayer, currKing.getLocation()).size() != 0);
+                        boolean currKingCheck = board.isInCheckBoolean(currPlayer, currKing.getLocation());
                         if (currKingCheck) {
                             System.out.println("Moving your piece into check. Illegal move.");
                             System.exit(0);
@@ -173,7 +126,7 @@ public class myShogi {
 //                    System.out.println("calling listValidMoves on opponent's king");
                         List<Location> movesList = board.listValidMoves(opponentKing, opponentKingLoc);
                         List<String> dropList = board.getDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-
+                        List<String> sacrificeMoves = board.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
 
                         if (movesList.size() == 0) {
                             System.out.println(currPlayer.getName() + " player has won.");
@@ -186,6 +139,9 @@ public class myShogi {
                         }
                         for(String s : dropList){
                             System.out.println(s);
+                        }
+                        for(String sacrifice : sacrificeMoves){
+                            System.out.println(sacrifice);
                         }
                     }
 

@@ -7,8 +7,6 @@ public class Board {
 //    private Location lowerKingPos;
     private Player upper;
     private Player lower;
-    private boolean upperInCheck;
-    private boolean lowerInCheck;
 
     public Board() {
         this.board = this.initializeBoard();
@@ -123,6 +121,16 @@ public class Board {
         piece.promote();
     }
 
+    public boolean isInCheckBoolean(Player owner, Location kingLoc){
+        List<Piece> threateningPieces = isInCheck(owner, kingLoc);
+        if(threateningPieces.size() != 0){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     /**
      * @param owner
      * @param kingLoc
@@ -194,7 +202,7 @@ public class Board {
                     continue;
                 }
             }
-            if (isInCheck(owner, l).size() != 0) {
+            if (this.isInCheckBoolean(owner, l)) {
                 System.out.println("Continuing on position: " + l.toString() + " because puts king in check");
                 continue;
             }
@@ -203,6 +211,41 @@ public class Board {
         System.out.println("valid moves after checking: " + retList.toString());
         return retList;
     }
+
+    /**
+     * This method will check whether the king will be in check after a specific move has been made.
+     * This is to check for double/triple/... check.
+     * @param action
+     * @return
+     */
+    public boolean testCheckAfterAction(Player player, String action){
+        String[] actionSplit = action.split(" ");
+        Location endLoc = new Location (actionSplit[2]);
+
+        if(actionSplit[0].equals("move")){
+            Location startLoc = new Location(actionSplit[1]);
+            this.move(startLoc, endLoc);
+            boolean currKingCheck = this.isInCheckBoolean(player, player.getKing().getLocation());
+
+//          REVERSE MOVES MADE TO TEST.
+            this.move(endLoc, startLoc);
+
+            if(currKingCheck){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        else if(actionSplit[0].equals("drop")){
+            String pieceName = actionSplit[1];
+            Piece dropPiece = player.getCaptured().get(pieceName);
+        }
+
+        return false;
+    }
+
+
 
     public List<String> getDropMoves(Player owner, Location kingLoc, List<Piece> threateningPieces){
         List<String> dropStrings = new ArrayList<>();
@@ -213,7 +256,10 @@ public class Board {
                 if(position.equals(kingLoc))
                     continue;
                 for(String dropPiece : owner.getCaptured().keySet()){
-                    dropStrings.add(String.format("drop %s %s", dropPiece, position.toString()));
+                    String action = String.format("drop %s %s", dropPiece, position.toString());
+                    if(! testCheckAfterAction(owner, action)) {
+                        dropStrings.add(action);
+                    }
                 }
             }
         }
@@ -222,7 +268,34 @@ public class Board {
 
     public List<String> listSacrificeMoves(Player owner, Location kingLoc, List<Piece> threateningPieces){
         List<String> moves = new ArrayList<>();
-
+        for(Piece threateningPiece : threateningPieces){
+            Location start = threateningPiece.getLocation();
+            List<Location> positions = threateningPiece.findValidPath(start, kingLoc);
+            for(Piece ownerPiece: owner.getOnBoard().values()){
+                Location ownerPieceLoc = ownerPiece.getLocation();
+                for(Location position : positions){
+                    List<Location> path = ownerPiece.findValidPath(ownerPieceLoc, position);
+//                    If valid path exists:
+                    if(path.size() != 0){
+                        boolean obstructed = false;
+                        for(Location l : path){
+//                          If the path is obstructed by another piece, the owner is not allowed to move their piece
+//                              there to save their king.
+                            if(this.getPiece(l) != null){
+                                obstructed = true;
+                                break;
+                            }
+                        }
+                        if(! obstructed) {
+                            String action = String.format("move %s %s", ownerPieceLoc, position.toString());
+                            if (!testCheckAfterAction(owner, action)) {
+                                moves.add(action);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return moves;
     }
 
@@ -346,7 +419,7 @@ public class Board {
 //  This is to check whether the piece that's moving is the king. If it is, we need to check whether the destination
 //  of the king will put it in check. If it is not, then we just need to check the original position of the king.
                 if (startLoc.equals(currKing.getLocation())) {
-                    boolean currKingCheck = (this.isInCheck(currPlayer, endLoc).size() != 0);
+                    boolean currKingCheck = this.isInCheckBoolean(currPlayer, endLoc);
 
 //  If moving the king to this location puts king in check, this is illegal.
                     if (currKingCheck) {
@@ -356,7 +429,7 @@ public class Board {
                     this.move(startLoc, endLoc);
                 } else {
                     this.move(startLoc, endLoc);
-                    boolean currKingCheck = (this.isInCheck(currPlayer, currKing.getLocation()).size() != 0);
+                    boolean currKingCheck = this.isInCheckBoolean(currPlayer, currKing.getLocation());
                     if (currKingCheck) {
                         System.out.println("Moving your piece into check. Illegal move.");
                         System.exit(0);
@@ -372,7 +445,7 @@ public class Board {
                 Location opponentKingLoc = opponentKing.getLocation();
                 List<Piece> threateningPieces = this.isInCheck(opponentPlayer, opponentKingLoc);
 
-                boolean opponentKingCheck = (this.isInCheck(opponentPlayer, opponentKingLoc).size() != 0);
+                boolean opponentKingCheck = this.isInCheckBoolean(opponentPlayer, opponentKingLoc);
                 if (opponentKingCheck) {
 //                    System.out.println("calling listValidMoves on opponent's king");
                     List<Location> kingMovesList = this.listValidMoves(opponentKing, opponentKing.getLocation());
