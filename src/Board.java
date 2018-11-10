@@ -578,14 +578,6 @@ public class Board {
             System.out.println("Illegal move. " + opponent.getName() + " wins.");
         }
 
-        int promotionRow = 0;
-        if (captor.isUpper())
-            promotionRow = 4;
-
-        if (dropLoc.getRow() == promotionRow) {
-            System.out.println("Illegal move. Cannot drop into promotion zone.");
-            System.exit(0);
-        }
 
         Piece dropPiece = captor.getPieceFromCaptured(pieceName);
 
@@ -632,7 +624,7 @@ public class Board {
             return new Pawn(curr, loc);
         }
 
-        if (pieceName.equalsIgnoreCase("b")) {
+        else if (pieceName.equalsIgnoreCase("b")) {
             Player curr;
             if (pieceName.equals("b"))
                 curr = lower;
@@ -640,7 +632,7 @@ public class Board {
                 curr = upper;
             return new Bishop(curr, loc);
         }
-        if (pieceName.equalsIgnoreCase("r")) {
+        else if (pieceName.equalsIgnoreCase("r")) {
             Player curr;
             if (pieceName.equals("r"))
                 curr = lower;
@@ -648,7 +640,7 @@ public class Board {
                 curr = upper;
             return new Rook(curr, loc);
         }
-        if (pieceName.equalsIgnoreCase("g")) {
+        else if (pieceName.equalsIgnoreCase("g")) {
             Player curr;
             if (pieceName.equals("g"))
                 curr = lower;
@@ -657,7 +649,7 @@ public class Board {
             return new GoldGeneral(curr, loc);
         }
 
-        if (pieceName.equalsIgnoreCase("s")) {
+        else if (pieceName.equalsIgnoreCase("s")) {
             Player curr;
             if (pieceName.equals("p"))
                 curr = lower;

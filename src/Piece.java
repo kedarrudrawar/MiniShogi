@@ -278,12 +278,12 @@ class Pawn extends Piece {
 
     public boolean canDrop(Location dropLoc){
         if(this.getPlayer().isUpper()){
-            if(dropLoc.getRow() == 4){
+            if(dropLoc.getRow() == 0){
                 return false;
             }
         }
         else{
-            if(dropLoc.getRow() == 0)
+            if(dropLoc.getRow() == 4)
                 return false;
         }
         return true;
