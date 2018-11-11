@@ -9,23 +9,24 @@ public class myShogi {
 //        File mode:
         if (args[0].equals("-f")) {
             Utils.TestCase tc = null;
-            System.out.println("path : " + args[1]);
+//            System.out.println("path : " + args[1]);
             try {
                 tc = Utils.parseTestCase(args[1]);
             } catch (Exception e) {
                 System.out.println("caught exception");
             }
-            Board board = new Board(tc.initialPieces);
+            Board board = new Board(tc);
 
-            board.movePieces(tc.moves);
-
+            board.runFileMode(tc.moves);
 
             System.exit(0);
+
+        }
 
 
 //            Interactive mode
 
-        } else {
+        else {
 
 
 //        Initialize board
@@ -114,7 +115,7 @@ public class myShogi {
 
                     if (promote) {
                         System.out.println("about to promote");
-                        board.promote(endPos);
+                        board.promote(startLoc, endLoc);
                     }
 
                     Piece opponentKing = opponentPlayer.getKing();

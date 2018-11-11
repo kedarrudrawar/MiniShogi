@@ -15,11 +15,10 @@ public abstract class Piece {
     }
 
     public String getName() {
-        if (this.player.getName().equals("UPPER"))
+        if (this.player.isUpper())
             return this.name;
         else
             return this.name.toLowerCase();
-
     }
 
 //    Getter methods
@@ -39,7 +38,7 @@ public abstract class Piece {
 //    Setter methods
 
     public void promote() {
-        this.name = "+" + this.name;
+        this.setName("+" + this.name);
     }
 
     public void demote(){
@@ -96,7 +95,14 @@ class Bishop extends Piece {
     public List<Location> findValidPath(Location startLoc, Location endLoc) {
         List<Location> retList = new ArrayList<Location>();
         if(startLoc.equals(endLoc))
-            return new ArrayList<>();
+            return retList;
+
+        if (this.isPromoted()) {
+            List<Location> validPromotedMoves = this.promotionPiece.findValidPath(startLoc, endLoc);
+            if(validPromotedMoves.size() != 0){
+                return validPromotedMoves;
+            }
+        }
 
         int colDiff = Math.abs(startLoc.getCol() - endLoc.getCol());
         int rowDiff = Math.abs(startLoc.getRow() - endLoc.getRow());
@@ -109,7 +115,6 @@ class Bishop extends Piece {
 
         int endCol = endLoc.getCol();
 
-
         int colAdder = 1;
         int rowAdder = 1;
         if(startLoc.getCol() > endLoc.getCol())
@@ -117,14 +122,11 @@ class Bishop extends Piece {
         if(startLoc.getRow() > endLoc.getRow())
             rowAdder = -1;
 
-
         while(startCol != endCol){
             startCol += colAdder;
             startRow += rowAdder;
             retList.add(new Location(startCol, startRow));
         }
-
-
         return retList;
     }
 
@@ -261,7 +263,7 @@ class Pawn extends Piece {
             return new ArrayList<>();
 
 //        Check if promoted:
-        if (this.name.charAt(0) == '+') {
+        if (this.isPromoted()) {
             List<Location> validPromotedMoves = this.promotionPiece.findValidPath(startLoc, endLoc);
             return validPromotedMoves;
         }
