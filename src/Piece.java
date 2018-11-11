@@ -51,7 +51,6 @@ public abstract class Piece {
         return false;
     }
 
-
     public void setPlayer(Player newPlayer){
         this.player = newPlayer;
         if(player.isUpper()){

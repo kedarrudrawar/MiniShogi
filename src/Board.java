@@ -408,16 +408,15 @@ public class Board {
         Piece startPiece = this.getPiece(start);
         Player opponent = this.getOpponent(startPiece.getPlayer());
         if (startPiece == null) {
-            System.out.println("Cannot move piece that doesn't exist.");
-            System.out.println("Illegal move. " + opponent.toString() + " wins.");
-            System.out.println(opponent.toString() + " player wins. " + " Illegal move.");
+//            System.out.println("Cannot move piece that doesn't exist.");
+//            System.out.println(opponent.toString() + " player wins. " + " Illegal move.");
             return false;
         }
 
         List<Location> positions = startPiece.findValidPath(start, end);
         if (positions.size() == 0) {
 //            System.out.println("Called findValidPath on piece : " + startPiece.getName() + " from pos : " + start.toString() + " to " + end.toString());
-            System.out.println(opponent.toString() + " player wins. " + " Illegal move.");
+//            System.out.println(opponent.toString() + " player wins. " + " Illegal move.");
 //            throw new IllegalArgumentException();
             return false;
         }
@@ -456,12 +455,18 @@ public class Board {
         String output = "";
         output += Utils.stringifyBoard(this.getBoard()) + System.getProperty("line.separator");
         output += "Captures UPPER: ";
-        for (Piece piece : upper.getCaptured())
-            output += " " + piece.toString();
+        for(int i = 0; i < upper.getCaptured().size(); i++){
+            if(i != 0)
+                output += " ";
+            output += upper.getCaptured().get(i).toString();
+        }
         output += System.getProperty("line.separator");
         output += "Captures lower: ";
-        for (Piece piece : lower.getCaptured())
-            output += piece.toString() + " ";
+        for(int i = 0; i < lower.getCaptured().size(); i++){
+            if(i != 0)
+                output += " ";
+            output += lower.getCaptured().get(i).toString();
+        }
         output += System.getProperty("line.separator");
         return output;
     }
@@ -484,13 +489,6 @@ public class Board {
         return output;
     }
 
-    /**
-     * TODO: THIS METHOD NEEDS TO BE FIXED. This is for taking in files from -f mode, and running the moves within them.
-     *
-     * @param moves
-     */
-
-
     public void runFileMode(List<String> moves) {
         boolean lowerTurn = true;
         Player currPlayer = this.lower;
@@ -498,7 +496,7 @@ public class Board {
         boolean success = true;
 
         String checkString = "";
-        boolean lastMove = true;
+        boolean lastMove = false;
 
         for (int i = 0; i < moves.size(); i++) {
             if(i == moves.size() - 1)
@@ -586,11 +584,8 @@ public class Board {
 
             if(lastMove) {
                 System.out.println(currPlayer.getName() + " player action: " + move);
-                System.out.println(printBoardAndStats());
-                System.out.print(checkString);
             }
 
-            currPlayer.incrementTurn();
             lowerTurn = !lowerTurn;
 
             if (lowerTurn) {
@@ -601,12 +596,20 @@ public class Board {
                 opponentPlayer = lower;
             }
 
-            if(lastMove)
+
+            if(lastMove) {
+                System.out.println(printBoardAndStats());
+                System.out.print(checkString);
+                if (!success) {
+                    System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
+                    System.exit(0);
+                }
                 System.out.println(currPlayer.getName() + "> ");
+            }
+            currPlayer.incrementTurn();
+
         }
     }
-
-    //TODO: need to implement drop so that the piece gets correctly pushed back into the onBoard map, and taken out of captured.
 
     public void drop(Player captor, String pieceName, Location dropLoc) {
         Piece checkPiece = this.getPiece(dropLoc);
@@ -625,7 +628,6 @@ public class Board {
                     checkPiece.getName());
             System.out.println("Illegal move. " + opponent.getName() + " wins.");
         }
-
 
         Piece dropPiece = captor.getPieceFromCaptured(pieceName);
 
@@ -656,7 +658,6 @@ public class Board {
                 throw new IllegalArgumentException("Cannot promote. Not in promotion zone.");
             }
         }
-
 
         piece.promote();
     }
