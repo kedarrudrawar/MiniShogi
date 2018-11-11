@@ -289,18 +289,19 @@ class Pawn extends Piece {
 
     }
 
-//    @Override
-//    public void setLocation(Location loc){
-//        this.currPos = loc;
-//        if(this.getPlayer().isUpper()) {
-//            if(loc.getRow() == 0)
-//                this.promote();
-//        }
-//        else{
-//            if(loc.getRow() == 4)
-//                this.promote();
-//        }
-//    }
+    @Override
+    public void setLocation(Location loc){
+        this.currPos = loc;
+        if(loc != null) {
+            if (this.getPlayer().isUpper()) {
+                if (loc.getRow() == 0)
+                    this.promote();
+            } else {
+                if (loc.getRow() == 4)
+                    this.promote();
+            }
+        }
+    }
 
     public List<Location> getValidMoves(Location pos){
         return new ArrayList<Location>();
