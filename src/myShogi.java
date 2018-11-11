@@ -122,7 +122,7 @@ public class myShogi {
                     if (opponentKingCheck) {
 //                    System.out.println("calling listValidMoves on opponent's king");
                         List<Location> movesList = board.listValidMoves(opponentKing, opponentKingLoc);
-                        List<String> dropList = board.getDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+                        List<String> dropList = board.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
                         List<String> sacrificeMoves = board.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
 
                         if (movesList.size() == 0) {
