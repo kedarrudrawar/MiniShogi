@@ -3,17 +3,13 @@ import java.util.*;
 
 public class Player {
     private String name;
-    private int turnCounter = 0;
-    //    private Map<String, Piece> captured;
-//    private Map<String, Piece> onBoard;
+    private int turnCounter;
     private List<Piece> capturedList;
     private List<Piece> onBoardList;
 
     public Player(String name) {
         this.name = name;
         this.turnCounter = 0;
-//     this.captured = new HashMap<String, Piece>();
-//     this.onBoard = new HashMap<String, Piece>();
         this.capturedList = new ArrayList<>();
         this.onBoardList = new ArrayList<>();
     }

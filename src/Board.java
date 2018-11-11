@@ -4,8 +4,6 @@ import java.util.stream.*;
 
 public class Board {
     private Piece[][] board;
-    //    private Location upperKingPos;
-//    private Location lowerKingPos;
     private Player upper;
     private Player lower;
 
@@ -13,7 +11,7 @@ public class Board {
         this.board = this.initializeBoard();
     }
 
-    public Board(Utils.TestCase tc){
+    public Board(Utils.TestCase tc) {
         this.board = this.initializeBoard(tc);
     }
 
@@ -84,21 +82,22 @@ public class Board {
         return board;
     }
 
-    private void initalizePlayerLists(List<String> upperCaptures, List<String> lowerCaptures){
-        for(String piece : upperCaptures){
-            if(piece.length() == 0){
+    private void initalizePlayerLists(List<String> upperCaptures, List<String> lowerCaptures) {
+        for (String piece : upperCaptures) {
+            if (piece.length() == 0) {
                 continue;
             }
             this.upper.addToCapturedList(this.createPiece(piece, null));
         }
-        for(String piece : lowerCaptures){
-            if(piece.length() == 0){
+        for (String piece : lowerCaptures) {
+            if (piece.length() == 0) {
                 continue;
             }
             this.lower.addToCapturedList(this.createPiece(piece, null));
         }
     }
-// GETTER methods
+
+//    GETTER methods
 
     public Player getLower() {
         return this.lower;
@@ -124,15 +123,17 @@ public class Board {
         return this.board[pos.getCol()][pos.getRow()];
     }
 
+
     //    Setter method
     public void setPiece(Location pos, Piece piece) {
         this.board[pos.getCol()][pos.getRow()] = piece;
     }
 
+
     //    HELPER methods
-    public boolean illegalPawnDrop(boolean success, boolean checkmate, Player dropPlayer, Location dropLoc, int index){
-        if(!success){
-            if(checkmate){
+    public boolean illegalPawnDrop(boolean success, boolean checkmate, Player dropPlayer, Location dropLoc, int index) {
+        if (!success) {
+            if (checkmate) {
                 this.unDrop(dropPlayer, dropLoc, index);
                 return true;
             }
@@ -181,7 +182,7 @@ public class Board {
                 if (this.getPiece(move) != null) {
                     if (this.getPiece(move).getName().equalsIgnoreCase("k"))
                         continue; // We can continue, because we already know the king's location can be accessed. This is why it's in check.
-                    else if(move.equals(kingLoc))
+                    else if (move.equals(kingLoc))
                         continue; // This edge case means that there was a piece there, but the king is considering capturing it.
 //                                      If the position of the move and kingLoc are the same, and there is already a piece there on the board
 //                                      We can ignore it, because the king will have captured it.
@@ -262,7 +263,7 @@ public class Board {
 //          REVERSE MOVES MADE TO TEST.
             this.forceMove(endLoc, startLoc);
 
-            if(! empty){
+            if (!empty) {
 //                System.out.println("After moving : \n" + Utils.stringifyBoard(this.board));
                 Player originalOwner = this.getOpponent(player);
 
@@ -277,10 +278,9 @@ public class Board {
 //                System.out.println("Target's new location : " + target.getLocation());
             }
 
-            if(currKingCheck){
+            if (currKingCheck) {
                 return true;
-            }
-            else{
+            } else {
                 return false;
             }
         } else if (actionSplit[0].equals("drop")) {
@@ -292,7 +292,7 @@ public class Board {
 
             this.unDrop(player, endLoc, capturedIndex);
 
-            if(currKingCheck)
+            if (currKingCheck)
                 return true;
         }
 
@@ -369,8 +369,80 @@ public class Board {
         return moves;
     }
 
+    public boolean checkValidPlayer(Player player, Location startLoc) {
+        if (player != this.getPiece(startLoc).getPlayer())
+            return false;
+        return true;
+    }
 
-    // ACTION methods
+
+    // Execution methods
+
+    public boolean executeMove(Player currPlayer, String input) {
+        boolean success;
+
+        String[] inputSplit = input.split(" ");
+        Location startLoc = new Location(inputSplit[1]);
+        Location endLoc = new Location(inputSplit[2]);
+
+        boolean promote = false;
+        if (inputSplit.length == 4) {
+            if (inputSplit[3].equals("promote"))
+                promote = true;
+            else {
+                return false;
+            }
+        }
+
+        if (!checkValidPlayer(currPlayer, startLoc)) {
+            return false;
+        }
+
+        Piece currKing = currPlayer.getPieceFromBoard("k");
+
+        if (startLoc.equals(currKing.getLocation())) {
+            boolean moveKingIntoCheck = this.isInCheckBoolean(currPlayer, endLoc);
+            if (moveKingIntoCheck) {
+                return false;
+            } else {
+                success = this.move(startLoc, endLoc);
+            }
+        } else {
+            success = this.move(startLoc, endLoc);
+            boolean inducedCheck = this.isInCheckBoolean(currPlayer, currKing.getLocation());
+            if (inducedCheck) {
+//                TODO: DOUBLE CHECK this line
+//                this.forceMove(endLoc, startLoc);
+                return false;
+            }
+        }
+
+        if (!success) {
+            return success;
+        }
+
+
+        if (promote) {
+            success = this.promote(startLoc, endLoc);
+            if (!success)
+                this.forceMove(endLoc, startLoc);
+        }
+        return success;
+    }
+
+    public boolean executeDrop(Player currPlayer, String input) {
+        boolean success = false;
+
+        String[] inputSplit = input.split(" ");
+        String dropPiece = inputSplit[1];
+        Location dropLoc = new Location(inputSplit[2]);
+
+        success = this.drop(currPlayer, dropPiece, dropLoc);
+
+
+        return success;
+    }
+
 
     public void capture(Location startPos, Location endPos) {
 //        Initialize variables
@@ -417,7 +489,7 @@ public class Board {
      * @return boolean - to check whether moving the piece puts a piece in check
      * @throws IllegalArgumentException
      */
-    public boolean move(Location start, Location end){
+    public boolean move(Location start, Location end) {
         Piece startPiece = this.getPiece(start);
         Player opponent = this.getOpponent(startPiece.getPlayer());
         if (startPiece == null) {
@@ -464,19 +536,19 @@ public class Board {
         return true;
     }
 
-    public String printBoardAndStats(){
+    public String printBoardAndStats() {
         String output = "";
         output += Utils.stringifyBoard(this.getBoard()) + System.getProperty("line.separator");
         output += "Captures UPPER: ";
-        for(int i = 0; i < upper.getCaptured().size(); i++){
-            if(i != 0)
+        for (int i = 0; i < upper.getCaptured().size(); i++) {
+            if (i != 0)
                 output += " ";
             output += upper.getCaptured().get(i).toString();
         }
         output += System.getProperty("line.separator");
         output += "Captures lower: ";
-        for(int i = 0; i < lower.getCaptured().size(); i++){
-            if(i != 0)
+        for (int i = 0; i < lower.getCaptured().size(); i++) {
+            if (i != 0)
                 output += " ";
             output += lower.getCaptured().get(i).toString();
         }
@@ -484,8 +556,7 @@ public class Board {
         return output;
     }
 
-//    public String printCheckOutput(Player checkedPlayer, List<String> kingMovesList, List<String> dropList, List<String> sacrificeMoves){
-    public String printCheckOutput(Player checkedPlayer, List<String> allMoves){
+    public String printCheckOutput(Player checkedPlayer, List<String> allMoves) {
         String output = "";
         Location opponentKingLoc = checkedPlayer.getPieceFromBoard("k").getLocation();
         output += checkedPlayer.getName() + " player is in check!" + System.getProperty("line.separator");
@@ -505,28 +576,36 @@ public class Board {
         return output;
     }
 
-    public void runFileMode(List<String> moves) {
-        boolean lowerTurn = true;
-        Player currPlayer = this.lower;
-        Player opponentPlayer = this.upper;
+    public boolean executeCommand(Player currPlayer, String command) {
         boolean success = true;
-        boolean checkmate = false;
 
-        String checkString = "";
-        boolean lastMove = false;
+        String[] inputSplit = command.split(" ");
+        String action = inputSplit[0];
 
-        for (int i = 0; i < moves.size(); i++) {
-            int capturedIndex = 0;
-            checkString = "";
-            if(i == moves.size() - 1)
-                lastMove = true;
+        if (action.equals("move")) {
+            success = executeMove(currPlayer, command);
+        } else if (action.equals("drop")) {
+            success = executeDrop(currPlayer, command);
+        } else {
+            success = false;
+        }
+        return success;
+    }
 
-            String move = moves.get(i);
-            String[] inputSplit = move.split(" ");
-            String action = inputSplit[0];
-            System.out.println(move);
 
-            if (action.equals("move")) {
+
+
+
+
+
+
+
+
+
+
+
+
+                /*
                 String startPos = inputSplit[1];
                 String endPos = inputSplit[2];
 
@@ -575,51 +654,53 @@ public class Board {
                         this.forceMove(endLoc, startLoc);
                 }
 
-            }
-            else if (action.equals("drop")) {
-                String dropPiece = inputSplit[1];
-                String dropPos = inputSplit[2];
-
-                Location dropLoc = new Location(dropPos);
-                capturedIndex = currPlayer.getIndexFromCaptured(dropPiece);
-                success = this.drop(currPlayer, dropPiece, dropLoc);
-
-            }
-            else {
-                System.out.println(Utils.stringifyBoard(this.getBoard()));
-                System.out.println(opponentPlayer.toString() + " player wins.  Illegal move.");
-                System.exit(0);
-            }
-
-            Piece opponentKing = opponentPlayer.getKing();
-            Location opponentKingLoc = opponentKing.getLocation();
-            List<Piece> threateningPieces = this.isInCheck(opponentPlayer, opponentKingLoc);
-
-            boolean opponentKingCheck = this.isInCheckBoolean(opponentPlayer, opponentKingLoc);
-            if (opponentKingCheck) {
-                List<String> kingMovesList= this.listValidMoves(opponentKing, opponentKing.getLocation());
-                List<String> dropList = this.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-                List<String> sacrificeMoves = this.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-
-                List<String> allMoves = Stream.concat(sacrificeMoves.stream(), Stream.concat(kingMovesList.stream(),
-                        dropList.stream())).collect(Collectors.toList());
-                Collections.sort(allMoves);
+                */
 
 
+//        else if (action.equals("drop")) {
+//            String dropPiece = inputSplit[1];
+//            String dropPos = inputSplit[2];
+//
+//            Location dropLoc = new Location(dropPos);
+//            capturedIndex = currPlayer.getIndexFromCaptured(dropPiece);
+//            success = this.drop(currPlayer, dropPiece, dropLoc);
+//
+//        }
+//        else {
+//            System.out.println(Utils.stringifyBoard(this.getBoard()));
+//            System.out.println(opponentPlayer.toString() + " player wins.  Illegal move.");
+//            System.exit(0);
+//        }
+/*
+        Piece opponentKing = opponentPlayer.getKing();
+        Location opponentKingLoc = opponentKing.getLocation();
+        List<Piece> threateningPieces = this.isInCheck(opponentPlayer, opponentKingLoc);
 
-                if (allMoves.size() == 0) {
+        boolean opponentKingCheck = this.isInCheckBoolean(opponentPlayer, opponentKingLoc);
+        if (opponentKingCheck) {
+            List<String> kingMovesList= this.listValidMoves(opponentKing, opponentKing.getLocation());
+            List<String> dropList = this.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+            List<String> sacrificeMoves = this.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+
+            List<String> allMoves = Stream.concat(sacrificeMoves.stream(), Stream.concat(kingMovesList.stream(),
+                    dropList.stream())).collect(Collectors.toList());
+            Collections.sort(allMoves);
+
+
+
+            if (allMoves.size() == 0) {
 //                        System.out.println(currPlayer.getName() + " player has won.");
 //                        System.exit(0);
-                    success = false;
-                    checkmate = true;
-                }
-                else {
-                    checkString = printCheckOutput(opponentPlayer, allMoves);
-                }
+                success = false;
+                checkmate = true;
             }
+            else {
+                checkString = printCheckOutput(opponentPlayer, allMoves);
+            }
+        }
 
             if(lastMove) {
-                System.out.println(currPlayer.getName() + " player action: " + move);
+                System.out.println(currPlayer.getName() + " player action: " + command);
             }
 
             lowerTurn = !lowerTurn;
@@ -660,9 +741,10 @@ public class Board {
                 System.out.println(currPlayer.getName() + "> ");
             }
             currPlayer.incrementTurn();
+*/
 
-        }
-    }
+
+
 
     public void unDrop(Player captor, Location dropLoc, int capturedListIndex){
         Piece droppedPiece = this.getPiece(dropLoc);
