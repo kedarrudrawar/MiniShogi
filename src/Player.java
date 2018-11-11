@@ -72,6 +72,14 @@ public class Player {
         return null;
     }
 
+    public int getIndexFromCaptured(String pieceName){
+        for(int i = 0; i < this.capturedList.size(); i++){
+            if(this.capturedList.get(i).getName().equalsIgnoreCase(pieceName)){
+                return i;
+            }
+        }
+        return 0;
+    }
 
     public boolean isUpper() {
         if (this.getName().equals("UPPER"))
@@ -110,6 +118,11 @@ public class Player {
 
     public void addToCapturedList(Piece piece) {
         this.capturedList.add(piece);
+        piece.setPlayer(this);
+    }
+
+    public void addToCapturedList(int index, Piece piece) {
+        this.capturedList.add(index, piece);
         piece.setPlayer(this);
     }
 

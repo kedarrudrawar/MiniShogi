@@ -129,17 +129,14 @@ public class Board {
     }
 
     //    HELPER methods
-    public void canPromote(Location endPos) throws IllegalArgumentException {
-        Piece piece = this.getPiece(endPos);
-        if (piece.getPlayer().getName() == "UPPER") {
-            if (endPos.getRow() != 0)
-                throw new IllegalArgumentException("Cannot promote.");
-        } else {
-            if (endPos.getRow() != 1)
-                throw new IllegalArgumentException("Cannot promote.");
+    public boolean illegalPawnDrop(boolean success, boolean checkmate, Player dropPlayer, Location dropLoc, int index){
+        if(!success){
+            if(checkmate){
+                this.unDrop(dropPlayer, dropLoc, index);
+                return true;
+            }
         }
-
-        piece.promote();
+        return false;
     }
 
     public boolean isInCheckBoolean(Player owner, Location kingLoc) {
@@ -286,12 +283,12 @@ public class Board {
             }
         } else if (actionSplit[0].equals("drop")) {
             String pieceName = actionSplit[1];
-            Piece dropPiece = player.getPieceFromCaptured(pieceName);
+            int capturedIndex = player.getIndexFromCaptured(pieceName);
             this.drop(player, pieceName, endLoc);
             boolean currKingCheck = this.isInCheckBoolean(player, player.getKing().getLocation());
 //            System.out.println("currKingCheck : " + currKingCheck + " for position: " + endLoc.toString());
 
-            this.unDrop(player, endLoc);
+            this.unDrop(player, endLoc, capturedIndex);
 
             if(currKingCheck)
                 return true;
@@ -514,14 +511,16 @@ public class Board {
         boolean lastMove = false;
 
         for (int i = 0; i < moves.size(); i++) {
+            int capturedIndex = 0;
             checkString = "";
             if(i == moves.size() - 1)
                 lastMove = true;
 
             String move = moves.get(i);
             String[] inputSplit = move.split(" ");
+            String action = inputSplit[0];
 
-            if (inputSplit[0].equals("move")) {
+            if (action.equals("move")) {
                 String startPos = inputSplit[1];
                 String endPos = inputSplit[2];
 
@@ -541,7 +540,6 @@ public class Board {
                 }
 
                 Piece currKing = currPlayer.getPieceFromBoard("k");
-
 
 //  This is to check whether the piece that's moving is the king. If it is, we need to check whether the destination
 //  of the king will put it in check. If it is not, then we just need to check the original position of the king.
@@ -567,38 +565,43 @@ public class Board {
                     this.promote(startLoc, endLoc);
                 }
 
-                Piece opponentKing = opponentPlayer.getKing();
-                Location opponentKingLoc = opponentKing.getLocation();
-                List<Piece> threateningPieces = this.isInCheck(opponentPlayer, opponentKingLoc);
-
-                boolean opponentKingCheck = this.isInCheckBoolean(opponentPlayer, opponentKingLoc);
-                if (opponentKingCheck) {
-                    List<Location> kingMovesList = this.listValidMoves(opponentKing, opponentKing.getLocation());
-                    List<String> dropList = this.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-                    List<String> sacrificeMoves = this.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-
-                    if (kingMovesList.size() == 0) {
-//                        System.out.println(currPlayer.getName() + " player has won.");
-//                        System.exit(0);
-                        success = false;
-                        checkmate = true;
-                    }
-                    else {
-                        checkString = printCheckOutput(opponentPlayer, kingMovesList, dropList, sacrificeMoves);
-                    }
-                }
-            } else if (inputSplit[0].equals("drop")) {
+            } else if (action.equals("drop")) {
                 String dropPiece = inputSplit[1];
                 String dropPos = inputSplit[2];
 
                 Location dropLoc = new Location(dropPos);
-
+                capturedIndex = currPlayer.getIndexFromCaptured(dropPiece);
                 success = this.drop(currPlayer, dropPiece, dropLoc);
 
             } else {
                 System.out.println("Illegal move. " + opponentPlayer.toString() + " has won.");
                 System.exit(0);
             }
+
+
+            Piece opponentKing = opponentPlayer.getKing();
+            Location opponentKingLoc = opponentKing.getLocation();
+            List<Piece> threateningPieces = this.isInCheck(opponentPlayer, opponentKingLoc);
+
+            boolean opponentKingCheck = this.isInCheckBoolean(opponentPlayer, opponentKingLoc);
+            if (opponentKingCheck) {
+                List<Location> kingMovesList = this.listValidMoves(opponentKing, opponentKing.getLocation());
+                List<String> dropList = this.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+                List<String> sacrificeMoves = this.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+
+                if (kingMovesList.size() == 0) {
+//                        System.out.println(currPlayer.getName() + " player has won.");
+//                        System.exit(0);
+                    success = false;
+                    checkmate = true;
+                }
+                else {
+                    checkString = printCheckOutput(opponentPlayer, kingMovesList, dropList, sacrificeMoves);
+                }
+            }
+
+
+
 
             if(lastMove) {
                 System.out.println(currPlayer.getName() + " player action: " + move);
@@ -616,6 +619,20 @@ public class Board {
 
 
             if(lastMove) {
+
+//                Check for illegal pawn drop here (checkmate)
+                if(action.equals("drop")) {
+                    if (inputSplit[1].equalsIgnoreCase("p")) {
+                        if(illegalPawnDrop(success, checkmate, opponentPlayer, new Location(inputSplit[2]), capturedIndex)){
+                            System.out.println(printBoardAndStats());
+                            System.out.print(checkString);
+                            System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
+                            System.exit(0);
+                        }
+                    }
+                }
+
+
                 System.out.println(printBoardAndStats());
                 System.out.print(checkString);
                 if (!success) {
@@ -634,11 +651,11 @@ public class Board {
         }
     }
 
-    public void unDrop(Player captor, Location dropLoc){
+    public void unDrop(Player captor, Location dropLoc, int capturedListIndex){
         Piece droppedPiece = this.getPiece(dropLoc);
 
         captor.removeFromBoard(droppedPiece);
-        captor.addToCapturedList(droppedPiece);
+        captor.addToCapturedList(capturedListIndex, droppedPiece);
         this.setPiece(dropLoc, null);
         droppedPiece.setLocation(null);
     }
