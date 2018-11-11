@@ -38,9 +38,17 @@ public abstract class Piece {
 //    Setter methods
 
     public boolean promote() {
+        if(this.getName().charAt(0) == '+') {
+            return false;
+        }
         this.setName("+" + this.name);
         return true;
     }
+
+    public void forcePromote(){
+        this.setName("+" + this.name);
+    }
+
 
     public void demote(){
         this.name = this.name.split("\\+")[1];
@@ -275,6 +283,26 @@ class Pawn extends Piece {
             retList.add(endLoc);
         return retList;
     }
+
+    @Override
+    public boolean promote(){
+        if(this.getPlayer().isUpper()){
+            if(this.getLocation().getRow() == 0) {
+                if(this.getName().charAt(0) != '+')
+                    this.setName("+" + this.name);
+                return true;
+            }
+        }
+        else{
+            if(this.getLocation().getRow() == 4){
+                if(this.getName().charAt(0) != '+')
+                    this.setName("+" + this.name);
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public boolean canDrop(Location dropLoc){
         if(this.getPlayer().isUpper()){

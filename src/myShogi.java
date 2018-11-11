@@ -121,9 +121,11 @@ public class myShogi {
                     boolean opponentKingCheck = (threateningPieces.size() != 0);
                     if (opponentKingCheck) {
 //                    System.out.println("calling listValidMoves on opponent's king");
-                        List<Location> movesList = board.listValidMoves(opponentKing, opponentKingLoc);
+                        List<String> movesList = board.listValidMoves(opponentKing, opponentKingLoc);
                         List<String> dropList = board.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
                         List<String> sacrificeMoves = board.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+
+
 
                         if (movesList.size() == 0) {
                             System.out.println(currPlayer.getName() + " player has won.");
@@ -131,8 +133,8 @@ public class myShogi {
                         }
                         System.out.println(opponentPlayer.getName() + " player is in check!");
                         System.out.println("Available moves: ");
-                        for (Location loc : movesList) {
-                            System.out.println(String.format("move %s %s", opponentKingLoc.toString(), loc.toString()));
+                        for (String kingMove: movesList) {
+                            System.out.println(String.format("move %s %s", opponentKingLoc.toString(), kingMove));
                         }
                         for(String s : dropList){
                             System.out.println(s);

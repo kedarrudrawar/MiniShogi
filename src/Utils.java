@@ -94,7 +94,6 @@ public class Utils {
             case 2:
                 return sq + "|";
         }
-
         throw new IllegalArgumentException("Board must be an array of strings like \"\", \"P\", or \"+P\"");
     }
 
