@@ -183,7 +183,7 @@ public class Board {
                 if (move.equals(kingLoc))
                     continue; // We can continue, because we already know the king's location can be accessed. This is why it's in check.
                 if (this.getPiece(move) != null) {
-//                    System.out.println("currently blocked by : " + this.getPiece(moves.get(i)).toString());
+//                    System.out.println("currently blocked by : " + this.getPiece(move).toString());
                     blocked = true;
                     break;
                 }
@@ -267,7 +267,6 @@ public class Board {
                 this.setPiece(endLoc, target);
                 target.setLocation(endLoc);
                 originalOwner.addToBoardList(target);
-
 
                 System.out.println("After supposedly fixing: \n" + Utils.stringifyBoard(this.board));
                 System.out.println("Target's new location : " + target.getLocation());
@@ -499,6 +498,7 @@ public class Board {
         boolean lastMove = false;
 
         for (int i = 0; i < moves.size(); i++) {
+            checkString = "";
             if(i == moves.size() - 1)
                 lastMove = true;
 
@@ -548,7 +548,6 @@ public class Board {
                 }
 
                 if (promote) {
-                    System.out.println("about to promote");
                     this.promote(startLoc, endLoc);
                 }
 
@@ -654,7 +653,7 @@ public class Board {
                 throw new IllegalArgumentException("Cannot promote. Not in promotion zone.");
             }
         } else {
-            if (startLoc.getRow() != 5 && endLoc.getRow() != 5) {
+            if (startLoc.getRow() != 4 && endLoc.getRow() != 4) {
                 throw new IllegalArgumentException("Cannot promote. Not in promotion zone.");
             }
         }

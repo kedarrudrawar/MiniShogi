@@ -27,8 +27,6 @@ public class myShogi {
 //            Interactive mode
 
         else {
-
-
 //        Initialize board
             Board board = new Board();
             Piece[][] boardArray = board.getBoard();
@@ -57,9 +55,7 @@ public class myShogi {
             System.out.println("\n");
             System.out.print(currPlayer.getName() + "> ");
 
-
             String input = sc.nextLine();
-
 
 //        main loop
 

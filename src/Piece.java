@@ -267,8 +267,6 @@ class Pawn extends Piece {
             return validPromotedMoves;
         }
 
-
-
         if (endLoc.getCol() != startLoc.getCol()) {
             return retList;
         }
