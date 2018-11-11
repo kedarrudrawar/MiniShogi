@@ -493,6 +493,7 @@ public class Board {
         Player currPlayer = this.lower;
         Player opponentPlayer = this.upper;
         boolean success = true;
+        boolean checkmate = false;
 
         String checkString = "";
         boolean lastMove = false;
@@ -562,11 +563,14 @@ public class Board {
                     List<String> sacrificeMoves = this.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
 
                     if (kingMovesList.size() == 0) {
-                        System.out.println(currPlayer.getName() + " player has won.");
-                        System.exit(0);
+//                        System.out.println(currPlayer.getName() + " player has won.");
+//                        System.exit(0);
+                        success = false;
+                        checkmate = true;
                     }
-
-                    checkString = printCheckOutput(opponentPlayer, kingMovesList, dropList, sacrificeMoves);
+                    else {
+                        checkString = printCheckOutput(opponentPlayer, kingMovesList, dropList, sacrificeMoves);
+                    }
                 }
             } else if (inputSplit[0].equals("drop")) {
                 String dropPiece = inputSplit[1];
@@ -574,7 +578,7 @@ public class Board {
 
                 Location dropLoc = new Location(dropPos);
 
-                this.drop(currPlayer, dropPiece, dropLoc);
+                success = this.drop(currPlayer, dropPiece, dropLoc);
 
             } else {
                 System.out.println("Illegal move. " + opponentPlayer.toString() + " has won.");
@@ -600,7 +604,12 @@ public class Board {
                 System.out.println(printBoardAndStats());
                 System.out.print(checkString);
                 if (!success) {
-                    System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
+                    if(checkmate){
+                        System.out.println(opponentPlayer.toString() + " player wins.  Checkmate.");
+                    }
+                    else {
+                        System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
+                    }
                     System.exit(0);
                 }
                 System.out.println(currPlayer.getName() + "> ");
@@ -610,40 +619,45 @@ public class Board {
         }
     }
 
-    public void drop(Player captor, String pieceName, Location dropLoc) {
+    public boolean drop(Player captor, String pieceName, Location dropLoc) {
         Piece checkPiece = this.getPiece(dropLoc);
 
         Player opponent = this.getOpponent(captor);
 
         if (pieceName.equals("p") || pieceName.equals("P")) {
             if (dropLoc.getCol() == captor.getPawn().getLocation().getCol()) {
-                System.out.println("Cannot have multiple pawns in same column. Illegal move.");
-                System.exit(1);
+//                System.out.println("Cannot have multiple pawns in same column. Illegal move.");
+//                System.exit(1);
+                return false;
             }
         }
 
         if (checkPiece != null) {
-            System.out.println("Desired position to drop piece is currently occupied by: " +
-                    checkPiece.getName());
-            System.out.println("Illegal move. " + opponent.getName() + " wins.");
+//            System.out.println("Desired position to drop piece is currently occupied by: " +
+//                    checkPiece.getName());
+//            System.out.println("Illegal move. " + opponent.getName() + " wins.");
+            return false;
         }
 
         Piece dropPiece = captor.getPieceFromCaptured(pieceName);
 
-        if (dropPiece == null)
-            throw new IllegalArgumentException("You have not captured this piece.");
-
+        if (dropPiece == null) {
+//            throw new IllegalArgumentException("You have not captured this piece.");
+            return false;
+        }
 
 //        Check for dropping validity here (pawns cannot be in same column)
         if (!dropPiece.canDrop(dropLoc)) {
-            System.out.println("Cannot drop piece. Illegal move.");
-            System.out.println(opponent.getName() + " wins.");
-            System.exit(0);
+//            System.out.println("Cannot drop piece. Illegal move.");
+//            System.out.println(opponent.getName() + " wins.");
+//            System.exit(0);
+            return false;
         }
 
         this.setPiece(dropLoc, dropPiece);
         dropPiece.setLocation(dropLoc);
         captor.moveToBoardList(dropPiece);
+        return true;
     }
 
     public void promote(Location startLoc, Location endLoc) {
