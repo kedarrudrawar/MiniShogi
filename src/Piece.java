@@ -37,8 +37,9 @@ public abstract class Piece {
 
 //    Setter methods
 
-    public void promote() {
+    public boolean promote() {
         this.setName("+" + this.name);
+        return true;
     }
 
     public void demote(){
@@ -325,8 +326,8 @@ class King extends Piece {
 
 
     @Override
-    public void promote() throws IllegalArgumentException {
-        throw new IllegalArgumentException("Cannot promote King. Illegal move.");
+    public boolean promote(){
+        return false;
     }
 
     public List<Location> findValidPath(Location startLoc, Location endLoc) {
@@ -447,9 +448,8 @@ class GoldGeneral extends Piece {
     }
 
     @Override
-    public void promote(){
-        System.out.println("Gold General cannot be promoted. Illegal Move");
-        System.exit(0);
+    public boolean promote(){
+        return false;
     }
 
     public List<Location> findValidPath(Location startLoc, Location endLoc){

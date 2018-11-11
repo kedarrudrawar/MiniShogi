@@ -548,21 +548,25 @@ public class Board {
 
 //  If moving the king to this location puts king in check, this is illegal.
                     if (currKingCheck) {
-                        System.out.println("Moving your piece into check. Illegal move.");
-                        System.exit(0);
+//                        System.out.println("Moving your piece into check. Illegal move.");
+                        success = false;
                     }
-                    success = this.move(startLoc, endLoc);
+                    else {
+                        success = this.move(startLoc, endLoc);
+                    }
                 } else {
                     success = this.move(startLoc, endLoc);
                     boolean currKingCheck = this.isInCheckBoolean(currPlayer, currKing.getLocation());
                     if (currKingCheck) {
-                        System.out.println("Moving your piece into check. Illegal move.");
-                        System.exit(0);
+//                        System.out.println("Moving your piece into check. Illegal move.");
+                        success = false;
                     }
                 }
 
                 if (promote) {
-                    this.promote(startLoc, endLoc);
+                    success = this.promote(startLoc, endLoc);
+                    if(!success)
+                        this.forceMove(endLoc, startLoc);
                 }
 
             } else if (action.equals("drop")) {
@@ -577,7 +581,6 @@ public class Board {
                 System.out.println("Illegal move. " + opponentPlayer.toString() + " has won.");
                 System.exit(0);
             }
-
 
             Piece opponentKing = opponentPlayer.getKing();
             Location opponentKingLoc = opponentKing.getLocation();
@@ -699,19 +702,21 @@ public class Board {
         return true;
     }
 
-    public void promote(Location startLoc, Location endLoc) {
+    public boolean promote(Location startLoc, Location endLoc) {
         Piece piece = this.getPiece(endLoc);
         if (piece.getPlayer().isUpper()) {
             if (startLoc.getRow() != 0 && endLoc.getRow() != 0) {
-                throw new IllegalArgumentException("Cannot promote. Not in promotion zone.");
+//                throw new IllegalArgumentException("Cannot promote. Not in promotion zone.");
+                return false;
             }
         } else {
             if (startLoc.getRow() != 4 && endLoc.getRow() != 4) {
-                throw new IllegalArgumentException("Cannot promote. Not in promotion zone.");
+//                throw new IllegalArgumentException("Cannot promote. Not in promotion zone.");
+                return false;
             }
         }
 
-        piece.promote();
+        return piece.promote();
     }
 
     public Piece createPiece(String piece, Location loc) {
