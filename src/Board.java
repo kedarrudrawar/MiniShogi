@@ -7,7 +7,7 @@ import java.util.stream.*;
  */
 
 /**
- * Board object.
+ * Board Class
  * stores 2D array of Piece objects that represent the miniShogi board.
  *
  * @author Kedar Rudrawar
