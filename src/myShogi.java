@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 /**
  * The class myShogi to run the game miniShogi, in interactive or file mode.
  *
  * @author Kedar Rudrawar
  */
-
 public class myShogi {
     private static final int TURNLIMIT = 200;
     private static final String ILLEGALSTRING = " player wins.  Illegal move.";

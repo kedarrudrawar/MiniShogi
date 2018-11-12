@@ -1,5 +1,10 @@
 import java.util.*;
 
+/**
+ * Abstract class Piece. Represents all Pieces used to play miniShogi.
+ * Maintain and implements movement, promotion, and drop functionality of every piece.
+ * @author Kedar Rudrawar
+ */
 public abstract class Piece {
     protected static final char PLUS_CHAR = '+';
     protected static final String PLUS_STRING = "+";
