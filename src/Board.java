@@ -11,14 +11,27 @@ public class Board {
     private Player upper;
     private Player lower;
 
+    /**
+     * Constructor - used in Interactive Mode
+     */
     public Board() {
         this.board = this.initializeBoard();
     }
 
+    /**
+     * Constructor - used in File Mode
+     * @param tc    TestCase object including initialization information
+     */
     public Board(Utils.TestCase tc) {
         this.board = this.initializeBoard(tc);
     }
 
+    /**
+     * This method is used to initialize a board (2D Piece array) given Initialization Information.
+     * Used in File Mode
+     * @param tc
+     * @return - 2D Piece Array
+     */
     private Piece[][] initializeBoard(Utils.TestCase tc) {
         List<Utils.InitialPosition> positions = tc.initialPieces;
         Piece[][] board = new Piece[5][5];
@@ -44,6 +57,10 @@ public class Board {
         return board;
     }
 
+    /**
+     * This method is used to initialize a board (2D Piece array) from scratch.
+     * @return - 2D Piece Array
+     */
     private Piece[][] initializeBoard() {
         Piece[][] board = new Piece[5][5];
 
@@ -86,6 +103,12 @@ public class Board {
         return board;
     }
 
+    /**
+     * This method initializes the captured Lists of each of the Players
+     * Used in File Mode
+     * @param upperCaptures List of Strings representing captured Pieces for Upper player
+     * @param lowerCaptures List of Strings representing captured Pieces for Lower player
+     */
     private void initalizePlayerLists(List<String> upperCaptures, List<String> lowerCaptures) {
         for (String piece : upperCaptures) {
             if (piece.length() == 0) {
@@ -103,14 +126,27 @@ public class Board {
 
 //    GETTER methods
 
+    /**
+     * This function returns the lower player.
+     * @return - Player
+     */
     public Player getLower() {
         return this.lower;
     }
 
+    /**
+     * This function returns the upper player.
+     * @return - Player
+     */
     public Player getUpper() {
         return this.upper;
     }
 
+    /**
+     * This function returns the opponent of a Player
+     * @param player    Player whose opponent will be returned
+     * @return Player - opponent
+     */
     private Player getOpponent(Player player) {
         if (player.isUpper())
             return this.getLower();
@@ -119,22 +155,42 @@ public class Board {
 
     }
 
+    /**
+     * This function returns the 2D Piece array stored as a field of the class
+     * @return
+     */
     public Piece[][] getBoard() {
         return this.board;
     }
 
+    /**
+     * This function returns a Piece object stored at a Location on the board
+     * @param pos   Location representing desired Piece's position
+     * @return  Piece
+     */
     public Piece getPiece(Location pos) {
         return this.board[pos.getCol()][pos.getRow()];
     }
 
-
-    //    Setter method
+    /**
+     * This function sets a specific Location on the board to a given Piece
+     * @param pos   Location on the board to be set
+     * @param piece Piece to be set
+     */
     public void setPiece(Location pos, Piece piece) {
         this.board[pos.getCol()][pos.getRow()] = piece;
     }
 
-
-    //    HELPER methods
+    /**
+     * This method checks whether dropping a pawn induces a checkmate (which is illegal). This will be called if a player
+     * has attempted to drop a pawn.
+     * @param success   boolean representing whether anything has failed yet until this method is called
+     * @param checkmate boolean representing whether opponent's king is now in checkmate
+     * @param dropPlayer    Player who is attempting to drop the pawn
+     * @param dropLoc   Location at which the pawn may be dropped
+     * @param index index in the captured array to return the pawn to if it is illegal to drop
+     * @return  boolean - true if dropping the pawn is illegal, false otherwise
+     */
     public boolean illegalPawnDrop(boolean success, boolean checkmate, Player dropPlayer, Location dropLoc, int index) {
         if (!success) {
             if (checkmate) {
@@ -145,6 +201,12 @@ public class Board {
         return false;
     }
 
+    /**
+     * This method returns whether or not a player's king is in check.
+     * @param owner Player whose King this method checks for
+     * @param kingLoc   Location of where the king is located
+     * @return boolean - true if king is in check, false otherwise
+     */
     public boolean isInCheckBoolean(Player owner, Location kingLoc) {
         List<Piece> threateningPieces = isInCheck(owner, kingLoc);
         if (threateningPieces.size() != 0) {
@@ -155,9 +217,10 @@ public class Board {
     }
 
     /**
-     * @param owner
-     * @param kingLoc
-     * @return
+     * This method returns a List of Pieces that are currently putting the inputted Player's king in check
+     * @param owner Player whose King this method checks for
+     * @param kingLoc   Location of where the king is located
+     * @return List - List of Pieces currently ready to capture the King
      */
     public List<Piece> isInCheck(Player owner, Location kingLoc) {
         List<Piece> threateningPieces = new ArrayList<>();
@@ -207,48 +270,35 @@ public class Board {
 
     /**
      * This method will return all valid moves the king can make to remove himself from check.
-     *
-     * @param king
-     * @param kingPos
+     * @param king - Piece object for the King
+     * @param kingLoc - Location representing position of the King
      * @return List - all locations the king can move to
      */
-
-    public List<String> listValidMoves(Piece king, Location kingPos) {
+    public List<String> listValidMoves(Piece king, Location kingLoc) {
 
         Player owner = king.getPlayer();
-//        System.out.println("called listValidMoves() on " + owner.getName());
-
-        String movesString = "";
-        List<Location> moves = king.getValidMoves(kingPos);
+        List<Location> moves = king.getValidMoves(kingLoc);
         List<String> retList = new ArrayList<>();
 
-//        System.out.println("valid moves before checking: " + moves.toString());
-
         for (Location l : moves) {
-//            System.out.println("testing position : " + l.toString());
             if (this.getPiece(l) != null) {
                 if (this.getPiece(l).getPlayer() == owner) {
-//                    System.out.println("Continuing on position: " + l.toString() + " because owned by same piece");
                     continue;
                 }
             }
             if (this.isInCheckBoolean(owner, l)) {
-//                System.out.println("Continuing on position: " + l.toString() + " because puts king in check");
                 continue;
             }
-            retList.add("move " + kingPos.toString() + " " + l.toString());
+            retList.add("move " + kingLoc.toString() + " " + l.toString());
         }
-//        System.out.println("valid moves after checking: " + retList.toString());
-
         return retList;
     }
 
     /**
      * This method will check whether the king will be in check after a specific move has been made.
      * This is to check for double/triple/... check.
-     *
-     * @param action
-     * @return
+     * @param action    String representing action after which we need to check if the King will be in check
+     * @return  boolean - true if King in check after action
      */
     public boolean testCheckAfterAction(Player player, String action) {
         String[] actionSplit = action.split(" ");
@@ -287,8 +337,6 @@ public class Board {
             int capturedIndex = player.getIndexFromCaptured(pieceName);
             this.drop(player, pieceName, endLoc);
             boolean currKingCheck = this.isInCheckBoolean(player, player.getKing().getLocation());
-//            System.out.println("currKingCheck : " + currKingCheck + " for position: " + endLoc.toString());
-
             this.unDrop(player, endLoc, capturedIndex);
 
             if (currKingCheck)
@@ -298,7 +346,13 @@ public class Board {
         return false;
     }
 
-
+    /**
+     * This function lists all possible drops that would remove a king from check.
+     * @param owner Player whose king is in check
+     * @param kingLoc   Location of the king in check
+     * @param threateningPieces List of Pieces that are currently causing the king to be in check
+     * @return  List of Strings - list of all drops
+     */
     public List<String> listDropMoves(Player owner, Location kingLoc, List<Piece> threateningPieces) {
         List<String> dropStrings = new ArrayList<>();
         for (Piece piece : threateningPieces) {
@@ -319,6 +373,14 @@ public class Board {
         return dropStrings;
     }
 
+    /**
+     * This method returns a list of moves that a player can make to remove their king from check.
+     * These moves are for pieces that are not a King
+     * @param owner
+     * @param kingLoc
+     * @param threateningPieces
+     * @return
+     */
     public List<String> listSacrificeMoves(Player owner, Location kingLoc, List<Piece> threateningPieces) {
         List<String> moves = new ArrayList<>();
         for (Piece threateningPiece : threateningPieces) {
@@ -368,6 +430,12 @@ public class Board {
         return moves;
     }
 
+    /**
+     * This method checks whether a player owns the Piece they are moving.
+     * @param player    Player to check
+     * @param startLoc  Location of the Piece to check
+     * @return  boolean - true if their Piece, false otherwise
+     */
     public boolean isValidPlayer(Player player, Location startLoc) {
         if (player != this.getPiece(startLoc).getPlayer())
             return false;
@@ -377,6 +445,12 @@ public class Board {
 
     // Execution methods
 
+    /**
+     * This method calls the move method in the this class, returns whether the method was called successfully
+     * @param currPlayer    Player performing the action
+     * @param input String reprsenting the move action ("move a1 a2")
+     * @return  boolean - true if move was successfully made, false otherwise
+     */
     public boolean executeMove(Player currPlayer, String input) {
         boolean success;
 
@@ -448,7 +522,13 @@ public class Board {
         return success;
     }
 
-    public boolean executeDrop(Player currPlayer, String input) {
+    /**
+     * This method calls the drop method in the this class, returns whether the method was called successfully
+     * @param currPlayer    Player performing the action
+     * @param input String representing the move action ("move a1 a2")
+     * @return  boolean - true if drop was successfully made, false otherwise
+     */
+    private boolean executeDrop(Player currPlayer, String input) {
         boolean success = false;
 
         String[] inputSplit = input.split(" ");
@@ -459,41 +539,6 @@ public class Board {
 
 
         return success;
-    }
-
-    /**
-     * This method implements capturing a piece for a player and the board. It moves the Piece from the board to the
-     * captor's captured list, and reassigns the respective fields of the Piece.
-     * @param startLoc  source Location of the capturing piece.
-     * @param endLoc    destination Location of capturing piece (original Location of captured piece)
-     */
-    public void capture(Location startLoc, Location endLoc) {
-//        Initialize variables
-        Piece captorPiece = this.getPiece(startLoc);
-        Piece capturedPiece = this.getPiece(endLoc);
-        Player captorPlayer = captorPiece.getPlayer();
-        Player opponentPlayer = this.getOpponent(captorPlayer);
-
-        capturedPiece.setPlayer(captorPlayer);
-        capturedPiece.setLocation(null);
-        captorPlayer.addToCapturedList(capturedPiece);
-        opponentPlayer.removeFromBoard(capturedPiece);
-
-        this.setPiece(endLoc, captorPiece);
-        this.setPiece(startLoc, null);
-    }
-
-    /**
-     * This method is only to be used for moving pieces back to original positions. They would have been moved for
-     * testing (in method testCheckAfterAction()). This method ignores regular conventions of moving pieces.
-     * @param startLoc  source Location for move
-     * @param endLoc    destination Location for move
-     */
-    private void forceMove(Location startLoc, Location endLoc) {
-        Piece startPiece = this.getPiece(startLoc);
-        this.setPiece(endLoc, startPiece);
-        this.setPiece(startLoc, null);
-        startPiece.setLocation(endLoc);
     }
 
     /**
@@ -542,6 +587,41 @@ public class Board {
         startPiece.setLocation(end);
 
         return true;
+    }
+
+    /**
+     * This method implements capturing a piece for a player and the board. It moves the Piece from the board to the
+     * captor's captured list, and reassigns the respective fields of the Piece.
+     * @param startLoc  source Location of the capturing piece.
+     * @param endLoc    destination Location of capturing piece (original Location of captured piece)
+     */
+    public void capture(Location startLoc, Location endLoc) {
+//        Initialize variables
+        Piece captorPiece = this.getPiece(startLoc);
+        Piece capturedPiece = this.getPiece(endLoc);
+        Player captorPlayer = captorPiece.getPlayer();
+        Player opponentPlayer = this.getOpponent(captorPlayer);
+
+        capturedPiece.setPlayer(captorPlayer);
+        capturedPiece.setLocation(null);
+        captorPlayer.addToCapturedList(capturedPiece);
+        opponentPlayer.removeFromBoard(capturedPiece);
+
+        this.setPiece(endLoc, captorPiece);
+        this.setPiece(startLoc, null);
+    }
+
+    /**
+     * This method is only to be used for moving pieces back to original positions. They would have been moved for
+     * testing (in method testCheckAfterAction()). This method ignores regular conventions of moving pieces.
+     * @param startLoc  source Location for move
+     * @param endLoc    destination Location for move
+     */
+    private void forceMove(Location startLoc, Location endLoc) {
+        Piece startPiece = this.getPiece(startLoc);
+        this.setPiece(endLoc, startPiece);
+        this.setPiece(startLoc, null);
+        startPiece.setLocation(endLoc);
     }
 
     /**
@@ -609,17 +689,28 @@ public class Board {
         return success;
     }
 
-
+    /**
+     * This method reverses the action of dropping a Piece onto the board. This is used to reverse a drop made for testing.
+     * @param captor    Player who dropped the Piece onto the board
+     * @param dropLoc   Location at which Piece was bored
+     * @param capturedListIndex Index in the captured ArrayList to place Piece back into
+     */
     public void unDrop(Player captor, Location dropLoc, int capturedListIndex){
         Piece droppedPiece = this.getPiece(dropLoc);
-
         captor.removeFromBoard(droppedPiece);
         captor.addToCapturedList(capturedListIndex, droppedPiece);
         this.setPiece(dropLoc, null);
         droppedPiece.setLocation(null);
     }
 
-    public boolean drop(Player captor, String pieceName, Location dropLoc) {
+    /**
+     * This method drops a Piece onto the board.
+     * @param captor    Player who has captured the Piece.
+     * @param pieceName String representing name of the Piece to be dropped
+     * @param dropLoc   Location representing position to drop Piece on
+     * @return  boolean - true if the drop was executed, false if any failure occured
+     */
+    private boolean drop(Player captor, String pieceName, Location dropLoc) {
         Piece checkPresencePiece = this.getPiece(dropLoc);
         if (pieceName.equals("p") || pieceName.equals("P")) {
             Piece pawn = captor.getPieceFromBoard("p");
@@ -649,30 +740,39 @@ public class Board {
         return true;
     }
 
-    public boolean promote(Location startLoc, Location endLoc) {
+    /**
+     * This method is used to promote a Piece. It calls the promote method within the Piece class if the Piece
+     *  was in the right position to be promoted.
+     * @param startLoc
+     * @param endLoc
+     * @return boolean - true if promotion was executed, false if any failure occured
+     */
+    private boolean promote(Location startLoc, Location endLoc) {
         Piece piece = this.getPiece(endLoc);
-//        System.out.println("Player : " + piece.getPlayer().toString() + " , piece : " + piece.toString());
         if (piece.getPlayer().isUpper()) {
             if (startLoc.getRow() != 0 && endLoc.getRow() != 0) {
-//                throw new IllegalArgumentException("Cannot promote. Not in promotion zone.");
                 return false;
             }
         } else {
             if (startLoc.getRow() != 4 && endLoc.getRow() != 4) {
-//                throw new IllegalArgumentException("Cannot promote. Not in promotion zone.");
                 return false;
             }
         }
         return piece.promote();
     }
 
+    /**
+     * This function creates a new Piece with a specific Location field. This is used in file mode to initialize pieces.
+     * @param piece String indicating type of piece to be made
+     * @param loc   Location representing position the Piece should be placed
+     * @return  Piece object
+     */
     public Piece createPiece(String piece, Location loc) {
         String pieceName = piece.substring(piece.length() - 1);
         boolean promoted = false;
         if (piece.charAt(0) == '+') {
             promoted = true;
         }
-
         if (pieceName.equalsIgnoreCase("p")) {
             Player curr;
             if (pieceName.equals("p"))

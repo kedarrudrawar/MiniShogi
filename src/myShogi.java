@@ -270,19 +270,15 @@ public class myShogi {
                 }
             }
 
-
-
             if(lastMove) {
                 System.out.println(this.board.printBoardAndStats());
                 System.out.print(availableMoves);
                 if (!success) {
-                    if (checkmate) {
+                    if (checkmate)
                         System.out.println(opponentPlayer.toString() + " player wins.  Checkmate.");
-                        System.exit(0);
-                    } else {
+                    else
                         System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
-                        System.exit(0);
-                    }
+                    System.exit(0);
                 }
                 currPlayer.incrementTurn();
                 if (moveCountLimit(currPlayer, command)) {
