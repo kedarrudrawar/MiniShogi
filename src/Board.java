@@ -1,10 +1,14 @@
-import javax.swing.*;
 import java.util.*;
 import java.util.stream.*;
-
+/*
+ * File - Board.java
+ *
+ * Board class - implements functionality of the miniShogi game
+ */
 
 /**
- * Class: Board - stores 2D array of Piece objects that represent the miniShogi board.
+ * Board object.
+ * stores 2D array of Piece objects that represent the miniShogi board.
  *
  * @author Kedar Rudrawar
  */
@@ -19,8 +23,6 @@ public class Board {
     private Piece[][] board;
     private Player upper;
     private Player lower;
-
-
 
     /**
      * Constructor - used in Interactive Mode
@@ -54,36 +56,6 @@ public class Board {
      */
     public Player getUpper() {
         return this.upper;
-    }
-
-    /**
-     * This function returns the opponent of a Player
-     * @param player    Player whose opponent will be returned
-     * @return a Player - opponent
-     */
-    private Player getOpponent(Player player) {
-        if (player.isUpper())
-            return this.getLower();
-        else
-            return this.getUpper();
-    }
-
-    /**
-     * This function returns a Piece object stored at a Location on the board
-     * @param pos   Location representing desired Piece's position
-     * @return a Piece
-     */
-    private Piece getPiece(Location pos) {
-        return this.board[pos.getCol()][pos.getRow()];
-    }
-
-    /**
-     * This function sets a specific Location on the board to a given Piece
-     * @param pos   Location on the board to be set
-     * @param piece Piece to be set
-     */
-    private void setPiece(Location pos, Piece piece) {
-        this.board[pos.getCol()][pos.getRow()] = piece;
     }
 
     /**
@@ -378,6 +350,37 @@ public class Board {
             }
             this.lower.addToCapturedList(this.createPiece(piece, null));
         }
+    }
+
+    /**
+     * This function returns the opponent of a Player
+     * @param player    Player whose opponent will be returned
+     * @return a Player - opponent
+     */
+    private Player getOpponent(Player player) {
+        if (player.isUpper())
+            return this.getLower();
+        else
+            return this.getUpper();
+    }
+
+    /**
+     * This function returns a Piece object stored at a Location on the board
+     * @param pos   Location representing desired Piece's position
+     * @return a Piece
+     */
+    private Piece getPiece(Location pos) {
+        return this.board[pos.getCol()][pos.getRow()];
+    }
+
+    /**
+     * This function sets a specific Location on the board to a given Piece
+     * @param pos   Location on the board to be set
+     * @param piece Piece to be set
+     * @return void
+     */
+    private void setPiece(Location pos, Piece piece) {
+        this.board[pos.getCol()][pos.getRow()] = piece;
     }
 
     /**

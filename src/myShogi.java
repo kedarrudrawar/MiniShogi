@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 /**
  * The class myShogi to run the game miniShogi, in interactive or file mode.
  *
@@ -12,43 +11,77 @@ import java.util.stream.Stream;
  */
 
 public class myShogi {
+    private static final int TURNLIMIT = 200;
+    private static final String ILLEGALSTRING = " player wins.  Illegal move.";
+    private static final String CHECKMATESTRING = " player wins.  Checkmate.";
+    private static final String TIESTRING = " Tie game.  Too many moves.";
+
     private Board board;
 
-    private static final int TURNLIMIT = 200;
-
-
+    /**
+     * No-Argument constructor for myShogi.
+     * Instantiates new Board object.
+     */
     public myShogi() {
         this.board = new Board();
     }
 
+    /**
+     * Constructor for myShogi - used in File mode.
+     * @param tc    TestCase object containing initialization data
+     */
     public myShogi(Utils.TestCase tc) {
         this.board = new Board(tc);
     }
 
-    public void printBoardAndStats() {
+    /**
+     * This method prints out the current state of the game.
+     * @return void
+     */
+    private void printBoardAndStats() {
         Utils.stringifyBoard(this.board.getBoard());
         System.out.println(this.board.printBoardAndStats());
     }
 
-    public void printIllegalMoveOutput(Player winnerPlayer) {
+    /**
+     * This method prints current game state and a string indicating opponent win due to an illegal move.
+     * @param winnerPlayer  Player that won
+     * @return void
+     */
+    private void printIllegalMoveOutput(Player winnerPlayer) {
         System.out.println(this.board.printBoardAndStats());
-        System.out.println(winnerPlayer.toString() + " player wins.  Illegal move.");
+        System.out.println(winnerPlayer.toString() + ILLEGALSTRING);
     }
 
-    public void printCheckmateOutput(Player winnerPlayer) {
+    /**
+     * This method prints current game state and a string indicating opponent win due to checkmate.
+     * @param winnerPlayer  Player that won
+     * @return void
+     */
+    private void printCheckmateOutput(Player winnerPlayer) {
         System.out.println(this.board.printBoardAndStats());
-        System.out.println(winnerPlayer.toString() + " player wins.  Checkmate.");
+        System.out.println(winnerPlayer.toString() + CHECKMATESTRING);
     }
 
-    public boolean moveCountLimit() {
+    /**
+     * This method checks whether the turn count limit has been reached.
+     * If it has, it will output a String indicating a tie.
+     * @return a boolean - true if reached limit, false otherwise
+     */
+    private boolean moveCountLimit() {
         if (board.getUpper().getTurnCount() == TURNLIMIT && board.getLower().getTurnCount() == TURNLIMIT) {
-            System.out.println("Tie game.  Too many moves.");
+            System.out.println(TIESTRING);
             return true;
         }
         return false;
     }
 
-    public void runInteractiveMode() {
+    /**
+     * This method runs the interactive mode of the game. Calls for user input at each turn, while constantly writing
+     * to output.
+     * @return void
+     */
+    private void runInteractiveMode() {
         // Initialize board
         this.board = new Board();
 
@@ -58,7 +91,6 @@ public class myShogi {
 
         boolean success;
         boolean lowerTurn = true;
-        boolean checkmate = false;
 
         Player currPlayer = lower;
         Player opponentPlayer = upper;
@@ -125,6 +157,12 @@ public class myShogi {
         }
     }
 
+    /**
+     * This method runs the file mode of the game. Takes an input TestCase file to initialize board, runs a series of
+     * inputted commands, and outputs the game state at the end.
+     * @param tc    TestCase Object containing initialization info
+     * @return void
+     */
     public void runFileMode(Utils.TestCase tc) {
         this.board = new Board(tc);
         Player currPlayer = this.board.getLower();
@@ -225,9 +263,11 @@ public class myShogi {
 
     }
 
-
-
-
+    /**
+     * Main method. Run miniShogi here.
+     * @param args  '-i' for interactive mode, '-f' for file mode
+     * @return void
+     */
     public static void main(String[] args) {
         if (args[0].equals("-f")) {
             Utils.TestCase tc = null;
