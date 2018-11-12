@@ -41,13 +41,13 @@ public class Player {
         return null;
     }
 
-    public Piece getPawn() {
-        for (Piece piece : this.onBoardList) {
-            if (piece.getName().equalsIgnoreCase("p")) {
-                return piece;
-            }
+    @Override
+    public boolean equals(Object obj){
+        Player p = (Player) obj;
+        if(this.getName().equals(p.getName())){
+            return true;
         }
-        return null;
+        return false;
     }
 
     public Piece getPieceFromBoard(String pieceName) {

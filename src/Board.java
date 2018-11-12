@@ -437,8 +437,9 @@ public class Board {
      * @return  boolean - true if their Piece, false otherwise
      */
     public boolean isValidPlayer(Player player, Location startLoc) {
-        if (player != this.getPiece(startLoc).getPlayer())
+        if (! player.equals(this.getPiece(startLoc).getPlayer())) {
             return false;
+        }
         return true;
     }
 
@@ -497,8 +498,9 @@ public class Board {
         }
 
         if (!success) {
-            return success;
+            return false;
         }
+
 
         if (promoteCurrPiece) {
             success = this.promote(startLoc, endLoc);
