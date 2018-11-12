@@ -123,6 +123,17 @@ public abstract class Piece {
         this.name = name;
     }
 
+    /**
+     * This method returns whether it is legal for a piece to be dropped in this Location.
+     * (Mainly created for Pawn class, maintains abstraction of the Piece).
+     * @param dropLoc   Location to be dropped
+     * @return a boolean - true if can be dropped, false otherwise
+     */
+    public boolean canDrop(Location dropLoc){
+        return true;
+    }
+
+
     /* Abstract methods */
 
     /**
@@ -143,13 +154,6 @@ public abstract class Piece {
      */
     abstract List<Location> getValidMoves(Location pos);
 
-    /**
-     * This method returns whether it is illegal for a piece to be dropped in this Location.
-     * (Mainly created for Pawn class, maintains abstraction of the Piece).
-     * @param dropLoc   Location to be dropped
-     * @return a boolean - true if can be dropped, false otherwise
-     */
-    abstract boolean canDrop(Location dropLoc);
 }
 
 /**
@@ -207,6 +211,7 @@ class Bishop extends Piece {
             }
         }
 
+
         if (colDiff != rowDiff)
             return retList;
 
@@ -225,15 +230,6 @@ class Bishop extends Piece {
         }
 
         return retList;
-    }
-
-    /**
-     * This method returns true as a Bishop can be dropped anywhere that's empty.
-     * @param dropLoc   Location to be dropped
-     * @return a boolean - true
-     */
-    public boolean canDrop(Location dropLoc){
-        return true;
     }
 
     /**
@@ -262,10 +258,10 @@ class Rook extends Piece {
     }
 
     /**
-     * Constructor - Generates Bishop object, sets promotable piece to King object, initializes name, Player, Location
+     * Constructor - Generates Rook object, sets promotable piece to King object, initializes name, Player, Location
      * This is used in file mode, when initializing the Piece at a certain location
-     * @param player    Player owner of Bishop object
-     * @param pos   Location of the Bishop on the board
+     * @param player    Player owner of Rook object
+     * @param pos   Location of the Rook on the board
      */
     public Rook(Player player, Location pos) {
         this.name = "R";
@@ -340,15 +336,6 @@ class Rook extends Piece {
     }
 
     /**
-     * This method returns true as a Rook can be dropped anywhere that's empty.
-     * @param dropLoc   Location to be dropped
-     * @return a boolean - true
-     */
-    public boolean canDrop(Location dropLoc){
-        return true;
-    }
-
-    /**
      * This method returns list of Locations Rook can move to.
      * (Incomplete, because used only for King)
      * @param pos   Location position
@@ -374,6 +361,12 @@ class Pawn extends Piece {
         this.promotionPiece = new GoldGeneral(player);
     }
 
+    /**
+     * Constructor - Generates Pawn object, sets promotable piece to King object, initializes name, Player, Location
+     * This is used in file mode, when initializing the Piece at a certain location
+     * @param player    Player owner of Pawn object
+     * @param pos   Location of the Pawn on the board
+     */
     public Pawn(Player player, Location pos){
         this.name = "P";
         this.player = player;
@@ -381,26 +374,41 @@ class Pawn extends Piece {
         this.currLoc = pos;
     }
 
-
+    /**
+     * This method returns the valid positions a Pawn can go through from its start to end position.
+     * If not promoted, can move one unit forward
+     * If promoted, absorb functionality of King movement
+     * @param startLoc  Location start position
+     * @param endLoc    Location end position
+     * @return  List of Locations - path
+     */
     public List<Location> findValidPath(Location startLoc, Location endLoc) {
         List<Location> retList = new ArrayList<>();
         if(startLoc.equals(endLoc))
             return new ArrayList<>();
 
-//        Check if promoted:
+        // Check if promoted:
         if (this.isPromoted()) {
             List<Location> validPromotedMoves = this.promotionPiece.findValidPath(startLoc, endLoc);
             return validPromotedMoves;
         }
 
+        // Indicates horizontal movement, Illegal
         if (endLoc.getCol() != startLoc.getCol()) {
             return retList;
         }
+
+        // Check for one unit movement forward
         if (Math.abs(endLoc.getRow() - startLoc.getRow()) == 1)
             retList.add(endLoc);
         return retList;
     }
 
+    /**
+     * This method checks whether for illegal  promotions (prevents accidental double promotions)
+     * If move was "move a4 a5 promote", super method would cause double promotion and end
+     * @return a boolean - true if promoted
+     */
     @Override
     public boolean promote(){
         if(this.getPlayer().isUpper()){
@@ -421,6 +429,13 @@ class Pawn extends Piece {
     }
 
 
+    /**
+     * This method returns whether it is legal for a Pawn to be dropped in this Location.
+     * Pawns cannot be dropped in promotion zone
+     * @param dropLoc   Location to be dropped
+     * @return a boolean - true if can be dropped, false otherwise
+     */
+    @Override
     public boolean canDrop(Location dropLoc){
         if(this.getPlayer().isUpper()){
             if(dropLoc.getRow() == 0){
@@ -431,10 +446,15 @@ class Pawn extends Piece {
             if(dropLoc.getRow() == 4)
                 return false;
         }
-        return true;
 
+        return true;
     }
 
+    /**
+     * This method sets the Location of a Pawn object. If the Location is in the promotion zone, it automatically
+     * promotes the Pawn.
+     * @param loc   Location object
+     */
     @Override
     public void setLocation(Location loc){
         this.currLoc = loc;
@@ -449,6 +469,12 @@ class Pawn extends Piece {
         }
     }
 
+    /**
+     * This method returns list of Locations Pawn can move to.
+     * (Incomplete, because used only for King)
+     * @param pos   Location position
+     * @return a List of Locations
+     */
     public List<Location> getValidMoves(Location pos){
         return new ArrayList<Location>();
     }
@@ -458,12 +484,23 @@ class Pawn extends Piece {
  * This class initializes a King object on the board. Enables functionality of checking requested movement.
  */
 class King extends Piece {
+
+    /**
+     * Constructor - Generates King object, initializes name and Player
+     * @param player    Player owner
+     */
     public King(Player player) {
         this.name = "K";
         this.player = player;
         this.promotionPiece = null;
     }
 
+    /**
+     * Constructor - Generates King object, initializes name, Player, Location
+     * This is used in file mode, when initializing the Piece at a certain location
+     * @param player    Player owner of Pawn object
+     * @param pos   Location of the Pawn on the board
+     */
     public King(Player player, Location pos) {
         this.name = "K";
         this.player = player;
@@ -480,20 +517,39 @@ class King extends Piece {
         return false;
     }
 
+    /**
+     * This method returns the valid positions a King can go through from its start to end position.
+     * A King can move one unit in any direction.
+     * @param startLoc  Location start position
+     * @param endLoc    Location end position
+     * @return  List of Locations - path
+     */
     public List<Location> findValidPath(Location startLoc, Location endLoc) {
         List<Location> retList = new ArrayList<Location>();
-        if(startLoc.equals(endLoc))
-            return new ArrayList<>();
+
+        // Check for exactly one unit of movement
         if (Math.abs(startLoc.getCol() - endLoc.getCol()) <= 1 && Math.abs(startLoc.getRow() - endLoc.getRow()) <= 1)
             retList.add(endLoc);
 
         return retList;
     }
 
+    /**
+     * This method returns whether a King can be dropped at a specific Location.
+     * A King cannot be captured, so it cannot be dropped. Return false.
+     * @param dropLoc   Location to be dropped
+     * @return a boolean - false
+     */
     public boolean canDrop(Location dropLoc) {
         return false;
     }
 
+    /**
+     * This method returns a List of Locations that a King can move to in general given a position Location.
+     * This method does not take account of obstructions.
+     * @param pos   Location position
+     * @return  List of Location - validMoves
+     */
     public List<Location> getValidMoves(Location pos) {
         int row = pos.getRow();
         int col = pos.getCol();
@@ -518,31 +574,52 @@ class King extends Piece {
  * This class initializes a SilverGeneral object on the board. Enables functionality of checking requested movement.
  */
 class SilverGeneral extends Piece {
+
+    /**
+     * Constructor - Generates SilverGeneral object, sets promotable piece to GoldGeneral object, initializes name and Player
+     *
+     * @param player Player owner
+     */
     public SilverGeneral(Player player) {
         this.name = "S";
         this.player = player;
         this.promotionPiece = new GoldGeneral(player);
     }
 
-    public SilverGeneral(Player player, Location pos){
+    /**
+     * Constructor - Generates SilverGeneral object, initializes name, Player, Location
+     * This is used in file mode, when initializing the Piece at a certain location
+     *
+     * @param player Player owner of Pawn object
+     * @param pos    Location of the Pawn on the board
+     */
+    public SilverGeneral(Player player, Location pos) {
         this.name = "S";
         this.player = player;
         this.promotionPiece = new GoldGeneral(player);
         this.currLoc = pos;
     }
 
+    /**
+     * This method returns the valid positions a SilverGeneral can go through from its start to end position.
+     * A SilverGeneral can move one unit in any diagonal direction, or one unit forward.
+     *
+     * @param startLoc Location start position
+     * @param endLoc   Location end position
+     * @return List of Locations - path
+     */
     public List<Location> findValidPath(Location startLoc, Location endLoc) {
         List<Location> retList = new ArrayList<>();
 
-        if(startLoc == null)
+        if (startLoc == null)
             System.out.println("STARTLOC = null");
-        if(endLoc == null)
+        if (endLoc == null)
             System.out.println("endLoc = null");
 
-        if(startLoc.equals(endLoc))
+        if (startLoc.equals(endLoc))
             return retList;
-//        Check if promoted:
-        if (this.name.charAt(0) == PLUS_CHAR) {
+        // If promoted, replace movement functionality with Gold General's
+        if (this.isPromoted()) {
             List<Location> validPromotedMoves = this.promotionPiece.findValidPath(startLoc, endLoc);
             return validPromotedMoves;
         }
@@ -550,11 +627,11 @@ class SilverGeneral extends Piece {
         int columnDiff = Math.abs(startLoc.getCol() - endLoc.getCol());
         int rowDiff = Math.abs(startLoc.getRow() - endLoc.getRow());
 
-//        if movement is more than 1 unit, move is illegal
+        // Check if movement is 1 unit
         if (columnDiff > 1 || rowDiff > 1)
             return retList;
 
-//        this indicates diagonal movement, which is okay in any direction
+        // Check for diagonal movement, legal in any direction
         if (columnDiff != 0) {
             if (rowDiff != 0) {
                 retList.add(endLoc);
@@ -562,6 +639,7 @@ class SilverGeneral extends Piece {
             }
         }
 
+        // Cannot move backwards (negative for lower piece, positive for upper piece)
         int multiplier = 1;
         if (this.player.getName().equals("UPPER"))
             multiplier = -1;
@@ -570,29 +648,41 @@ class SilverGeneral extends Piece {
             retList.add(endLoc);
 
         return retList;
-
     }
-    public List<Location> getValidMoves(Location pos){
+
+    /**
+     * This method returns list of Locations SilverGeneral can move to.
+     * (Incomplete, because used only for King)
+     * @param pos Location position
+     * @return List of Location - validMoves
+     */
+    public List<Location> getValidMoves(Location pos) {
         return new ArrayList<Location>();
     }
-
-
-    public boolean canDrop(Location dropLoc){
-        return true;
-    }
-
 }
 
 /**
  * This class initializes a GoldGeneral object on the board. Enables functionality of checking requested movement.
  */
 class GoldGeneral extends Piece {
+
+    /**
+     * Constructor - Generates GoldGeneral object, initializes name and Player
+     * @param player    Player owner
+     */
     public GoldGeneral(Player player) {
         this.name = "G";
         this.player = player;
         this.promotionPiece = null;
     }
 
+    /**
+     * Constructor - Generates SilverGeneral object, initializes name, Player, Location
+     * This is used in file mode, when initializing the Piece at a certain location
+     *
+     * @param player Player owner of Pawn object
+     * @param pos    Location of the Pawn on the board
+     */
     public GoldGeneral(Player player, Location pos) {
         this.name = "G";
         this.player = player;
@@ -600,29 +690,41 @@ class GoldGeneral extends Piece {
         this.currLoc = pos;
     }
 
+    /**
+     * This method returns false, because a GoldGeneral cannot be promoted. Other pieces can be.
+     * @return a boolean - false
+     */
     @Override
     public boolean promote(){
         return false;
     }
 
+    /**
+     * This method returns the valid positions a GoldGeneral can go through from its start to end position.
+     * A GoldGeneral can move one unit in any direction, except backwards diagonals.
+     *
+     * @param startLoc Location start position
+     * @param endLoc   Location end position
+     * @return List of Locations - path
+     */
     public List<Location> findValidPath(Location startLoc, Location endLoc){
         List<Location> retList = new ArrayList<Location>();
-        if(startLoc.equals(endLoc))
-            return new ArrayList<>();
-
-//        check if end position is greater than one unit away from start
         int columnDiff = Math.abs(startLoc.getCol() - endLoc.getCol());
         int rowDiff = Math.abs(startLoc.getRow() - endLoc.getRow());
-        if (columnDiff > 1 || rowDiff > 1) {
-            return retList;
-        }
 
-//        if player is UPPER, their piece's forward movement is vertically negative, so we will use a negative multipler
-//          to identify validity of the move
+        if(startLoc.equals(endLoc))
+            return retList;
+
+        // check if end position is greater than one unit away from start
+        if (columnDiff > 1 || rowDiff > 1)
+            return retList;
+
+        // Cannot move to backwards diagonal (negative for lower piece, positive for upper piece)
         int multiplier = 1;
         if (this.player.getName().equals("UPPER"))
             multiplier = -1;
 
+        // Only applies if there is horizontal AND vertical displacement
         if (columnDiff != 0) {
             if ((multiplier * (endLoc.getRow() - startLoc.getRow())) >= 0) {
                 retList.add(endLoc);
@@ -633,9 +735,13 @@ class GoldGeneral extends Piece {
         }
         return retList;
     }
-    public boolean canDrop(Location dropLoc){
-        return true;
-    }
+
+    /**
+     * This method returns list of Locations GoldGeneral can move to.
+     * (Incomplete, because used only for King)
+     * @param pos Location position
+     * @return List of Location - validMoves
+     */
     public List<Location> getValidMoves(Location pos){
         return new ArrayList<Location>();
     }

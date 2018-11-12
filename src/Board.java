@@ -113,10 +113,13 @@ public class Board {
      * @return a boolean - true if the command was executed, false if any failure occured
      */
     public boolean executeCommand(Player currPlayer, String command) {
-        boolean success = true;
+        boolean success;
 
         String[] inputSplit = command.split(" ");
         String action = inputSplit[0];
+        if(inputSplit.length != 3 && inputSplit.length != 4) {
+            return false;
+        }
 
         if (action.equals(MOVE)) {
             success = executeMove(currPlayer, command);
@@ -382,6 +385,7 @@ public class Board {
         if (!success)
             return false;
 
+
         if (promoteCurrPiece) {
             success = this.promote(startLoc, endLoc);
             if (!success) {
@@ -452,6 +456,7 @@ public class Board {
                 return false;
             }
         }
+
 
         Piece endPiece = this.getPiece(end);
         //  If destination is empty, move Piece
