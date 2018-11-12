@@ -6,7 +6,10 @@ of traditional chess.
 ### 2 modes:
 
 1. Interactive Mode
-   run as 'java myShogi -i'
+
+   run as `java myShogi -i`
+
 2. File Mode
-   run as 'java myShogi -f /path/to/file/'
+
+   run as `java myShogi -f /path/to/file/`
 
