@@ -19,7 +19,7 @@ public class myShogi {
     private Board board;
 
     /**
-     * No-Argument constructor for myShogi.
+     * No - arg constructor for myShogi.
      * Instantiates new Board object.
      */
     public myShogi() {
@@ -163,7 +163,7 @@ public class myShogi {
      * @param tc    TestCase Object containing initialization info
      * @return void
      */
-    public void runFileMode(Utils.TestCase tc) {
+    private void runFileMode(Utils.TestCase tc) {
         this.board = new Board(tc);
         Player currPlayer = this.board.getLower();
         Player opponentPlayer = this.board.getUpper();
@@ -264,8 +264,8 @@ public class myShogi {
     }
 
     /**
-     * Main method. Run miniShogi here.
-     * @param args  '-i' for interactive mode, '-f' for file mode
+     * This is the Main method. Run miniShogi here.
+     * @param args  '-i' for interactive mode, '-f [path]' for file mode
      * @return void
      */
     public static void main(String[] args) {
