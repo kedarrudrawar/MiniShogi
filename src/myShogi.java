@@ -23,12 +23,18 @@ public class myShogi {
     }
 
 
-    public void printInitialOutput(Player currPlayer){
-        String boardString = Utils.stringifyBoard(board.getBoard());
-        System.out.println(board.printBoardAndStats());
-        System.out.print(currPlayer.getName() + "> ");
+    public void printBoardAndStats(Player currPlayer){
+        String boardString = Utils.stringifyBoard(this.board.getBoard());
+        System.out.println(this.board.printBoardAndStats());
     }
 
+    public boolean moveCountLimit(Player currPlayer, String command){
+        if(board.getUpper().getTurnCount() == 200 && board.getLower().getTurnCount() == 200){
+            System.out.println("Tie game.  Too many moves.");
+            return true;
+        }
+        return false;
+    }
     public void runInteractiveMode(){
 //        Initialize board
         Board board = new Board();
@@ -44,7 +50,8 @@ public class myShogi {
         Player opponentPlayer = upper;
 
 //        Initial printing
-        this.printInitialOutput(currPlayer);
+        this.printBoardAndStats(currPlayer);
+        System.out.print(currPlayer.getName() + "> ");
 
         String input = sc.nextLine();
 
@@ -61,9 +68,6 @@ public class myShogi {
 
             if (action.equals("move")) {
                 board.executeMove(currPlayer, input);
-
-
-
 
                 String startPos = inputSplit[1];
                 String endPos = inputSplit[2];
@@ -145,10 +149,8 @@ public class myShogi {
 
                 Location dropLoc = new Location(dropPos);
 
-//                    board.executeDrop(currPlayer, dropPiece, dropLoc);
-
             } else {
-                System.out.println("Illegal move. " + opponentPlayer.toString() + " has won.");
+                System.out.println(opponentPlayer.toString() + " player wins.  Illegal move.");
                 System.exit(0);
             }
 
@@ -181,13 +183,15 @@ public class myShogi {
     }
 
     public void runFileMode(Utils.TestCase tc){
-        Board board = new Board(tc);
+        this.board = new Board(tc);
         boolean lowerTurn = true;
-        Player currPlayer = board.getLower();
-        Player opponentPlayer = board.getUpper();
-        boolean success = true;
+        Player currPlayer = this.board.getLower();
+        Player opponentPlayer = this.board.getUpper();
+
         boolean checkmate = false;
         boolean lastMove = false;
+
+        boolean success;
 
         String availableMoves;
         for (int i = 0; i < tc.moves.size(); i++) {
@@ -196,14 +200,18 @@ public class myShogi {
             String action = commandSplit[0];
             int capturedIndex = 0;
             availableMoves = "";
+
+
             if (i == tc.moves.size() - 1) {
                 lastMove = true;
             }
 
-            success = board.executeCommand(currPlayer, command);
+
+
+            success = this.board.executeCommand(currPlayer, command);
             if (!success) {
                 System.out.println(currPlayer.getName() + " player action: " + command);
-                System.out.println(board.printBoardAndStats());
+                System.out.println(this.board.printBoardAndStats());
                 System.out.println(opponentPlayer.toString() + " player wins.  Illegal move.");
                 System.exit(0);
             }
@@ -211,15 +219,15 @@ public class myShogi {
 
             Piece opponentKing = opponentPlayer.getKing();
             Location opponentKingLoc = opponentKing.getLocation();
-            boolean opponentKingInCheck = board.isInCheckBoolean(opponentPlayer, opponentKingLoc);
+            boolean opponentKingInCheck = this.board.isInCheckBoolean(opponentPlayer, opponentKingLoc);
 
             if (opponentKingInCheck) {
 
-                List<Piece> threateningPieces = board.isInCheck(opponentPlayer, opponentKingLoc);
+                List<Piece> threateningPieces = this.board.isInCheck(opponentPlayer, opponentKingLoc);
 
-                List<String> kingMovesList = board.listValidMoves(opponentKing, opponentKing.getLocation());
-                List<String> dropList = board.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-                List<String> sacrificeMoves = board.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+                List<String> kingMovesList = this.board.listValidMoves(opponentKing, opponentKing.getLocation());
+                List<String> dropList = this.board.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
+                List<String> sacrificeMoves = this.board.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
 
                 List<String> allMoves = this.combineAndSortLists(kingMovesList, dropList, sacrificeMoves);
 
@@ -228,7 +236,7 @@ public class myShogi {
                     success = false;
                     checkmate = true;
                 } else {
-                    availableMoves = board.printCheckOutput(opponentPlayer, allMoves);
+                    availableMoves = this.board.printCheckOutput(opponentPlayer, allMoves);
                 }
             }
 
@@ -244,19 +252,19 @@ public class myShogi {
             lowerTurn = !lowerTurn;
 
             if (lowerTurn) {
-                currPlayer = board.getLower();
-                opponentPlayer = board.getUpper();
+                currPlayer = this.board.getLower();
+                opponentPlayer = this.board.getUpper();
             } else {
-                currPlayer = board.getUpper();
-                opponentPlayer = board.getLower();
+                currPlayer = this.board.getUpper();
+                opponentPlayer = this.board.getLower();
             }
 
             if(lastMove) {
 //                Check for illegal pawn drop here (checkmate)
-                if(action.equals("drop")) {
+                if (action.equals("drop")) {
                     if (commandSplit[1].equalsIgnoreCase("p")) {
-                        if(board.illegalPawnDrop(success, checkmate, opponentPlayer, new Location(commandSplit[2]), capturedIndex)){
-                            System.out.println(board.printBoardAndStats());
+                        if (this.board.illegalPawnDrop(success, checkmate, opponentPlayer, new Location(commandSplit[2]), capturedIndex)) {
+                            System.out.println(this.board.printBoardAndStats());
                             System.out.print(availableMoves);
                             System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
                             System.exit(0);
@@ -264,22 +272,32 @@ public class myShogi {
                     }
                 }
 
-
-                System.out.println(board.printBoardAndStats());
+                System.out.println(this.board.printBoardAndStats());
                 System.out.print(availableMoves);
                 if (!success) {
-                    if(checkmate){
+                    if (checkmate) {
                         System.out.println(opponentPlayer.toString() + " player wins.  Checkmate.");
                         System.exit(0);
-                    }
-                    else {
+                    } else {
                         System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
                         System.exit(0);
                     }
                 }
+                currPlayer.incrementTurn();
+                if (moveCountLimit(currPlayer, command)) {
+                    System.exit(0);
+                }
                 System.out.println(currPlayer.getName() + "> ");
+
             }
-            currPlayer.incrementTurn();
+            else {
+                currPlayer.incrementTurn();
+                if (moveCountLimit(currPlayer, command)) {
+                    System.exit(0);
+                }
+            }
+
+
 
         }
 

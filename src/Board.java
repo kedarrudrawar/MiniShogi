@@ -107,7 +107,7 @@ public class Board {
         return this.upper;
     }
 
-    public Player getOpponent(Player player) {
+    private Player getOpponent(Player player) {
         if (player.isUpper())
             return this.getLower();
         else
@@ -264,7 +264,6 @@ public class Board {
             this.forceMove(endLoc, startLoc);
 
             if (!empty) {
-//                System.out.println("After moving : \n" + Utils.stringifyBoard(this.board));
                 Player originalOwner = this.getOpponent(player);
 
                 player.removeFromCaptured(target);
@@ -272,10 +271,6 @@ public class Board {
                 this.setPiece(endLoc, target);
                 target.setLocation(endLoc);
                 originalOwner.addToBoardList(target);
-
-
-//                System.out.println("After supposedly fixing: \n" + Utils.stringifyBoard(this.board));
-//                System.out.println("Target's new location : " + target.getLocation());
             }
 
             if (currKingCheck) {
@@ -369,7 +364,7 @@ public class Board {
         return moves;
     }
 
-    public boolean checkValidPlayer(Player player, Location startLoc) {
+    public boolean isValidPlayer(Player player, Location startLoc) {
         if (player != this.getPiece(startLoc).getPlayer())
             return false;
         return true;
@@ -385,16 +380,24 @@ public class Board {
         Location startLoc = new Location(inputSplit[1]);
         Location endLoc = new Location(inputSplit[2]);
 
-        boolean promote = false;
+        Piece capturedPiece = this.getPiece(endLoc);
+        boolean wasPromoted = false;
+
+        if(capturedPiece != null){
+            if(capturedPiece.isPromoted())
+                wasPromoted = true;
+        }
+
+        boolean promoteCurrPiece = false;
         if (inputSplit.length == 4) {
             if (inputSplit[3].equals("promote"))
-                promote = true;
+                promoteCurrPiece = true;
             else {
                 return false;
             }
         }
 
-        if (!checkValidPlayer(currPlayer, startLoc)) {
+        if (! isValidPlayer(currPlayer, startLoc)) {
             return false;
         }
 
@@ -411,8 +414,6 @@ public class Board {
             success = this.move(startLoc, endLoc);
             boolean inducedCheck = this.isInCheckBoolean(currPlayer, currKing.getLocation());
             if (inducedCheck) {
-//                TODO: DOUBLE CHECK this line
-//                this.forceMove(endLoc, startLoc);
                 return false;
             }
         }
@@ -421,11 +422,24 @@ public class Board {
             return success;
         }
 
-
-        if (promote) {
+        if (promoteCurrPiece) {
             success = this.promote(startLoc, endLoc);
-            if (!success)
+            if (!success) {
                 this.forceMove(endLoc, startLoc);
+                if(capturedPiece != null){
+
+                    Player originalOwner = this.getOpponent(currPlayer);
+
+                    currPlayer.removeFromCaptured(capturedPiece);
+                    capturedPiece.setPlayer(originalOwner);
+                    this.setPiece(endLoc, capturedPiece);
+                    capturedPiece.setLocation(endLoc);
+                    originalOwner.addToBoardList(capturedPiece);
+                    if(wasPromoted)
+                        capturedPiece.promote();
+
+                }
+            }
         }
         return success;
     }
@@ -456,13 +470,6 @@ public class Board {
         captorPlayer.addToCapturedList(capturedPiece);
         opponentPlayer.removeFromBoard(capturedPiece);
 
-
-//        System.out.println(captorPlayer.getName() + "'s on board : " + captorPlayer.printOnBoard());
-//        System.out.println(captorPlayer.getName() + "'s captured: " + captorPlayer.printCaptured());
-//        System.out.println(opponentPlayer.getName() + "'s on board : " + opponentPlayer.printOnBoard());
-//        System.out.println(opponentPlayer.getName() + "'s captured: " + opponentPlayer.printCaptured());
-
-
         this.setPiece(endPos, captorPiece);
         this.setPiece(startPos, null);
     }
@@ -482,7 +489,6 @@ public class Board {
         startPiece.setLocation(end);
     }
 
-
     /**
      * @param start
      * @param end
@@ -493,16 +499,11 @@ public class Board {
         Piece startPiece = this.getPiece(start);
         Player opponent = this.getOpponent(startPiece.getPlayer());
         if (startPiece == null) {
-//            System.out.println("Cannot move piece that doesn't exist.");
-//            System.out.println(opponent.toString() + " player wins. " + " Illegal move.");
             return false;
         }
 
         List<Location> positions = startPiece.findValidPath(start, end);
         if (positions.size() == 0) {
-//            System.out.println("Called findValidPath on piece : " + startPiece.getName() + " from pos : " + start.toString() + " to " + end.toString());
-//            System.out.println(opponent.toString() + " player wins. " + " Illegal move.");
-//            throw new IllegalArgumentException();
             return false;
         }
 
@@ -511,7 +512,6 @@ public class Board {
             Location currLoc = positions.get(i);
             Piece currPiece = this.getPiece(currLoc);
             if (currPiece != null) {
-//                throw new IllegalArgumentException("Obstructed by: " + currPiece.getName());
                 System.out.println(opponent.toString() + " player wins. Illegal move.");
                 return false;
             }
@@ -591,160 +591,6 @@ public class Board {
         }
         return success;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                /*
-                String startPos = inputSplit[1];
-                String endPos = inputSplit[2];
-
-                Location startLoc = new Location(startPos);
-                Location endLoc = new Location(endPos);
-
-                boolean promote = false;
-
-                if (inputSplit.length == 4) {
-                    if (inputSplit[3].equals("promote"))
-                        promote = true;
-                }
-
-                if (this.getPiece(startLoc).getPlayer() != currPlayer) {
-                    System.out.println("Moving piece that is not yours. Illegal move.");
-                    System.exit(0);
-                }
-
-                Piece currKing = currPlayer.getPieceFromBoard("k");
-
-//  This is to check whether the piece that's moving is the king. If it is, we need to check whether the destination
-//  of the king will put it in check. If it is not, then we just need to check the original position of the king.
-                if (startLoc.equals(currKing.getLocation())) {
-//  If moving the king to this location puts king in check, this is illegal.
-                    boolean currKingCheck = this.isInCheckBoolean(currPlayer, endLoc);
-                    if (currKingCheck) {
-//                        System.out.println("Moving your piece into check. Illegal move.");
-                        success = false;
-                    }
-                    else {
-                        success = this.move(startLoc, endLoc);
-                    }
-                } else {
-
-                    success = this.move(startLoc, endLoc);
-                    boolean currKingCheck = this.isInCheckBoolean(currPlayer, currKing.getLocation());
-                    if (currKingCheck) {
-//                        System.out.println("Moving your piece into check. Illegal move.");
-                        success = false;
-                    }
-                }
-
-                if (promote) {
-                    success = this.promote(startLoc, endLoc);
-                    if(!success)
-                        this.forceMove(endLoc, startLoc);
-                }
-
-                */
-
-
-//        else if (action.equals("drop")) {
-//            String dropPiece = inputSplit[1];
-//            String dropPos = inputSplit[2];
-//
-//            Location dropLoc = new Location(dropPos);
-//            capturedIndex = currPlayer.getIndexFromCaptured(dropPiece);
-//            success = this.drop(currPlayer, dropPiece, dropLoc);
-//
-//        }
-//        else {
-//            System.out.println(Utils.stringifyBoard(this.getBoard()));
-//            System.out.println(opponentPlayer.toString() + " player wins.  Illegal move.");
-//            System.exit(0);
-//        }
-/*
-        Piece opponentKing = opponentPlayer.getKing();
-        Location opponentKingLoc = opponentKing.getLocation();
-        List<Piece> threateningPieces = this.isInCheck(opponentPlayer, opponentKingLoc);
-
-        boolean opponentKingCheck = this.isInCheckBoolean(opponentPlayer, opponentKingLoc);
-        if (opponentKingCheck) {
-            List<String> kingMovesList= this.listValidMoves(opponentKing, opponentKing.getLocation());
-            List<String> dropList = this.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-            List<String> sacrificeMoves = this.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-
-            List<String> allMoves = Stream.concat(sacrificeMoves.stream(), Stream.concat(kingMovesList.stream(),
-                    dropList.stream())).collect(Collectors.toList());
-            Collections.sort(allMoves);
-
-
-
-            if (allMoves.size() == 0) {
-//                        System.out.println(currPlayer.getName() + " player has won.");
-//                        System.exit(0);
-                success = false;
-                checkmate = true;
-            }
-            else {
-                checkString = printCheckOutput(opponentPlayer, allMoves);
-            }
-        }
-
-            if(lastMove) {
-                System.out.println(currPlayer.getName() + " player action: " + command);
-            }
-
-            lowerTurn = !lowerTurn;
-
-            if (lowerTurn) {
-                currPlayer = lower;
-                opponentPlayer = upper;
-            } else {
-                currPlayer = upper;
-                opponentPlayer = lower;
-            }
-
-            if(lastMove) {
-
-//                Check for illegal pawn drop here (checkmate)
-                if(action.equals("drop")) {
-                    if (inputSplit[1].equalsIgnoreCase("p")) {
-                        if(illegalPawnDrop(success, checkmate, opponentPlayer, new Location(inputSplit[2]), capturedIndex)){
-                            System.out.println(printBoardAndStats());
-                            System.out.print(checkString);
-                            System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
-                            System.exit(0);
-                        }
-                    }
-                }
-
-                System.out.println(printBoardAndStats());
-                System.out.print(checkString);
-                if (!success) {
-                    if(checkmate){
-                        System.out.println(opponentPlayer.toString() + " player wins.  Checkmate.");
-                        System.exit(0);
-                    }
-                    else {
-                        System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
-                    }
-                }
-                System.out.println(currPlayer.getName() + "> ");
-            }
-            currPlayer.incrementTurn();
-*/
-
-
-
 
     public void unDrop(Player captor, Location dropLoc, int capturedListIndex){
         Piece droppedPiece = this.getPiece(dropLoc);
