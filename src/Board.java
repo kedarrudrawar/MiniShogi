@@ -385,7 +385,6 @@ public class Board {
         if (!success)
             return false;
 
-
         if (promoteCurrPiece) {
             success = this.promote(startLoc, endLoc);
             if (!success) {

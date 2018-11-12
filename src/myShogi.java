@@ -82,7 +82,6 @@ public class myShogi {
      * @return void
      */
     private void runInteractiveMode() {
-        // Initialize board
         this.board = new Board();
 
         // Initialize players (all pieces of one team are initialized to same player)
@@ -97,19 +96,19 @@ public class myShogi {
 
         Scanner sc = new Scanner(System.in);
 
+        // This string will store any available moves if a king is in check. Reset to "" every move.
         String availableMoves = "";
 
-        // Initial printing
+        // Initial print
         this.printBoardAndStats();
         System.out.print(currPlayer.getName() + "> ");
 
         String input = sc.nextLine();
 
         while (upper.getTurnCount() < TURNLIMIT || lower.getTurnCount() < TURNLIMIT) {
+            availableMoves = "";
             if (input.equals("quit"))
                 return;
-
-            availableMoves = "";
 
             System.out.println(currPlayer.getName() + " player action: " + input);
 
@@ -123,6 +122,7 @@ public class myShogi {
             Location opponentKingLoc = opponentKing.getLocation();
             boolean opponentKingInCheck = this.board.isInCheckBoolean(opponentPlayer, opponentKingLoc);
 
+            //Check if move placed opponent in check
             if (opponentKingInCheck) {
                 List<String> allMoves = this.board.listAllAvailableMoves(opponentPlayer, opponentKingLoc);
 
@@ -136,9 +136,8 @@ public class myShogi {
 
             currPlayer.incrementTurn();
 
-//            Flip turn:
+            // Flip turn
             lowerTurn = !lowerTurn;
-
             if (lowerTurn) {
                 currPlayer = lower;
                 opponentPlayer = upper;
@@ -149,11 +148,9 @@ public class myShogi {
 
             this.printBoardAndStats();
             System.out.print(availableMoves);
-
             System.out.print(currPlayer.getName() + "> ");
 
             input = sc.nextLine();
-
         }
     }
 
@@ -165,6 +162,7 @@ public class myShogi {
      */
     private void runFileMode(Utils.TestCase tc) {
         this.board = new Board(tc);
+
         Player currPlayer = this.board.getLower();
         Player opponentPlayer = this.board.getUpper();
         boolean lowerTurn = true;
@@ -172,7 +170,9 @@ public class myShogi {
         boolean lastMove = false;
         boolean success;
 
+        // This string will store any available moves if a king is in check. Reset to "" every move.
         String availableMoves;
+
         for (int i = 0; i < tc.moves.size(); i++) {
             String command = tc.moves.get(i);
             String[] commandSplit = command.split(" ");
@@ -188,7 +188,7 @@ public class myShogi {
             if (!success) {
                 System.out.println(currPlayer.getName() + " player action: " + command);
                 this.printIllegalMoveOutput(opponentPlayer);
-                System.exit(0);
+                return;
             }
 
             Piece opponentKing = opponentPlayer.getKing();
@@ -209,8 +209,7 @@ public class myShogi {
                 System.out.println(currPlayer.getName() + " player action: " + command);
             }
 
-//            FLIP TURN HERE
-
+            // Flip turn
             lowerTurn = !lowerTurn;
 
             if (lowerTurn) {
@@ -221,17 +220,19 @@ public class myShogi {
                 opponentPlayer = this.board.getLower();
             }
 
+            // check legality of pawn drop
             if (action.equals("drop")) {
                 String pieceName = commandSplit[1];
                 Location dropLoc = new Location(commandSplit[2]);
                 if (pieceName.equalsIgnoreCase("p")) {
                     if (this.board.illegalPawnDrop(success, checkmate, opponentPlayer, dropLoc, capturedIndex)) {
                         this.printIllegalMoveOutput(currPlayer);
-                        System.exit(0);
+                        return;
                     }
                 }
             }
 
+            // Output only on last move
             if (lastMove) {
                 if (!success) {
                     if (checkmate) {
@@ -239,7 +240,7 @@ public class myShogi {
                     } else {
                         this.printIllegalMoveOutput(currPlayer);
                     }
-                    System.exit(0);
+                    return;
                 }
 
                 System.out.println(this.board.printBoardAndStats());
@@ -257,10 +258,7 @@ public class myShogi {
                     System.exit(0);
                 }
             }
-
-
         }
-
     }
 
     /**
