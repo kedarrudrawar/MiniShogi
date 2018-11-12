@@ -1,19 +1,28 @@
 import java.util.*;
 
 public abstract class Piece {
-    //    Fields
+    protected static final char PLUS_CHAR = '+';
+    protected static final String PLUS_STRING = "+";
+    protected static final String PLUS_REGEX = "\\+";
+
     protected Player player;
     protected String name;
     protected Piece promotionPiece;
-    protected Location currPos;
+    protected Location currLoc;
 
-
-    //    Defined methods
+    /**
+     * This method returns a Piece object as a String. It returns the name of a Piece.
+     * @return a String - name
+     */
     @Override
     public String toString() {
         return this.getName();
     }
 
+    /**
+     * This method returns the name of a Piece object
+     * @return a String - name
+     */
     public String getName() {
         if (this.player.isUpper())
             return this.name;
@@ -21,45 +30,71 @@ public abstract class Piece {
             return this.name.toLowerCase();
     }
 
-//    Getter methods
+    /* GETTER methods */
 
     /**
-     *
-     * @return player
+     * This method returns the owner Player of a Piece
+     * @return a Player - owner
      */
     public Player getPlayer() {
         return this.player;
     }
 
+    /**
+     * This method returns the Location of a Piece (null if captured)
+     * @return a Location
+     */
     public Location getLocation(){
-        return this.currPos;
+        return this.currLoc;
     }
 
-//    Setter methods
+    /* SETTER methods */
 
+    /**
+     * This method promotes a Piece (adds a '+' in front of its name)
+     * If already promoted, returns false
+     * @return a boolean - true if successfully promoted, false otherwise
+     */
     public boolean promote() {
-        if(this.getName().charAt(0) == '+') {
+        if(this.getName().charAt(0) == PLUS_CHAR) {
             return false;
         }
-        this.setName("+" + this.name);
+        this.setName(PLUS_STRING + this.name);
         return true;
     }
 
+    /**
+     * This method is used to forcePromote a piece, even if its not in the right location.
+     * This is used to promote a piece when creating Piece objects in File mode at specific locations.
+     * @return void
+     */
     public void forcePromote(){
-        this.setName("+" + this.name);
+        this.setName(PLUS_STRING + this.name);
     }
 
-
+    /**
+     * This method is used to demote a Piece object.
+     * @return void
+     */
     public void demote(){
-        this.name = this.name.split("\\+")[1];
+        this.name = this.name.split(PLUS_REGEX)[1];
     }
 
+    /**
+     * This method returns whether a Piece is promoted.
+     * @return a boolean - true if promoted, false otherwise
+     */
     public boolean isPromoted(){
-        if(this.name.charAt(0) == '+')
+        if(this.name.charAt(0) == PLUS_CHAR)
             return true;
         return false;
     }
 
+    /**
+     * This method sets the owner of a Piece to an inputted Player
+     * @param newPlayer Player owner
+     * @return void
+     */
     public void setPlayer(Player newPlayer){
         this.player = newPlayer;
         if(player.isUpper()){
@@ -70,38 +105,98 @@ public abstract class Piece {
         }
     }
 
+    /**
+     * This method sets the Location of a piece to an inputted Location.
+     * @param loc   Location object
+     * @return void
+     */
     public void setLocation(Location loc){
-        this.currPos = loc;
+        this.currLoc = loc;
     }
 
+    /**
+     * This method sets the name field of a Piece to a String name
+     * @param name  String name
+     * @return void
+     */
     public void setName(String name){
         this.name = name;
     }
 
+    /* Abstract methods */
 
-    //    Abstract methods
+    /**
+     * This method returns a List of Locations, which form a valid path for a Piece to move from a startLoc to endLoc.
+     * If the path is invalid, the returned List is empty.
+     * @param startLoc  Location start position
+     * @param endLoc    Location end position
+     * @return  List of Locations - paths
+     */
     abstract List<Location> findValidPath(Location startLoc, Location endLoc);
+
+    /**
+     * This method returns a List of Locations that a Piece can move to in general given a position Location.
+     * This method does not take account of obstructions.
+     * (Mainly created for King class, maintains abstraction of the Piece).
+     * @param pos   Location position
+     * @return  List of Location - validMoves
+     */
     abstract List<Location> getValidMoves(Location pos);
+
+    /**
+     * This method returns whether it is illegal for a piece to be dropped in this Location.
+     * (Mainly created for Pawn class, maintains abstraction of the Piece).
+     * @param dropLoc   Location to be dropped
+     * @return a boolean - true if can be dropped, false otherwise
+     */
     abstract boolean canDrop(Location dropLoc);
 }
 
-
+/**
+ * This class initializes a Bishop object on the board. Enables functionality of checking requested movement.
+ */
 class Bishop extends Piece {
+    /**
+     * Constructor - Generates Bishop object, sets promotable piece to King object, initializes name and Player
+     * @param player    Player owner
+     */
     public Bishop(Player player){
         this.name = "B";
         this.player = player;
         this.promotionPiece = new King(player);
     }
 
+    /**
+     * Constructor - Generates Bishop object, sets promotable piece to King object, initializes name, Player, Location
+     * This is used in file mode, when initializing the Piece at a certain location
+     * @param player    Player owner of Bishop object
+     * @param pos   Location of the Bishop on the board
+     */
     public Bishop(Player player, Location pos) {
         this.name = "B";
         this.player = player;
         this.promotionPiece = new King(player);
-        this.currPos = pos;
+        this.currLoc = pos;
     }
 
+    /**
+     * This method returns the valid positions a bishop can go through from its start to end position.
+     * If not promoted, can move diagonally in any direction
+     * If promoted, absorb functionality of King movement
+     * @param startLoc  Location start position
+     * @param endLoc    Location end position
+     * @return  List of Locations - path
+     */
     public List<Location> findValidPath(Location startLoc, Location endLoc) {
         List<Location> retList = new ArrayList<Location>();
+        int colDiff = Math.abs(startLoc.getCol() - endLoc.getCol());
+        int rowDiff = Math.abs(startLoc.getRow() - endLoc.getRow());
+
+        int startCol = startLoc.getCol();
+        int startRow = startLoc.getRow();
+        int endCol = endLoc.getCol();
+
+        // source and destination are the same, Illegal move
         if(startLoc.equals(endLoc))
             return retList;
 
@@ -112,17 +207,10 @@ class Bishop extends Piece {
             }
         }
 
-        int colDiff = Math.abs(startLoc.getCol() - endLoc.getCol());
-        int rowDiff = Math.abs(startLoc.getRow() - endLoc.getRow());
-        if (colDiff != rowDiff) {
+        if (colDiff != rowDiff)
             return retList;
-        }
 
-        int startCol = startLoc.getCol();
-        int startRow = startLoc.getRow();
-
-        int endCol = endLoc.getCol();
-
+        // Check whether the bishop is moving up or down, left or right (up/right are +, left/down are -)
         int colAdder = 1;
         int rowAdder = 1;
         if(startLoc.getCol() > endLoc.getCol())
@@ -135,41 +223,71 @@ class Bishop extends Piece {
             startRow += rowAdder;
             retList.add(new Location(startCol, startRow));
         }
+
         return retList;
     }
 
-
+    /**
+     * This method returns true as a Bishop can be dropped anywhere that's empty.
+     * @param dropLoc   Location to be dropped
+     * @return a boolean - true
+     */
     public boolean canDrop(Location dropLoc){
         return true;
     }
 
-
+    /**
+     * This method returns list of Locations Bishop can move to.
+     * (Incomplete, because used only for King)
+     * @param pos   Location position
+     * @return  List of Locations
+     */
     public List<Location> getValidMoves(Location pos){
         return new ArrayList<Location>();
     }
 }
 
-
+/**
+ * This class initializes a Rook object on the board. Enables functionality of checking requested movement.
+ */
 class Rook extends Piece {
+    /**
+     * Constructor - Generates Rook object, sets promotable piece to King object, initializes name and Player
+     * @param player    Player owner
+     */
     public Rook(Player player){
         this.name = "R";
         this.player = player;
         this.promotionPiece = new King(player);
     }
 
+    /**
+     * Constructor - Generates Bishop object, sets promotable piece to King object, initializes name, Player, Location
+     * This is used in file mode, when initializing the Piece at a certain location
+     * @param player    Player owner of Bishop object
+     * @param pos   Location of the Bishop on the board
+     */
     public Rook(Player player, Location pos) {
         this.name = "R";
         this.player = player;
         this.promotionPiece = new King(player);
-        this.currPos = pos;
+        this.currLoc = pos;
     }
 
+    /**
+     * This method returns the valid positions a rook can go through from its start to end position.
+     * If not promoted, can move vertically OR horizontally in any direction
+     * If promoted, absorb functionality of King movement
+     * @param startLoc  Location start position
+     * @param endLoc    Location end position
+     * @return  List of Locations - path
+     */
     public List<Location> findValidPath(Location startLoc, Location endLoc) {
         List<Location> retList = new ArrayList<>();
         if(startLoc.equals(endLoc))
             return new ArrayList<>();
 //        Check if promoted:
-        if (this.name.charAt(0) == '+') {
+        if (this.name.charAt(0) == PLUS_CHAR) {
             List<Location> validPromotedMoves = this.promotionPiece.findValidPath(startLoc, endLoc);
             for (Location l : validPromotedMoves) {
                 retList.add(l);
@@ -218,39 +336,38 @@ class Rook extends Piece {
             }
         }
 
-
-
-//        if (horizontal) {
-//            int startCol = Math.min(startPos.getCol(), endPos.getCol()) + 1;
-//            int endCol = Math.max(startPos.getCol(), endPos.getCol());
-//
-//            int row = startPos.getRow();
-//
-//            for (int col = startCol; col <= endCol; col++) {
-//                retList.add(new Location(col, row));
-//            }
-//        } else {
-//            int startRow = Math.min(startPos.getRow(), endPos.getRow()) + 1;
-//            int endRow = Math.max(startPos.getRow(), endPos.getRow());
-//
-//            int col = startPos.getCol();
-//
-//            for (int row = startRow; row <= endRow; row++) {
-//                retList.add(new Location(col, row));
-//            }
-//        }
         return retList;
     }
+
+    /**
+     * This method returns true as a Rook can be dropped anywhere that's empty.
+     * @param dropLoc   Location to be dropped
+     * @return a boolean - true
+     */
     public boolean canDrop(Location dropLoc){
         return true;
     }
+
+    /**
+     * This method returns list of Locations Rook can move to.
+     * (Incomplete, because used only for King)
+     * @param pos   Location position
+     * @return a List of Locations
+     */
     public List<Location> getValidMoves(Location pos){
         return new ArrayList<Location>();
     }
 }
 
-
+/**
+ * This class initializes a Pawn object on the board. Enables functionality of checking requested movement.
+ * Also checks droppability.
+ */
 class Pawn extends Piece {
+    /**
+     * Constructor - Generates  Pawn object, sets promotable piece to King object, initializes name and Player
+     * @param player    Player owner
+     */
     public Pawn(Player player) {
         this.name = "P";
         this.player = player;
@@ -261,7 +378,7 @@ class Pawn extends Piece {
         this.name = "P";
         this.player = player;
         this.promotionPiece = new GoldGeneral(player);
-        this.currPos = pos;
+        this.currLoc = pos;
     }
 
 
@@ -288,15 +405,15 @@ class Pawn extends Piece {
     public boolean promote(){
         if(this.getPlayer().isUpper()){
             if(this.getLocation().getRow() == 0) {
-                if(this.getName().charAt(0) != '+')
-                    this.setName("+" + this.name);
+                if(this.getName().charAt(0) != PLUS_CHAR)
+                    this.setName(PLUS_STRING + this.name);
                 return true;
             }
         }
         else{
             if(this.getLocation().getRow() == 4){
-                if(this.getName().charAt(0) != '+')
-                    this.setName("+" + this.name);
+                if(this.getName().charAt(0) != PLUS_CHAR)
+                    this.setName(PLUS_STRING + this.name);
                 return true;
             }
         }
@@ -320,7 +437,7 @@ class Pawn extends Piece {
 
     @Override
     public void setLocation(Location loc){
-        this.currPos = loc;
+        this.currLoc = loc;
         if(loc != null) {
             if (this.getPlayer().isUpper()) {
                 if (loc.getRow() == 0)
@@ -337,7 +454,9 @@ class Pawn extends Piece {
     }
 }
 
-
+/**
+ * This class initializes a King object on the board. Enables functionality of checking requested movement.
+ */
 class King extends Piece {
     public King(Player player) {
         this.name = "K";
@@ -349,10 +468,13 @@ class King extends Piece {
         this.name = "K";
         this.player = player;
         this.promotionPiece = null;
-        this.currPos = pos;
+        this.currLoc = pos;
     }
 
-
+    /**
+     * This method returns false, because a King cannot be promoted. Other pieces can be.
+     * @return a boolean - false
+     */
     @Override
     public boolean promote(){
         return false;
@@ -366,7 +488,6 @@ class King extends Piece {
             retList.add(endLoc);
 
         return retList;
-
     }
 
     public boolean canDrop(Location dropLoc) {
@@ -377,6 +498,8 @@ class King extends Piece {
         int row = pos.getRow();
         int col = pos.getCol();
         List<Location> possibleMoves = new ArrayList<>();
+        // Use -1 to include the Location to the left, bottom, and bottom-left
+        // Use +2 to include the Location to the right, top, and top-right
         for(int i = col - 1; i < col + 2; i++){
             for(int j = row - 1; j < row + 2; j++){
                 if(i < 0 || i >= 5)
@@ -387,14 +510,13 @@ class King extends Piece {
             }
         }
 
-
         return possibleMoves;
-
     }
 }
 
-
-
+/**
+ * This class initializes a SilverGeneral object on the board. Enables functionality of checking requested movement.
+ */
 class SilverGeneral extends Piece {
     public SilverGeneral(Player player) {
         this.name = "S";
@@ -406,7 +528,7 @@ class SilverGeneral extends Piece {
         this.name = "S";
         this.player = player;
         this.promotionPiece = new GoldGeneral(player);
-        this.currPos = pos;
+        this.currLoc = pos;
     }
 
     public List<Location> findValidPath(Location startLoc, Location endLoc) {
@@ -420,7 +542,7 @@ class SilverGeneral extends Piece {
         if(startLoc.equals(endLoc))
             return retList;
 //        Check if promoted:
-        if (this.name.charAt(0) == '+') {
+        if (this.name.charAt(0) == PLUS_CHAR) {
             List<Location> validPromotedMoves = this.promotionPiece.findValidPath(startLoc, endLoc);
             return validPromotedMoves;
         }
@@ -461,6 +583,9 @@ class SilverGeneral extends Piece {
 
 }
 
+/**
+ * This class initializes a GoldGeneral object on the board. Enables functionality of checking requested movement.
+ */
 class GoldGeneral extends Piece {
     public GoldGeneral(Player player) {
         this.name = "G";
@@ -472,7 +597,7 @@ class GoldGeneral extends Piece {
         this.name = "G";
         this.player = player;
         this.promotionPiece = null;
-        this.currPos = pos;
+        this.currLoc = pos;
     }
 
     @Override

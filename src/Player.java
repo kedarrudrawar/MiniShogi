@@ -80,6 +80,7 @@ public class Player {
                 return piece;
             }
         }
+
         return null;
     }
 
@@ -94,6 +95,7 @@ public class Player {
                 return piece;
             }
         }
+
         return null;
     }
 
@@ -109,7 +111,8 @@ public class Player {
                 return i;
             }
         }
-        return 0;
+
+        return this.capturedList.size();
     }
 
     /**
@@ -215,9 +218,11 @@ public class Player {
      */
     @Override
     public boolean equals(Object obj){
-        Player p = (Player) obj;
-        if(this.getName().equals(p.getName())){
-            return true;
+        if(obj instanceof Player) {
+            Player p = (Player) obj;
+            if (this.getName().equals(p.getName())) {
+                return true;
+            }
         }
         return false;
     }

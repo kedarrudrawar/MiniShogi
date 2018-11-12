@@ -1,10 +1,5 @@
 import java.util.*;
 import java.util.stream.*;
-/*
- * File - Board.java
- *
- * Board class - implements functionality of the miniShogi game
- */
 
 /**
  * Board Class
@@ -24,6 +19,8 @@ public class Board {
     private Player upper;
     private Player lower;
 
+    /* CONSTRUCTORS */
+
     /**
      * Constructor - used in Interactive Mode
      */
@@ -38,7 +35,6 @@ public class Board {
     public Board(Utils.TestCase tc) {
         this.board = this.initializeBoard(tc);
     }
-
 
     /* GETTER methods */
 
@@ -134,70 +130,6 @@ public class Board {
     }
 
     /**
-     * This method moves a piece by force, without adhering to its moving conventions.
-     * This function is used to reverse moves made for testing (see testCheckAfterAction())
-     * @param start source Location for move
-     * @param end   destination Location for move
-     * @return a boolean - to check whether moving the piece puts a piece in check
-     */
-    public boolean move(Location start, Location end) {
-        Piece startPiece = this.getPiece(start);
-        Player opponent = this.getOpponent(startPiece.getPlayer());
-        if (startPiece == null) {
-            return false;
-        }
-
-        List<Location> positions = startPiece.findValidPath(start, end);
-        if (positions.size() == 0) {
-            return false;
-        }
-
-        // Iterate through all the positions except the final position (destination) to check if they are all empty.
-        for (int i = 0; i < positions.size() - 1; i++) {
-            Location currLoc = positions.get(i);
-            Piece currPiece = this.getPiece(currLoc);
-            if (currPiece != null) {
-                return false;
-            }
-        }
-
-        Piece endPiece = this.getPiece(end);
-        //  If destination is empty, move Piece
-        if (endPiece == null) {
-            this.setPiece(end, startPiece);
-            this.setPiece(start, null);
-        }
-        //  If not empty, capture the occupying piece and demote if necessary
-        else {
-            if (endPiece.getPlayer() != opponent) {
-                return false;
-            }
-            if (endPiece.isPromoted()) {
-                endPiece.demote();
-            }
-            this.capture(start, end);
-        }
-        startPiece.setLocation(end);
-
-        return true;
-    }
-
-    /**
-     * This method reverses the action of dropping a Piece onto the board. This is used to reverse a drop made for testing.
-     * @param captor    Player who dropped the Piece onto the board
-     * @param dropLoc   Location at which Piece was bored
-     * @param capturedListIndex Index in the captured ArrayList to place Piece back into
-     * @return void
-     */
-    public void unDrop(Player captor, Location dropLoc, int capturedListIndex){
-        Piece droppedPiece = this.getPiece(dropLoc);
-        captor.removeFromBoard(droppedPiece);
-        captor.addToCapturedList(capturedListIndex, droppedPiece);
-        this.setPiece(dropLoc, null);
-        droppedPiece.setLocation(null);
-    }
-
-    /**
      * This method checks whether dropping a pawn induces a checkmate (which is illegal). This will be called if a player
      * has attempted to drop a pawn.
      * @param success   boolean representing whether anything has failed yet until this method is called
@@ -252,6 +184,7 @@ public class Board {
         return allMoves;
     }
 
+    /* INITIALIZATION methods */
 
     /**
      * This method is used to initialize a board (2D Piece array) given Initialization Information.
@@ -352,6 +285,8 @@ public class Board {
         }
     }
 
+    /* GETTER methods */
+
     /**
      * This function returns the opponent of a Player
      * @param player    Player whose opponent will be returned
@@ -373,6 +308,8 @@ public class Board {
         return this.board[pos.getCol()][pos.getRow()];
     }
 
+    /* SETTER methods */
+
     /**
      * This function sets a specific Location on the board to a given Piece
      * @param pos   Location on the board to be set
@@ -383,36 +320,7 @@ public class Board {
         this.board[pos.getCol()][pos.getRow()] = piece;
     }
 
-    /**
-     * Concatenate three lists together into one and sort the final list.
-     * @param list1 List 1 to be concatenated
-     * @param list2 List 2 to be concatenated
-     * @param list3 List 3 to be concatenated
-     * @return a combined List
-     */
-    private List<String> combineAndSortLists(List<String> list1, List<String> list2, List<String> list3) {
-        List<String> allMoves = Stream.concat(list1.stream(), Stream.concat(list2.stream(),
-                list3.stream())).collect(Collectors.toList());
-        Collections.sort(allMoves);
-
-        return allMoves;
-    }
-
-    /**
-     * This method checks whether a player owns the Piece they are moving.
-     * @param player    Player to check
-     * @param startLoc  Location of the Piece to check
-     * @return a boolean - true if their Piece, false otherwise
-     */
-    private boolean isValidPlayer(Player player, Location startLoc) {
-        if (! player.equals(this.getPiece(startLoc).getPlayer())) {
-            return false;
-        }
-
-        return true;
-    }
-
-    // Execution methods
+    /* EXECUTION methods */
 
     /**
      * This method calls the move method in the this class, returns whether the method was called successfully
@@ -515,28 +423,55 @@ public class Board {
         return success;
     }
 
+    /* ACTION methods */
 
     /**
-     * This method implements capturing a piece for a player and the board. It moves the Piece from the board to the
-     * captor's captured list, and reassigns the respective fields of the Piece.
-     * @param startLoc  source Location of the capturing piece.
-     * @param endLoc    destination Location of capturing piece (original Location of captured piece)
-     * @return void
+     * This method moves a piece by force, without adhering to its moving conventions.
+     * This function is used to reverse moves made for testing (see testCheckAfterAction())
+     * @param start source Location for move
+     * @param end   destination Location for move
+     * @return a boolean - to check whether moving the piece puts a piece in check
      */
-    private void capture(Location startLoc, Location endLoc) {
-//        Initialize variables
-        Piece captorPiece = this.getPiece(startLoc);
-        Piece capturedPiece = this.getPiece(endLoc);
-        Player captorPlayer = captorPiece.getPlayer();
-        Player opponentPlayer = this.getOpponent(captorPlayer);
+    private boolean move(Location start, Location end) {
+        Piece startPiece = this.getPiece(start);
+        Player opponent = this.getOpponent(startPiece.getPlayer());
+        if (startPiece == null) {
+            return false;
+        }
 
-        capturedPiece.setPlayer(captorPlayer);
-        capturedPiece.setLocation(null);
-        captorPlayer.addToCapturedList(capturedPiece);
-        opponentPlayer.removeFromBoard(capturedPiece);
+        List<Location> positions = startPiece.findValidPath(start, end);
+        if (positions.size() == 0) {
+            return false;
+        }
 
-        this.setPiece(endLoc, captorPiece);
-        this.setPiece(startLoc, null);
+        // Iterate through all the positions except the final position (destination) to check if they are all empty.
+        for (int i = 0; i < positions.size() - 1; i++) {
+            Location currLoc = positions.get(i);
+            Piece currPiece = this.getPiece(currLoc);
+            if (currPiece != null) {
+                return false;
+            }
+        }
+
+        Piece endPiece = this.getPiece(end);
+        //  If destination is empty, move Piece
+        if (endPiece == null) {
+            this.setPiece(end, startPiece);
+            this.setPiece(start, null);
+        }
+        //  If not empty, capture the occupying piece and demote if necessary
+        else {
+            if (endPiece.getPlayer() != opponent) {
+                return false;
+            }
+            if (endPiece.isPromoted()) {
+                endPiece.demote();
+            }
+            this.capture(start, end);
+        }
+        startPiece.setLocation(end);
+
+        return true;
     }
 
     /**
@@ -551,6 +486,28 @@ public class Board {
         this.setPiece(endLoc, startPiece);
         this.setPiece(startLoc, null);
         startPiece.setLocation(endLoc);
+    }
+
+    /**
+     * This method implements capturing a piece for a player and the board. It moves the Piece from the board to the
+     * captor's captured list, and reassigns the respective fields of the Piece.
+     * @param startLoc  source Location of the capturing piece.
+     * @param endLoc    destination Location of capturing piece (original Location of captured piece)
+     * @return void
+     */
+    private void capture(Location startLoc, Location endLoc) {
+        Piece captorPiece = this.getPiece(startLoc);
+        Piece capturedPiece = this.getPiece(endLoc);
+        Player captorPlayer = captorPiece.getPlayer();
+        Player opponentPlayer = this.getOpponent(captorPlayer);
+
+        capturedPiece.setPlayer(captorPlayer);
+        capturedPiece.setLocation(null);
+        captorPlayer.addToCapturedList(capturedPiece);
+        opponentPlayer.removeFromBoard(capturedPiece);
+
+        this.setPiece(endLoc, captorPiece);
+        this.setPiece(startLoc, null);
     }
 
     /**
@@ -589,6 +546,21 @@ public class Board {
         captor.moveToBoardList(dropPiece);
 
         return true;
+    }
+
+    /**
+     * This method reverses the action of dropping a Piece onto the board. This is used to reverse a drop made for testing.
+     * @param captor    Player who dropped the Piece onto the board
+     * @param dropLoc   Location at which Piece was bored
+     * @param capturedListIndex Index in the captured ArrayList to place Piece back into
+     * @return void
+     */
+    private void unDrop(Player captor, Location dropLoc, int capturedListIndex){
+        Piece droppedPiece = this.getPiece(dropLoc);
+        captor.removeFromBoard(droppedPiece);
+        captor.addToCapturedList(capturedListIndex, droppedPiece);
+        this.setPiece(dropLoc, null);
+        droppedPiece.setLocation(null);
     }
 
     /**
@@ -685,6 +657,37 @@ public class Board {
                 curr = upper;
             return new King(curr, loc);
         }
+    }
+
+    /* HELPER methods */
+
+    /**
+     * Concatenate three lists together into one and sort the final list.
+     * @param list1 List 1 to be concatenated
+     * @param list2 List 2 to be concatenated
+     * @param list3 List 3 to be concatenated
+     * @return a combined List
+     */
+    private List<String> combineAndSortLists(List<String> list1, List<String> list2, List<String> list3) {
+        List<String> allMoves = Stream.concat(list1.stream(), Stream.concat(list2.stream(),
+                list3.stream())).collect(Collectors.toList());
+        Collections.sort(allMoves);
+
+        return allMoves;
+    }
+
+    /**
+     * This method checks whether a player owns the Piece they are moving.
+     * @param player    Player to check
+     * @param startLoc  Location of the Piece to check
+     * @return a boolean - true if their Piece, false otherwise
+     */
+    private boolean isValidPlayer(Player player, Location startLoc) {
+        if (! player.equals(this.getPiece(startLoc).getPlayer())) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

@@ -68,15 +68,17 @@ public class Location {
 
     /**
      * This method checks equality of two Location objects (whether the row and the column are the same)
-     * @param loc   Location object to compare the calling object to
+     * @param obj   Location object to compare the calling object to
      * @return  a boolean - true if equal, false otherwise
      */
     @Override
-    public boolean equals(Object loc){
-        Location l = (Location) loc;
-        if(this.getRow() == l.getRow()){
-            if(this.getCol() == l.getCol())
-                return true;
+    public boolean equals(Object obj){
+        if(obj instanceof Location) {
+            Location loc = (Location) obj;
+            if (this.getRow() == loc.getRow()) {
+                if (this.getCol() == loc.getCol())
+                    return true;
+            }
         }
         return false;
     }
