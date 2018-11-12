@@ -1,7 +1,11 @@
 import java.util.*;
 import java.util.stream.*;
 
-
+/**
+ * Class: Board - stores 2D array of Piece objects that represent the miniShogi board.
+ *
+ * @author Kedar Rudrawar
+ */
 public class Board {
     private Piece[][] board;
     private Player upper;
@@ -457,11 +461,16 @@ public class Board {
         return success;
     }
 
-
-    public void capture(Location startPos, Location endPos) {
+    /**
+     * This method implements capturing a piece for a player and the board. It moves the Piece from the board to the
+     * captor's captured list, and reassigns the respective fields of the Piece.
+     * @param startLoc  source Location of the capturing piece.
+     * @param endLoc    destination Location of capturing piece (original Location of captured piece)
+     */
+    public void capture(Location startLoc, Location endLoc) {
 //        Initialize variables
-        Piece captorPiece = this.getPiece(startPos);
-        Piece capturedPiece = this.getPiece(endPos);
+        Piece captorPiece = this.getPiece(startLoc);
+        Piece capturedPiece = this.getPiece(endLoc);
         Player captorPlayer = captorPiece.getPlayer();
         Player opponentPlayer = this.getOpponent(captorPlayer);
 
@@ -470,30 +479,29 @@ public class Board {
         captorPlayer.addToCapturedList(capturedPiece);
         opponentPlayer.removeFromBoard(capturedPiece);
 
-        this.setPiece(endPos, captorPiece);
-        this.setPiece(startPos, null);
+        this.setPiece(endLoc, captorPiece);
+        this.setPiece(startLoc, null);
     }
 
     /**
      * This method is only to be used for moving pieces back to original positions. They would have been moved for
      * testing (in method testCheckAfterAction()). This method ignores regular conventions of moving pieces.
-     *
-     * @param start
-     * @param end
+     * @param startLoc  source Location for move
+     * @param endLoc    destination Location for move
      */
-
-    private void forceMove(Location start, Location end) {
-        Piece startPiece = this.getPiece(start);
-        this.setPiece(end, startPiece);
-        this.setPiece(start, null);
-        startPiece.setLocation(end);
+    private void forceMove(Location startLoc, Location endLoc) {
+        Piece startPiece = this.getPiece(startLoc);
+        this.setPiece(endLoc, startPiece);
+        this.setPiece(startLoc, null);
+        startPiece.setLocation(endLoc);
     }
 
     /**
-     * @param start
-     * @param end
-     * @return boolean - to check whether moving the piece puts a piece in check
-     * @throws IllegalArgumentException
+     * This method moves a piece by force, without adhering to its moving conventions.
+     * This function is used to reverse moves made for testing (see testCheckAfterAction())
+     * @param start source Location for move
+     * @param end   destination Location for move
+     * @return  boolean - to check whether moving the piece puts a piece in check
      */
     public boolean move(Location start, Location end) {
         Piece startPiece = this.getPiece(start);
@@ -536,6 +544,10 @@ public class Board {
         return true;
     }
 
+    /**
+     * This method prints out the current state of the board and captured lists of each player.
+     * @return String - output String
+     */
     public String printBoardAndStats() {
         String output = "";
         output += Utils.stringifyBoard(this.getBoard()) + System.getProperty("line.separator");
@@ -556,26 +568,31 @@ public class Board {
         return output;
     }
 
+    /**
+     * This method returns a String containing information of a player who is in check and the available moves they can
+     * make to get out of check.
+     * @param checkedPlayer - Player that is in check
+     * @param allMoves - List of String moves to be printed
+     * @return  String - output String
+     */
     public String printCheckOutput(Player checkedPlayer, List<String> allMoves) {
         String output = "";
         Location opponentKingLoc = checkedPlayer.getPieceFromBoard("k").getLocation();
         output += checkedPlayer.getName() + " player is in check!" + System.getProperty("line.separator");
         output += "Available moves:" + System.getProperty("line.separator");
 
-
-//        for (String kingMove: kingMovesList) {
-//            output += String.format("move %s %s", opponentKingLoc.toString(), kingMove)
-//                    + System.getProperty("line.separator");
-//        }
-//        for (String dropMove : dropList) {
-//            output += dropMove + System.getProperty("line.separator");
-//        }
         for (String sacrifice : allMoves) {
             output += sacrifice + System.getProperty("line.separator");
         }
         return output;
     }
 
+    /**
+     * This method is the general method to execute actions/commands including drop and move.
+     * @param currPlayer - The Player executing the command
+     * @param command - String representing the command ("move a1 a2" or "drop p a2")
+     * @return boolean - true if the command was executed, false if any failure occured
+     */
     public boolean executeCommand(Player currPlayer, String command) {
         boolean success = true;
 
@@ -591,6 +608,7 @@ public class Board {
         }
         return success;
     }
+
 
     public void unDrop(Player captor, Location dropLoc, int capturedListIndex){
         Piece droppedPiece = this.getPiece(dropLoc);
@@ -612,26 +630,18 @@ public class Board {
             }
         }
         if (checkPresencePiece != null) {
-//            System.out.println("Desired position to drop piece is currently occupied by: " +
-//                    checkPiece.getName());
-//            System.out.println("Illegal move. " + opponent.getName() + " wins.");
             return false;
         }
 
         Piece dropPiece = captor.getPieceFromCaptured(pieceName);
 
-        if (dropPiece == null) {
-//            throw new IllegalArgumentException("You have not captured this piece.");
+        if (dropPiece == null)
             return false;
-        }
+
 
 //        Check for dropping validity here (pawns cannot be in same column)
-        if (!dropPiece.canDrop(dropLoc)) {
-//            System.out.println("Cannot drop piece. Illegal move.");
-//            System.out.println(opponent.getName() + " wins.");
-//            System.exit(0);
+        if (!dropPiece.canDrop(dropLoc))
             return false;
-        }
 
         this.setPiece(dropLoc, dropPiece);
         dropPiece.setLocation(dropLoc);

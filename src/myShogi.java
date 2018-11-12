@@ -259,19 +259,20 @@ public class myShogi {
                 opponentPlayer = this.board.getLower();
             }
 
-            if(lastMove) {
-//                Check for illegal pawn drop here (checkmate)
-                if (action.equals("drop")) {
-                    if (commandSplit[1].equalsIgnoreCase("p")) {
-                        if (this.board.illegalPawnDrop(success, checkmate, opponentPlayer, new Location(commandSplit[2]), capturedIndex)) {
-                            System.out.println(this.board.printBoardAndStats());
-                            System.out.print(availableMoves);
-                            System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
-                            System.exit(0);
-                        }
+            if (action.equals("drop")) {
+                if (commandSplit[1].equalsIgnoreCase("p")) {
+                    if (this.board.illegalPawnDrop(success, checkmate, opponentPlayer, new Location(commandSplit[2]), capturedIndex)) {
+                        System.out.println(this.board.printBoardAndStats());
+                        System.out.print(availableMoves);
+                        System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
+                        System.exit(0);
                     }
                 }
+            }
 
+
+
+            if(lastMove) {
                 System.out.println(this.board.printBoardAndStats());
                 System.out.print(availableMoves);
                 if (!success) {
