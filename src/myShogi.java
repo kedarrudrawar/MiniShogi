@@ -7,84 +7,84 @@ import java.util.stream.Stream;
 
 /**
  * The class myShogi to run the game miniShogi, in interactive or file mode.
+ *
  * @author Kedar Rudrawar
  */
 
 public class myShogi {
     private Board board;
 
+    private static final int TURNLIMIT = 200;
 
-    public myShogi(){
+
+    public myShogi() {
         this.board = new Board();
     }
 
-    public myShogi(Utils.TestCase tc){
+    public myShogi(Utils.TestCase tc) {
         this.board = new Board(tc);
     }
 
-
-    public void printBoardAndStats(){
+    public void printBoardAndStats() {
         Utils.stringifyBoard(this.board.getBoard());
         System.out.println(this.board.printBoardAndStats());
     }
 
-    public void printIllegalMoveOutput(Player winnerPlayer){
+    public void printIllegalMoveOutput(Player winnerPlayer) {
         System.out.println(this.board.printBoardAndStats());
         System.out.println(winnerPlayer.toString() + " player wins.  Illegal move.");
     }
 
-    public void printCheckmateOutput(Player winnerPlayer){
+    public void printCheckmateOutput(Player winnerPlayer) {
         System.out.println(this.board.printBoardAndStats());
         System.out.println(winnerPlayer.toString() + " player wins.  Checkmate.");
     }
 
-    public boolean moveCountLimit(){
-        if(board.getUpper().getTurnCount() == 200 && board.getLower().getTurnCount() == 200){
+    public boolean moveCountLimit() {
+        if (board.getUpper().getTurnCount() == TURNLIMIT && board.getLower().getTurnCount() == TURNLIMIT) {
             System.out.println("Tie game.  Too many moves.");
             return true;
         }
         return false;
     }
 
-    public void runInteractiveMode(){
-//        Initialize board
+    public void runInteractiveMode() {
+        // Initialize board
         this.board = new Board();
 
-//        Initialize players (all pieces of one team are initialized to same player)
+        // Initialize players (all pieces of one team are initialized to same player)
         Player lower = this.board.getLower();
         Player upper = this.board.getUpper();
 
-        Scanner sc = new Scanner(System.in);
-
         boolean success;
-
         boolean lowerTurn = true;
+        boolean checkmate = false;
+
         Player currPlayer = lower;
         Player opponentPlayer = upper;
-        boolean checkmate = false;
+
+        Scanner sc = new Scanner(System.in);
 
         String availableMoves = "";
 
-//        Initial printing
+        // Initial printing
         this.printBoardAndStats();
         System.out.print(currPlayer.getName() + "> ");
 
         String input = sc.nextLine();
 
-
-        while (upper.getTurnCount() < 200 || lower.getTurnCount() < 200) {
+        while (upper.getTurnCount() < TURNLIMIT || lower.getTurnCount() < TURNLIMIT) {
             if (input.equals("quit"))
-                System.exit(0);
+                return;
 
             availableMoves = "";
-
 
             System.out.println(currPlayer.getName() + " player action: " + input);
 
             success = this.board.executeCommand(currPlayer, input);
             if (!success) {
                 this.printIllegalMoveOutput(opponentPlayer);
-                System.exit(0);
+                return;
             }
 
             Piece opponentKing = opponentPlayer.getKing();
@@ -92,21 +92,13 @@ public class myShogi {
             boolean opponentKingInCheck = this.board.isInCheckBoolean(opponentPlayer, opponentKingLoc);
 
             if (opponentKingInCheck) {
-                List<Piece> threateningPieces = this.board.isInCheck(opponentPlayer, opponentKingLoc);
-
-                List<String> kingMovesList = this.board.listValidMoves(opponentKing, opponentKing.getLocation());
-                List<String> dropList = this.board.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-                List<String> sacrificeMoves = this.board.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-
-                List<String> allMoves = this.combineAndSortLists(kingMovesList, dropList, sacrificeMoves);
-
+                List<String> allMoves = this.board.listAllAvailableMoves(opponentPlayer, opponentKingLoc);
 
                 if (allMoves.size() == 0) {
-                    success = false;
-                    checkmate = true;
+                    this.printCheckmateOutput(currPlayer);
+                    System.exit(0);
                 } else {
                     availableMoves = this.board.printCheckOutput(opponentPlayer, allMoves);
-
                 }
             }
 
@@ -133,15 +125,13 @@ public class myShogi {
         }
     }
 
-    public void runFileMode(Utils.TestCase tc){
+    public void runFileMode(Utils.TestCase tc) {
         this.board = new Board(tc);
-        boolean lowerTurn = true;
         Player currPlayer = this.board.getLower();
         Player opponentPlayer = this.board.getUpper();
-
+        boolean lowerTurn = true;
         boolean checkmate = false;
         boolean lastMove = false;
-
         boolean success;
 
         String availableMoves;
@@ -152,7 +142,6 @@ public class myShogi {
             int capturedIndex = 0;
             availableMoves = "";
 
-
             if (i == tc.moves.size() - 1) {
                 lastMove = true;
             }
@@ -161,27 +150,15 @@ public class myShogi {
             if (!success) {
                 System.out.println(currPlayer.getName() + " player action: " + command);
                 this.printIllegalMoveOutput(opponentPlayer);
-//                System.out.println(this.board.printBoardAndStats());
-//                System.out.println(opponentPlayer.toString() + " player wins.  Illegal move.");
                 System.exit(0);
             }
-
 
             Piece opponentKing = opponentPlayer.getKing();
             Location opponentKingLoc = opponentKing.getLocation();
             boolean opponentKingInCheck = this.board.isInCheckBoolean(opponentPlayer, opponentKingLoc);
 
             if (opponentKingInCheck) {
-
-                List<Piece> threateningPieces = this.board.isInCheck(opponentPlayer, opponentKingLoc);
-
-                List<String> kingMovesList = this.board.listValidMoves(opponentKing, opponentKing.getLocation());
-                List<String> dropList = this.board.listDropMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-                List<String> sacrificeMoves = this.board.listSacrificeMoves(opponentPlayer, opponentKingLoc, threateningPieces);
-
-                List<String> allMoves = this.combineAndSortLists(kingMovesList, dropList, sacrificeMoves);
-
-
+                List<String> allMoves = this.board.listAllAvailableMoves(opponentPlayer, opponentKingLoc);
                 if (allMoves.size() == 0) {
                     success = false;
                     checkmate = true;
@@ -190,14 +167,11 @@ public class myShogi {
                 }
             }
 
-            if(!success || lastMove){
+            if (!success || lastMove) {
                 System.out.println(currPlayer.getName() + " player action: " + command);
             }
 
-
-            /*
-            Flip turns here:
-             */
+//            FLIP TURN HERE
 
             lowerTurn = !lowerTurn;
 
@@ -220,27 +194,26 @@ public class myShogi {
                 }
             }
 
-            if(lastMove) {
-                System.out.println(this.board.printBoardAndStats());
-                System.out.print(availableMoves);
-
+            if (lastMove) {
                 if (!success) {
                     if (checkmate) {
-                        System.out.println(opponentPlayer.toString() + " player wins.  Checkmate.");
-                    }
-                    else {
-                        System.out.println(currPlayer.toString() + " player wins.  Illegal move.");
+                        this.printCheckmateOutput(opponentPlayer);
+                    } else {
+                        this.printIllegalMoveOutput(currPlayer);
                     }
                     System.exit(0);
                 }
+
+                System.out.println(this.board.printBoardAndStats());
+                System.out.print(availableMoves);
+
                 currPlayer.incrementTurn();
                 if (moveCountLimit()) {
                     System.exit(0);
                 }
                 System.out.println(currPlayer.getName() + "> ");
 
-            }
-            else {
+            } else {
                 currPlayer.incrementTurn();
                 if (moveCountLimit()) {
                     System.exit(0);
@@ -248,23 +221,16 @@ public class myShogi {
             }
 
 
-
         }
 
     }
 
-    public List<String> combineAndSortLists(List<String> list1, List<String> list2, List<String> list3){
-        List<String> allMoves = Stream.concat(list1.stream(), Stream.concat(list2.stream(),
-                list3.stream())).collect(Collectors.toList());
-        Collections.sort(allMoves);
-        return allMoves;
-    }
+
 
 
     public static void main(String[] args) {
         if (args[0].equals("-f")) {
             Utils.TestCase tc = null;
-//            System.out.println("path : " + args[1]);
             try {
                 tc = Utils.parseTestCase(args[1]);
             } catch (Exception e) {
@@ -273,10 +239,8 @@ public class myShogi {
 
             myShogi game = new myShogi(tc);
             game.runFileMode(tc);
-        }
 
-
-        else {
+        } else {
             myShogi game = new myShogi();
             game.runInteractiveMode();
         }

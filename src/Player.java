@@ -7,6 +7,10 @@ public class Player {
     private List<Piece> capturedList;
     private List<Piece> onBoardList;
 
+    /**
+     * Constructor - generate Player object
+     * @param name  String representing player name (UPPER / lower)
+     */
     public Player(String name) {
         this.name = name;
         this.turnCounter = 0;
@@ -14,24 +18,44 @@ public class Player {
         this.onBoardList = new ArrayList<>();
     }
 
-
     // GETTER methods
+
+    /**
+     * Getter for name of Player
+     * @return String - name
+     */
     public String getName() {
         return this.name;
     }
 
+    /**
+     * Getter for number of turns Player has played
+     * @return int - number of turns
+     */
     public int getTurnCount() {
         return this.turnCounter;
     }
 
+    /**
+     * Getter for list of captured Pieces
+     * @return List - Captured Pieces
+     */
     public List<Piece> getCaptured() {
         return this.capturedList;
     }
 
+    /**
+     * Getter for list of Pieces on the board
+     * @return List - Pieces on board
+     */
     public List<Piece> getOnBoard() {
         return this.onBoardList;
     }
 
+    /**
+     * Getter for King Piece
+     * @return Piece - King
+     */
     public Piece getKing() {
         for (Piece piece : this.onBoardList) {
             if (piece.getName().equalsIgnoreCase("k")) {
@@ -104,14 +128,6 @@ public class Player {
 
     }
 
-    public String printCaptured() {
-        return this.capturedList.toString();
-    }
-
-    public String printOnBoard() {
-        return this.onBoardList.toString();
-    }
-
     public void addToCapturedList(Piece piece) {
         this.capturedList.add(piece);
         piece.setPlayer(this);
@@ -133,7 +149,6 @@ public class Player {
     public void incrementTurn() {
         this.turnCounter += 1;
     }
-
 
     @Override
     public String toString() {
