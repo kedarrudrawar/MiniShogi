@@ -1,0 +1,1 @@
+java myShogi -f
