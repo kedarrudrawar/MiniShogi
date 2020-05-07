@@ -48,10 +48,14 @@ class Board extends React.Component{
     }
 
     handleFirstClick(i, j){
-
+        return ;
     }
 
     handleSecondClick(i, j){
+        if(this.state.board[i][j] !== ''){
+            alert('PIECE ALREADY THERE >:(');
+            return false;
+        }
         let click1 = this.state.click1;
         let pieceToMove = this.state.board[click1[0]][click1[1]];
         var newBoard = this.state.board.map(function(arr) {
@@ -62,12 +66,15 @@ class Board extends React.Component{
         newBoard[click1[0]][click1[1]] = '';
         this.setState({
             board: newBoard,
-        })
+        });
+        return true;
     }
 
     handleClick(i, j) {
         // initial click
         if(this.state.click1.length === 0 && this.state.click2.length === 0){
+            if (this.state.board[i][j] === '')
+                return;
             this.setState({
                 click1: [i, j]
             })
@@ -75,20 +82,24 @@ class Board extends React.Component{
 
         //first click:
         else if (this.state.click2.length !== 0) {
+            if (this.state.board[i][j] === '')
+                return;
             this.setState({
                 click1: [i, j],
                 click2: [],
             });
-            this.handleFirstClick(i, j);
         }
 
         //second click
         else{
+            let piece_moved = this.handleSecondClick(i, j);
             console.log('HERE');
-            this.setState({
-                click2: [i, j]
-            });
-            this.handleSecondClick(i, j);
+            if (piece_moved) {
+                this.setState({
+                    click2: [i, j]
+                });
+            }
+
         }
     }
 
