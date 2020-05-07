@@ -18,8 +18,8 @@
 
 const Location = (row, col) => {
         return ({
-            col: 0,
-            row: 0,
+            col: col,
+            row: row,
         });
     };
 export default Location;
