@@ -13,6 +13,10 @@
     width: 34px;
 }
 
+.square_selected {
+    background-color: lightblue;
+}
+
 .square:focus {
     outline: none;
 }

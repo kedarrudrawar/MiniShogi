@@ -1,13 +1,15 @@
 import React from 'react';
-import {Player} from './Player.js';
+import {Player} from './Player';
 import './index.css';
+import {array_equals} from './utils';
+
 
 function Square(props){
     return (
         <button
             key={[props.i, props.j]}
-            className="square"
-            // onClick={}
+            className={`square ${props.selected ? "square_selected" : ""}`}
+            onClick={props.onClick}
         >{props.piece}
         </button>
     );
@@ -21,20 +23,27 @@ class Board extends React.Component{
                         ['','','','','P'],
                         ['','','','',''],
                         ['p','','','',''],
-                        ['r', 'b', 's', 'g', 'k'],
+                        ['k' ,'g' ,'s' ,'b' ,'r'],
                     ];
         this.state = {
             board,
-            click1:false,
-            click2:false,
+            click1:[],
+            click2:[],
         }
     }
     renderSquare(rowIdx, colIdx){
+        let click1 = this.state.click1;
+        let click2 = this.state.click2;
         let piece = this.state.board[rowIdx][colIdx];
+        let selected = false;
+        if (array_equals([rowIdx, colIdx], click1) || array_equals([rowIdx, colIdx], click2))
+            selected = true;
+
         return <Square
-            onClick={() => {this.handleClick(this.props.i,this.props.j)}}
+            onClick={() => {this.handleClick(rowIdx, colIdx)}}
             i = {rowIdx}
             j = {colIdx}
+            selected={selected}
             piece={piece}/>;
     }
 
@@ -43,24 +52,43 @@ class Board extends React.Component{
     }
 
     handleSecondClick(i, j){
+        let click1 = this.state.click1;
+        let pieceToMove = this.state.board[click1[0]][click1[1]];
+        var newBoard = this.state.board.map(function(arr) {
+            return arr.slice();
+        });
 
+        newBoard[i][j] = pieceToMove;
+        newBoard[click1[0]][click1[1]] = '';
+        this.setState({
+            board: newBoard,
+        })
     }
 
     handleClick(i, j) {
-        let click1 = this.state.click1;
+        // initial click
+        if(this.state.click1.length === 0 && this.state.click2.length === 0){
+            this.setState({
+                click1: [i, j]
+            })
+        }
 
-        if (click1) {
+        //first click:
+        else if (this.state.click2.length !== 0) {
             this.setState({
-                click1: false,
-                click2: true
-            });
-            this.handleSecondClick(i, j);
-        } else {
-            this.setState({
-                click1: true,
-                click2: false,
+                click1: [i, j],
+                click2: [],
             });
             this.handleFirstClick(i, j);
+        }
+
+        //second click
+        else{
+            console.log('HERE');
+            this.setState({
+                click2: [i, j]
+            });
+            this.handleSecondClick(i, j);
         }
     }
 
@@ -73,7 +101,7 @@ class Board extends React.Component{
                 return (
                     <div key={rowIdx} className="board-row">
                         {row.map((piece, colIdx) => {
-                            return this.renderSquare(piece, rowIdx, colIdx);
+                            return this.renderSquare(rowIdx, colIdx);
                         })}
                     </div>
                 )
