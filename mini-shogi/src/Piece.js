@@ -1,22 +1,47 @@
 import * as utils from './utils';
+
+/**
+ * Checks if movement from src --> dest is diagonal
+ * @param src
+ * @param dest
+ * @returns {boolean}
+ */
 function isDiagonal(src, dest){
     let [src_row, src_col] = src;
     let [dest_row, dest_col] = dest;
     return Math.abs(dest_row - src_row) === Math.abs(dest_col - src_col);
 }
 
+/**
+ * Checks if movement from src --> dest is vertical
+ * @param src
+ * @param dest
+ * @returns {boolean}
+ */
 function isVertical(src, dest){
     let [src_row, src_col] = src;
     let [dest_row, dest_col] = dest;
     return src_row === dest_row && src_col !== dest_col;
 }
 
+/**
+ * Checks if movement from src --> dest is horizontal
+ * @param src
+ * @param dest
+ * @returns {boolean}
+ */
 function isHorizontal(src, dest){
     let [src_row, src_col] = src;
     let [dest_row, dest_col] = dest;
     return src_row !== dest_row && src_col === dest_col;
 }
 
+/**
+ * Checks if movement from src --> dest is one unit distance
+ * @param src
+ * @param dest
+ * @returns {boolean}
+ */
 function isUnitMove(src, dest){
     let [src_row, src_col] = src;
     let [dest_row, dest_col] = dest;
@@ -103,17 +128,16 @@ export function getGoldGeneralPath(src, dest) {
     return false;
 }
 
-export function validateKingMovement(src, dest) {
-    console.log("king paths")
+export function getKingPath(src, dest) {
     let player = 'upper';
-    let [src_row, src_col] = src;
-    let [dest_row, dest_col] = dest;
+    // let [src_row, src_col] = src;
+    // let [dest_row, dest_col] = dest;
 
-    if(Math.abs(dest_col - src_col) <= 1 && Math.abs(dest_row - src_row) <= 1) {
-        return true;
+    if(isUnitMove(src, dest)){
+        return [dest];
     }
     alert("Illegal move.");
-    return false;
+    return [];
 }
 
 export function getBishopPath(src, dest) {

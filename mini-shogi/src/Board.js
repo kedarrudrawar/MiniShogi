@@ -54,7 +54,7 @@ class Board extends React.Component{
 
 
         return ((Piece.isBishop(piece) && Piece.getBishopPath(src, dest).length !== 0) ||
-            (Piece.isKing(piece) && Piece.validateKingMovement(src, dest).length !== 0) ||
+            (Piece.isKing(piece) && Piece.getKingPath(src, dest).length !== 0) ||
             (Piece.isGoldGeneral(piece) && Piece.getGoldGeneralPath(src, dest).length !== 0) ||
             (Piece.isSilverGeneral(piece) && Piece.getSilverGeneralPath(src, dest).length !== 0) ||
             (Piece.isRook(piece) && Piece.getRookPath(src, dest).length !== 0) ||
