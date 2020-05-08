@@ -1,7 +1,8 @@
 import React from 'react';
 import {Player} from './Player';
 import './index.css';
-import {array_equals} from './utils';
+import * as utils from './utils';
+import * as Piece from './Piece'
 
 
 function Square(props){
@@ -36,7 +37,7 @@ class Board extends React.Component{
         let click2 = this.state.click2;
         let piece = this.state.board[rowIdx][colIdx];
         let selected = false;
-        if (array_equals([rowIdx, colIdx], click1) || array_equals([rowIdx, colIdx], click2))
+        if (utils.array_equals([rowIdx, colIdx], click1) || utils.array_equals([rowIdx, colIdx], click2))
             selected = true;
 
         return <Square
@@ -47,37 +48,53 @@ class Board extends React.Component{
             piece={piece}/>;
     }
 
-    handleFirstClick(i, j){
-        return ;
+    validateMovement(piece, src, dest) {
+        if(utils.array_equals(src, dest))
+            return false;
+
+
+        return ((Piece.isBishop(piece) && Piece.getBishopPath(src, dest).length !== 0) ||
+            (Piece.isKing(piece) && Piece.validateKingMovement(src, dest).length !== 0) ||
+            (Piece.isGoldGeneral(piece) && Piece.getGoldGeneralPath(src, dest).length !== 0) ||
+            (Piece.isSilverGeneral(piece) && Piece.getSilverGeneralPath(src, dest).length !== 0) ||
+            (Piece.isRook(piece) && Piece.getRookPath(src, dest).length !== 0) ||
+            (Piece.isPawn(piece) && Piece.getPawnPath(src, dest).length !== 0)
+        );
+    }
+
+    movePiece(src, dest, board){
+        console.log('trying to move from: ' + src + ' to ' + dest);
+        let piece = board[src[0]][src[1]];
+        if(this.validateMovement(piece, src, dest)) {
+            console.log('valid');
+            board[dest[0]][dest[1]] = board[src[0]][src[1]];
+            board[src[0]][src[1]] = '';
+            this.setState({
+                board: board,
+            });
+        }
     }
 
     handleSecondClick(i, j){
+        // TODO: Fix bug where I can't move after hitting another piece
         if(this.state.board[i][j] !== ''){
             alert('PIECE ALREADY THERE >:(');
             return false;
         }
-        let click1 = this.state.click1;
-        let pieceToMove = this.state.board[click1[0]][click1[1]];
-        var newBoard = this.state.board.map(function(arr) {
+        let newBoard = this.state.board.map(function(arr) {
             return arr.slice();
         });
+        this.movePiece(this.state.click1, [i,j], newBoard);
 
-        newBoard[i][j] = pieceToMove;
-        newBoard[click1[0]][click1[1]] = '';
-        this.setState({
-            board: newBoard,
-        });
         return true;
     }
 
     handleClick(i, j) {
         // initial click
-        if(this.state.click1.length === 0 && this.state.click2.length === 0){
-            if (this.state.board[i][j] === '')
-                return;
-            this.setState({
-                click1: [i, j]
-            })
+        if(this.state.click1.length === 0 && this.state.click2.length === 0) {
+            if (this.state.board[i][j] !== ''){
+                this.setState({click1: [i, j]});
+            }
         }
 
         //first click:
