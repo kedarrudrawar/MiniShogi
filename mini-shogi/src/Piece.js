@@ -1,10 +1,30 @@
 import * as utils from './utils';
-
 function isDiagonal(src, dest){
     let [src_row, src_col] = src;
     let [dest_row, dest_col] = dest;
     return Math.abs(dest_row - src_row) === Math.abs(dest_col - src_col);
+}
 
+function isVertical(src, dest){
+    let [src_row, src_col] = src;
+    let [dest_row, dest_col] = dest;
+    return src_row === dest_row && src_col !== dest_col;
+}
+
+function isHorizontal(src, dest){
+    let [src_row, src_col] = src;
+    let [dest_row, dest_col] = dest;
+    return src_row !== dest_row && src_col === dest_col;
+}
+
+function isUnitMove(src, dest){
+    let [src_row, src_col] = src;
+    let [dest_row, dest_col] = dest;
+    let rowDiff = Math.abs(dest_row - src_row);
+    let colDiff = Math.abs(dest_col - src_col);
+
+    // can only move one space
+    return rowDiff <= 1 && colDiff <= 1;
 }
 
 export function getPawnPath(src, dest) {
@@ -33,7 +53,7 @@ export function getRookPath(src, dest) {
     let [src_row, src_col] = src;
     let [dest_row, dest_col] = dest;
 
-    if(src_row === dest_row && src_col !== dest_col){
+    if(isVertical(src, dest)){
         let col_adder = src_col < dest_col ? 1 : -1;
         src_col += col_adder;
         while (src_col !== dest_col){
@@ -42,7 +62,7 @@ export function getRookPath(src, dest) {
         }
         paths.push([dest_row, dest_col])
     }
-    else if(src_col === dest_col && src_row !== dest_row){
+    else if(isHorizontal(src, dest)){
         let row_adder = src_row < dest_row ? 1 : -1;
         src_row += row_adder;
         while (src_row !== dest_row){
@@ -54,7 +74,6 @@ export function getRookPath(src, dest) {
     else{
         alert("Illegal move.");
     }
-    console.log(paths);
     return paths;
 }
 
@@ -66,22 +85,14 @@ export function getSilverGeneralPath(src, dest) {
     let [src_row, src_col] = src;
     let [dest_row, dest_col] = dest;
 
-    let rowDiff = Math.abs(dest_row - src_row);
-    let colDiff = Math.abs(dest_col - src_col);
+    if(! isUnitMove(src, dest))
+        return [];
 
-    // can only move one space
-    if (rowDiff > 1 || colDiff > 1)
-        return false;
+    // can move behind or diagonally (in any direction)
+    if ((src_row + adder === dest_row && src_col === dest_col) || isDiagonal(src, dest))
+        return [dest];
 
-    // can move behind
-    if (src_row + adder === dest_row && src_col === dest_col)
-        return true;
-
-    // can move diagonally
-    else if(isDiagonal(src, dest))
-        return true;
-
-    return false;
+    return [];
 }
 
 export function getGoldGeneralPath(src, dest) {
@@ -116,10 +127,17 @@ export function getBishopPath(src, dest) {
         return paths;
     }
 
-    // for (let i = Math.min(src_row, dest_row) + 1; i < Math.max(src_row, dest_row); i++){
-    //     paths.push([i, ])
-    // }
+    let row_adder = src_row < dest_row ? 1 : -1;
+    let col_adder = src_col < dest_col ? 1 : -1;
 
+    let curr = src.slice();
+    while(! utils.array_equals(curr, dest)){
+        paths.push(curr);
+        curr[0] += row_adder;
+        curr[1] += col_adder;
+    }
+    paths.push(curr);
+    return paths;
 }
 
 export function isPawn(piece){
