@@ -1,5 +1,7 @@
 package com.MiniShogi.game;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.util.*;
 
 /**
@@ -12,6 +14,7 @@ public abstract class Piece {
     protected static final String PLUS_STRING = "+";
     protected static final String PLUS_REGEX = "\\+";
 
+    @JsonBackReference
     protected Player player;
     protected String name;
     protected Piece promotionPiece;

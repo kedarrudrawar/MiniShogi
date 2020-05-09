@@ -1,6 +1,7 @@
 package com.MiniShogi.game;
 
-import java.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.util.*;
 
 /**
@@ -12,7 +13,11 @@ import java.util.*;
 public class Player {
     private String name;
     private int turnCounter;
+
+    @JsonManagedReference
     private List<Piece> capturedList;
+
+    @JsonManagedReference
     private List<Piece> onBoardList;
 
     /**

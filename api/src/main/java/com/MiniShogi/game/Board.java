@@ -60,8 +60,21 @@ public class Board {
      * This function returns the 2D Piece array stored as a field of the class
      * @return a 2D array of Pieces
      */
-    public Piece[][] getBoard() {
+    public Piece[][] getBoardArray() {
         return this.board;
+    }
+
+    public Map<String, String> getBoardMap(){
+        Piece[][] boardArray = this.getBoardArray();
+        Map<String, String> boardMap = new HashMap<>();
+        for(int i = 0 ; i < boardArray.length; i++){
+            for(int j = 0; j < boardArray[i].length; j++){
+                String pos = String.format("%d,%d", i, j);
+                String pieceName = boardArray[i][j] != null ? boardArray[i][j].toString() : "";
+                boardMap.put(pos, pieceName);
+            }
+        }
+        return boardMap;
     }
 
     /**
@@ -70,7 +83,7 @@ public class Board {
      */
     public String printBoardAndStats() {
         String output = "";
-        output += Utils.stringifyBoard(this.getBoard()) + System.getProperty("line.separator");
+        output += Utils.stringifyBoard(this.getBoardArray()) + System.getProperty("line.separator");
         output += String.format("Captures %s: ", UPPER);
         for (int i = 0; i < upper.getCaptured().size(); i++) {
             if (i != 0)

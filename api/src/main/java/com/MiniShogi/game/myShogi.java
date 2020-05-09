@@ -1,11 +1,7 @@
 package com.MiniShogi.game;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The class myShogi to run the game miniShogi, in interactive or file mode.
@@ -18,7 +14,19 @@ public class myShogi {
     private static final String CHECKMATESTRING = " player wins.  Checkmate.";
     private static final String TIESTRING = " Tie game.  Too many moves.";
 
-    private Board board;
+    public Board board;
+
+    private Player currentPlayer;
+    private Player opponentPlayer;
+
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public Player getOpponentPlayer() {
+        return opponentPlayer;
+    }
+
 
     /**
      * No - arg constructor for myShogi.
@@ -26,6 +34,8 @@ public class myShogi {
      */
     public myShogi() {
         this.board = new Board();
+        this.currentPlayer = this.board.getLower();
+        this.opponentPlayer = this.board.getUpper();
     }
 
     /**
@@ -41,7 +51,7 @@ public class myShogi {
      * @return void
      */
     private void printBoardAndStats() {
-        Utils.stringifyBoard(this.board.getBoard());
+        Utils.stringifyBoard(this.board.getBoardArray());
         System.out.println(this.board.printBoardAndStats());
     }
 
@@ -83,7 +93,7 @@ public class myShogi {
      * to output.
      * @return void
      */
-    private void runInteractiveMode() {
+    public void runInteractiveMode() {
         this.board = new Board();
 
         // Initialize players (all pieces of one team are initialized to same player)
@@ -93,9 +103,6 @@ public class myShogi {
         boolean success;
         boolean lowerTurn = true;
 
-        Player currPlayer = lower;
-        Player opponentPlayer = upper;
-
         Scanner sc = new Scanner(System.in);
 
         // This string will store any available moves if a king is in check. Reset to "" every move.
@@ -103,7 +110,7 @@ public class myShogi {
 
         // Initial print
         this.printBoardAndStats();
-        System.out.print(currPlayer.getName() + "> ");
+        System.out.print(this.currentPlayer.getName() + "> ");
 
         String input = sc.nextLine();
 
@@ -112,45 +119,45 @@ public class myShogi {
             if (input.equals("quit"))
                 return;
 
-            System.out.println(currPlayer.getName() + " player action: " + input);
+            System.out.println(this.currentPlayer.getName() + " player action: " + input);
 
-            success = this.board.executeCommand(currPlayer, input);
+            success = this.board.executeCommand(this.currentPlayer, input);
             if (!success) {
-                this.printIllegalMoveOutput(opponentPlayer);
+                this.printIllegalMoveOutput(this.opponentPlayer);
                 return;
             }
 
-            Piece opponentKing = opponentPlayer.getKing();
+            Piece opponentKing = this.opponentPlayer.getKing();
             Location opponentKingLoc = opponentKing.getLocation();
-            boolean opponentKingInCheck = this.board.isInCheckBoolean(opponentPlayer, opponentKingLoc);
+            boolean opponentKingInCheck = this.board.isInCheckBoolean(this.opponentPlayer, opponentKingLoc);
 
             //Check if move placed opponent in check
             if (opponentKingInCheck) {
-                List<String> allMoves = this.board.listAllAvailableMoves(opponentPlayer, opponentKingLoc);
+                List<String> allMoves = this.board.listAllAvailableMoves(this.opponentPlayer, opponentKingLoc);
 
                 if (allMoves.size() == 0) {
-                    this.printCheckmateOutput(currPlayer);
+                    this.printCheckmateOutput(this.currentPlayer);
                     System.exit(0);
                 } else {
-                    availableMoves = this.board.printCheckOutput(opponentPlayer, allMoves);
+                    availableMoves = this.board.printCheckOutput(this.opponentPlayer, allMoves);
                 }
             }
 
-            currPlayer.incrementTurn();
+            this.currentPlayer.incrementTurn();
 
             // Flip turn
             lowerTurn = !lowerTurn;
             if (lowerTurn) {
-                currPlayer = lower;
-                opponentPlayer = upper;
+                this.currentPlayer = lower;
+                this.opponentPlayer = upper;
             } else {
-                currPlayer = upper;
-                opponentPlayer = lower;
+                this.currentPlayer = upper;
+                this.opponentPlayer = lower;
             }
 
             this.printBoardAndStats();
             System.out.print(availableMoves);
-            System.out.print(currPlayer.getName() + "> ");
+            System.out.print(this.currentPlayer.getName() + "> ");
 
             input = sc.nextLine();
         }
