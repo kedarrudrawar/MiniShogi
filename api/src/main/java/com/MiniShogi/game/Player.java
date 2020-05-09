@@ -1,6 +1,8 @@
 package com.MiniShogi.game;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.util.*;
 
@@ -67,6 +69,7 @@ public class Player {
      * This method is a getter for King Piece
      * @return a Piece - King
      */
+    @JsonIgnore
     public Piece getKing() {
         for (Piece piece : this.onBoardList) {
             if (piece.getName().equalsIgnoreCase("k")) {

@@ -124,6 +124,21 @@ class Board extends React.Component{
 
 
     render() {
+        fetch('http://localhost:8080/currentPlayer')
+            .then((response) => response.text())
+            .then(text => {
+                try {
+                    console.log(text);
+                    const data = JSON.parse(text);
+                    console.log(data);
+                } catch (err){
+                    console.log("its actually text");
+                }
+            })
+            .catch(() => {
+                console.log("Caught exception.");
+            });
+
         return (
             this.state.board.map((row, rowIdx) => {
                 return (

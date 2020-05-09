@@ -1,5 +1,8 @@
 package com.MiniShogi.game;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class Location
  * This class is used to create an object storing the specific position of a Piece on the board at all times
@@ -67,6 +70,14 @@ public class Location {
 
         return loc;
     }
+
+
+//    public List<Integer> getCoordinates(){
+//        List<Integer> coords = new ArrayList<>();
+//        coords.add(this.getRow());
+//        coords.add(this.getCol());
+//        return coords;
+//    }
 
     /**
      * This method checks equality of two Location objects (whether the row and the column are the same)
