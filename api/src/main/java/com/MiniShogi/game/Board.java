@@ -1,5 +1,7 @@
 package com.MiniShogi.game;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.*;
 import java.util.stream.*;
 
@@ -44,6 +46,7 @@ public class Board {
      * This function returns the lower player.
      * @return the lower Player
      */
+    @JsonIgnore
     public Player getLower() {
         return this.lower;
     }
@@ -52,6 +55,7 @@ public class Board {
      * This function returns the upper player.
      * @return the UPPER Player
      */
+    @JsonIgnore
     public Player getUpper() {
         return this.upper;
     }
@@ -64,6 +68,7 @@ public class Board {
         return this.boardArray;
     }
 
+    @JsonIgnore
     public Map<String, String> getBoardMap(){
         Piece[][] boardArray = this.getBoardArray();
         Map<String, String> boardMap = new HashMap<>();

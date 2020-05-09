@@ -72,13 +72,6 @@ public class Location {
     }
 
 
-//    public List<Integer> getCoordinates(){
-//        List<Integer> coords = new ArrayList<>();
-//        coords.add(this.getRow());
-//        coords.add(this.getCol());
-//        return coords;
-//    }
-
     /**
      * This method checks equality of two Location objects (whether the row and the column are the same)
      * @param obj   Location object to compare the calling object to

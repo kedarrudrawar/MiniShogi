@@ -3,6 +3,7 @@ import {Player} from './Player';
 import './index.css';
 import * as utils from './utils';
 import * as Piece from './Piece'
+import * as requests from './requests'
 
 
 function Square(props){
@@ -19,19 +20,41 @@ function Square(props){
 class Board extends React.Component{
     constructor(props){
         super(props);
-        let board = [
-                        ['R', 'B', 'S', 'G', 'K'],
-                        ['','','','','P'],
+
+
+        let emptyBoard = [
                         ['','','','',''],
-                        ['p','','','',''],
-                        ['k' ,'g' ,'s' ,'b' ,'r'],
+                        ['','','','',''],
+                        ['','','','',''],
+                        ['','','','',''],
+                        ['','','','',''],
                     ];
+
         this.state = {
-            board,
+            board: emptyBoard,
             click1:[],
             click2:[],
         }
     }
+
+    componentDidMount() {
+        let board = [
+            ['R', 'B', 'S', 'G', 'K'],
+            ['','','','','P'],
+            ['','','','',''],
+            ['p','','','',''],
+            ['k' ,'g' ,'s' ,'b' ,'r'],
+        ];
+        requests.handleRequest("http://localhost:8080/board")
+            .then((boardObj) => {
+                console.log("setting state now");
+                this.setState({
+                    board
+                });
+            });
+    }
+
+
     renderSquare(rowIdx, colIdx){
         let click1 = this.state.click1;
         let click2 = this.state.click2;
@@ -124,20 +147,7 @@ class Board extends React.Component{
 
 
     render() {
-        fetch('http://localhost:8080/currentPlayer')
-            .then((response) => response.text())
-            .then(text => {
-                try {
-                    console.log(text);
-                    const data = JSON.parse(text);
-                    console.log(data);
-                } catch (err){
-                    console.log("its actually text");
-                }
-            })
-            .catch(() => {
-                console.log("Caught exception.");
-            });
+
 
         return (
             this.state.board.map((row, rowIdx) => {

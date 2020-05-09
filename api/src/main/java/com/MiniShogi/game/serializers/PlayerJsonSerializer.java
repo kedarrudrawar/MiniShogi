@@ -17,6 +17,7 @@ public class PlayerJsonSerializer extends JsonSerializer<Player> {
     public void serialize(Player player, JsonGenerator jsonGen,
                           SerializerProvider serializerProvider) throws IOException, JsonProcessingException{
         jsonGen.writeStartObject();
+
         jsonGen.writeStringField("name", player.getName());
         jsonGen.writeArrayFieldStart("capturedList");
         for(Piece p : player.getCaptured()){
@@ -27,6 +28,18 @@ public class PlayerJsonSerializer extends JsonSerializer<Player> {
             jsonGen.writeEndObject();
         }
         jsonGen.writeEndArray();
+
+        jsonGen.writeArrayFieldStart("onBoardList");
+        for(Piece p : player.getOnBoard()){
+            jsonGen.writeStartObject();
+            jsonGen.writeStringField("name", p.getName());
+
+            jsonGen.writeObjectField("location", p.getLocation());
+            jsonGen.writeEndObject();
+        }
+        jsonGen.writeEndArray();
+
+        jsonGen.writeEndObject();
     }
 
 }
