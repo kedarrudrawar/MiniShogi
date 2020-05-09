@@ -3,7 +3,9 @@ import {Player} from './Player';
 import './index.css';
 import * as utils from './utils';
 import * as Piece from './Piece'
-import * as requests from './requests'
+import * as requests from './api/requests'
+import * as api from './api/api-client'
+import * as deserialize from './api/deserializers'
 
 
 function Square(props){
@@ -45,9 +47,11 @@ class Board extends React.Component{
             ['p','','','',''],
             ['k' ,'g' ,'s' ,'b' ,'r'],
         ];
-        requests.handleRequest("http://localhost:8080/board")
+        requests.handleRequest(api.boardState)
             .then((boardObj) => {
+                const board = deserialize.board_to_array(boardObj);
                 console.log("setting state now");
+                console.log(board);
                 this.setState({
                     board
                 });

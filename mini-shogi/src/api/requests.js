@@ -1,4 +1,5 @@
 
+
 export async function handleRequest(url){
     let data = null;
     await fetch(url)
