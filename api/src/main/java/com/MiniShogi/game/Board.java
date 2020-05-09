@@ -17,7 +17,7 @@ public class Board {
     private static final String UPPER = "UPPER";
     private static final int BOARDSIZE = 5;
 
-    private Piece[][] board;
+    private Piece[][] boardArray;
     private Player upper;
     private Player lower;
 
@@ -27,7 +27,7 @@ public class Board {
      * Constructor - used in Interactive Mode
      */
     public Board() {
-        this.board = this.initializeBoard();
+        this.boardArray = this.initializeBoard();
     }
 
     /**
@@ -35,7 +35,7 @@ public class Board {
      * @param tc    TestCase object including initialization information
      */
     public Board(Utils.TestCase tc) {
-        this.board = this.initializeBoard(tc);
+        this.boardArray = this.initializeBoard(tc);
     }
 
     /* GETTER methods */
@@ -61,7 +61,7 @@ public class Board {
      * @return a 2D array of Pieces
      */
     public Piece[][] getBoardArray() {
-        return this.board;
+        return this.boardArray;
     }
 
     public Map<String, String> getBoardMap(){
@@ -323,7 +323,7 @@ public class Board {
      * @return a Piece
      */
     private Piece getPiece(Location pos) {
-        return this.board[pos.getCol()][pos.getRow()];
+        return this.boardArray[pos.getCol()][pos.getRow()];
     }
 
     /* SETTER methods */
@@ -335,7 +335,7 @@ public class Board {
      * @return void
      */
     private void setPiece(Location pos, Piece piece) {
-        this.board[pos.getCol()][pos.getRow()] = piece;
+        this.boardArray[pos.getCol()][pos.getRow()] = piece;
     }
 
     /* EXECUTION methods */

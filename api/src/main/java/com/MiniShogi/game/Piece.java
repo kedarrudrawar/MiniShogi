@@ -10,15 +10,15 @@ import java.util.*;
  * @author Kedar Rudrawar
  */
 public abstract class Piece {
-    protected static final char PLUS_CHAR = '+';
-    protected static final String PLUS_STRING = "+";
-    protected static final String PLUS_REGEX = "\\+";
+    static final char PLUS_CHAR = '+';
+    static final String PLUS_STRING = "+";
+    private static final String PLUS_REGEX = "\\+";
 
     @JsonBackReference
-    protected Player player;
-    protected String name;
-    protected Piece promotionPiece;
-    protected Location currLoc;
+    Player player;
+    String name;
+    Piece promotionPiece;
+    Location currLoc;
 
     /**
      * This method returns a Piece object as a String. It returns the name of a Piece.

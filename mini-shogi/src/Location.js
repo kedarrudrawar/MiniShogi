@@ -16,6 +16,14 @@
     // if(row >= 0 && row <= 4)
     // this.row = row;
 
+const Location = (row, col) => {
+        return ({
+            col: col,
+            row: row,
+        });
+    };
+export default Location;
+
 /**
  * Constructor - initializes row and column in the board given an input String
  * Col: a - e [inclusive]
