@@ -1,7 +1,4 @@
-package com.MiniShogi.game;
-
-import java.util.ArrayList;
-import java.util.List;
+package com.MiniShogi.game.Service;
 
 /**
  * Class Location

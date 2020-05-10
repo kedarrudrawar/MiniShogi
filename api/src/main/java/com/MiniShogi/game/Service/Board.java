@@ -1,4 +1,4 @@
-package com.MiniShogi.game;
+package com.MiniShogi.game.Service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -346,7 +346,7 @@ public class Board {
     /* EXECUTION methods */
 
     /**
-     * This method calls the move method in the this class, returns whether the method was called successfully
+     * This method calls the move method in this class, returns whether the method was called successfully
      * @param currPlayer    Player performing the action
      * @param input String representing the move action ("move a1 a2")
      * @return a boolean - true if move was successfully made, false otherwise

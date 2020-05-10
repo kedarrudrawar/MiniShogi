@@ -1,8 +1,7 @@
-package com.MiniShogi.game;
+package com.MiniShogi.game.Service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.util.*;
 

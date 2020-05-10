@@ -1,6 +1,7 @@
 import {BOARDSIZE} from "../config";
 
-let initializeBoard = (size) => {
+export let initializeBoard;
+initializeBoard = (size) => {
     let board = [];
     for(let i = 0; i < size; i++){
         let row = [];

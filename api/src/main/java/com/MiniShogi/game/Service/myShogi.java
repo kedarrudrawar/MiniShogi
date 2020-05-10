@@ -1,4 +1,4 @@
-package com.MiniShogi.game;
+package com.MiniShogi.game.Service;
 
 import java.util.List;
 import java.util.Scanner;

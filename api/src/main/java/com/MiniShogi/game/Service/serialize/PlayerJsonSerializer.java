@@ -1,7 +1,7 @@
-package com.MiniShogi.game.serializers;
+package com.MiniShogi.game.Service.serialize;
 
-import com.MiniShogi.game.Piece;
-import com.MiniShogi.game.Player;
+import com.MiniShogi.game.Service.Piece;
+import com.MiniShogi.game.Service.Player;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;

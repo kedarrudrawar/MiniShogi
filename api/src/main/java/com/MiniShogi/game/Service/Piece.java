@@ -1,4 +1,4 @@
-package com.MiniShogi.game;
+package com.MiniShogi.game.Service;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
