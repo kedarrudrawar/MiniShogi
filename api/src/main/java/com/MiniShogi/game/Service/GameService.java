@@ -18,9 +18,12 @@ public class GameService {
     }
 
     public boolean movePiece(String src, String dest){
-        Board board = this.runner.getGame().board;
-        Location src_loc = new Location(src)
-        return board.executeCommand(this.getCurrentPlayer(), "move ");
+        String command = String.format("move %s %s", src, dest);
+        System.out.println(command);
+        return this.runner.getGame().performTurn(command);
     }
 
+    public void resetBoard(){
+        this.runner.resetGame();
+    }
 }

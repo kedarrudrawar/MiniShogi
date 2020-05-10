@@ -1,8 +1,6 @@
 package com.MiniShogi.game.Controller;
 
-import com.MiniShogi.game.Service.Board;
-import com.MiniShogi.game.Service.GameService;
-import com.MiniShogi.game.Service.Player;
+import com.MiniShogi.game.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +22,15 @@ public class GameController {
     }
 
     @PostMapping(value="/move")
-    public boolean movePiece(@RequestBody String src, @RequestBody String dest){
+    public boolean movePiece(@RequestBody MovePiece move){
+        String src = move.getSrc();
+        String dest = move.getDest();
         return this.gameService.movePiece(src, dest);
+    }
+
+    @GetMapping(value = "/resetBoard")
+    public void resetBoard(){
+        this.gameService.resetBoard();
     }
 
 

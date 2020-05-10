@@ -14,4 +14,7 @@ public class GameRunner {
         return this.game;
     }
 
+    public void resetGame(){
+        this.game = new myShogi();
+    }
 }

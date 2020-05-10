@@ -4,9 +4,13 @@ import './index.css';
 import * as utils from './utils';
 import * as Piece from './Piece'
 import * as requests from './api/requests'
-import * as api from './api/api-client'
-import * as deserialize from './api/deserializers'
-
+import * as urls from './api/endpoints'
+import * as deserialize from './api/deserialize'
+import {initializeBoard} from "./api/deserialize";
+import {BOARDSIZE} from "./config";
+import {calibrateLocation} from "./api/serialize";
+import {handleRequest} from "./api/requests";
+import axios from 'axios';
 
 function Square(props){
     return (
@@ -22,42 +26,29 @@ function Square(props){
 class Board extends React.Component{
     constructor(props){
         super(props);
-
-
-        let emptyBoard = [
-                        ['','','','',''],
-                        ['','','','',''],
-                        ['','','','',''],
-                        ['','','','',''],
-                        ['','','','',''],
-                    ];
+        let board = initializeBoard(BOARDSIZE);
 
         this.state = {
-            board: emptyBoard,
+            board,
             click1:[],
             click2:[],
         }
     }
 
     componentDidMount() {
-        let board = [
-            ['R', 'B', 'S', 'G', 'K'],
-            ['','','','','P'],
-            ['','','','',''],
-            ['p','','','',''],
-            ['k' ,'g' ,'s' ,'b' ,'r'],
-        ];
-        requests.handleRequest(api.boardState)
-            .then((boardObj) => {
-                const board = deserialize.board_to_array(boardObj);
-                console.log("setting state now");
-                console.log(board);
-                this.setState({
-                    board
-                });
-            });
+        this.refreshBoard();
     }
 
+    refreshBoard(){
+        axios.get(urls.boardState)
+        .then((boardObj) => {
+            console.log(boardObj.data);
+            const board = deserialize.board_to_array(boardObj.data);
+            this.setState( {
+                board
+            })
+        })
+    }
 
     renderSquare(rowIdx, colIdx){
         let click1 = this.state.click1;
@@ -75,31 +66,22 @@ class Board extends React.Component{
             piece={piece}/>;
     }
 
-    validateMovement(piece, src, dest) {
-        if(utils.array_equals(src, dest))
-            return false;
-
-
-        return ((Piece.isBishop(piece) && Piece.getBishopPath(src, dest).length !== 0) ||
-            (Piece.isKing(piece) && Piece.getKingPath(src, dest).length !== 0) ||
-            (Piece.isGoldGeneral(piece) && Piece.getGoldGeneralPath(src, dest).length !== 0) ||
-            (Piece.isSilverGeneral(piece) && Piece.getSilverGeneralPath(src, dest).length !== 0) ||
-            (Piece.isRook(piece) && Piece.getRookPath(src, dest).length !== 0) ||
-            (Piece.isPawn(piece) && Piece.getPawnPath(src, dest).length !== 0)
-        );
-    }
-
     movePiece(src, dest, board){
-        console.log('trying to move from: ' + src + ' to ' + dest);
-        let piece = board[src[0]][src[1]];
-        if(this.validateMovement(piece, src, dest)) {
-            console.log('valid');
-            board[dest[0]][dest[1]] = board[src[0]][src[1]];
-            board[src[0]][src[1]] = '';
-            this.setState({
-                board: board,
+        src = calibrateLocation(src[0], src[1]);
+        dest = calibrateLocation(dest[0], dest[1]);
+        
+        let body = {
+            'src': src,
+            'dest': dest,
+        };
+
+        axios.post(urls.movePiece, body)
+            .then((response) => {
+                console.log(response.data);
+            })
+            .then(() => {
+                this.refreshBoard();
             });
-        }
     }
 
     handleSecondClick(i, j){
@@ -108,7 +90,7 @@ class Board extends React.Component{
             alert('PIECE ALREADY THERE >:(');
             return false;
         }
-        let newBoard = this.state.board.map(function(arr) {
+        let newBoard = this.state.board.map(function(arr) { 
             return arr.slice();
         });
         this.movePiece(this.state.click1, [i,j], newBoard);
@@ -137,7 +119,6 @@ class Board extends React.Component{
         //second click
         else{
             let piece_moved = this.handleSecondClick(i, j);
-            console.log('HERE');
             if (piece_moved) {
                 this.setState({
                     click2: [i, j]
@@ -151,8 +132,6 @@ class Board extends React.Component{
 
 
     render() {
-
-
         return (
             this.state.board.map((row, rowIdx) => {
                 return (

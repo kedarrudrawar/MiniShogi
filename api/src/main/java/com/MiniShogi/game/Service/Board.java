@@ -377,6 +377,7 @@ public class Board {
 
         // Check if moving piece belongs to currPlayer
         if (!isValidPlayer(currPlayer, startLoc)) {
+            System.out.println("current player:" + currPlayer);
             return false;
         }
 

@@ -19,6 +19,10 @@ public class myShogi {
     private Player currentPlayer;
     private Player opponentPlayer;
 
+    private boolean lowerTurn;
+    private String availableMoves;
+
+
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
@@ -36,6 +40,8 @@ public class myShogi {
         this.board = new Board();
         this.currentPlayer = this.board.getLower();
         this.opponentPlayer = this.board.getUpper();
+        this.availableMoves = "";
+        this.lowerTurn = true;
     }
 
     /**
@@ -88,6 +94,42 @@ public class myShogi {
         return false;
     }
 
+
+    public boolean performTurn(String input){
+        this.availableMoves = "";
+        boolean success = this.board.executeCommand(this.currentPlayer, input);
+        if (!success) {
+            this.printIllegalMoveOutput(this.opponentPlayer);
+            return false;
+        }
+
+        Piece opponentKing = this.opponentPlayer.getKing();
+        Location opponentKingLoc = opponentKing.getLocation();
+        boolean opponentKingInCheck = this.board.isInCheckBoolean(this.opponentPlayer, opponentKingLoc);
+
+        //Check if move placed opponent in check
+        if (opponentKingInCheck) {
+            List<String> allMoves = this.board.listAllAvailableMoves(this.opponentPlayer, opponentKingLoc);
+
+            if (allMoves.size() == 0) {
+                this.printCheckmateOutput(this.currentPlayer);
+                System.exit(0);
+            } else {
+                this.availableMoves = this.board.printCheckOutput(this.opponentPlayer, allMoves);
+            }
+        }
+
+        this.currentPlayer.incrementTurn();
+
+        // Flip turn
+        this.lowerTurn = !this.lowerTurn;
+        Player temp = this.currentPlayer;
+        this.currentPlayer = this.opponentPlayer;
+        this.opponentPlayer = temp;
+
+        return success;
+    }
+
     /**
      * This method runs the interactive mode of the game. Calls for user input at each turn, while constantly writing
      * to output.
@@ -101,7 +143,6 @@ public class myShogi {
         Player upper = this.board.getUpper();
 
         boolean success;
-        boolean lowerTurn = true;
 
         Scanner sc = new Scanner(System.in);
 
@@ -115,45 +156,12 @@ public class myShogi {
         String input = sc.nextLine();
 
         while (upper.getTurnCount() < TURNLIMIT || lower.getTurnCount() < TURNLIMIT) {
-            availableMoves = "";
             if (input.equals("quit"))
                 return;
 
             System.out.println(this.currentPlayer.getName() + " player action: " + input);
 
-            success = this.board.executeCommand(this.currentPlayer, input);
-            if (!success) {
-                this.printIllegalMoveOutput(this.opponentPlayer);
-                return;
-            }
-
-            Piece opponentKing = this.opponentPlayer.getKing();
-            Location opponentKingLoc = opponentKing.getLocation();
-            boolean opponentKingInCheck = this.board.isInCheckBoolean(this.opponentPlayer, opponentKingLoc);
-
-            //Check if move placed opponent in check
-            if (opponentKingInCheck) {
-                List<String> allMoves = this.board.listAllAvailableMoves(this.opponentPlayer, opponentKingLoc);
-
-                if (allMoves.size() == 0) {
-                    this.printCheckmateOutput(this.currentPlayer);
-                    System.exit(0);
-                } else {
-                    availableMoves = this.board.printCheckOutput(this.opponentPlayer, allMoves);
-                }
-            }
-
-            this.currentPlayer.incrementTurn();
-
-            // Flip turn
-            lowerTurn = !lowerTurn;
-            if (lowerTurn) {
-                this.currentPlayer = lower;
-                this.opponentPlayer = upper;
-            } else {
-                this.currentPlayer = upper;
-                this.opponentPlayer = lower;
-            }
+            this.performTurn(input);
 
             this.printBoardAndStats();
             System.out.print(availableMoves);
