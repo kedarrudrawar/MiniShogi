@@ -4,6 +4,8 @@ export const movePiece = base_endpoint + 'move';
 export const dropPiece = base_endpoint + 'drop'
 export const capturedPieces = base_endpoint + 'getCaptured';
 
+export const resetGame = base_endpoint + 'resetBoard';
+
 export function buildCapturedPiecesLink(player) {
     return capturedPieces + "?player=" +player;
 }

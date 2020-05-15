@@ -21,7 +21,6 @@ const UPPER_COLUMN_IDX = BOARDSIZE + 1;
 function Piece(props){
     return (
         <button
-            key={[props.i, props.j]}
             className={`square ${props.selected ? "square_selected" : ""}`}
             onClick={props.onClick}
         >{props.piece}
@@ -54,11 +53,28 @@ class Board extends React.Component{
     }
 
     isDrop(){
-        return this.state.drop.piece !== '';
+        return this.state.drop.piece.length !== 0;
     }
 
     componentDidMount() {
         this.refresh();
+    }
+
+    reset(){
+        axios.get(urls.resetGame);
+        this.refresh();
+        this.setState({
+            move : {
+                click1: [],
+                click2: [],
+            },
+            drop : {
+                piece: [],
+                destination: []
+            },
+            captured_lower: [],
+            captured_upper: [],
+        });
     }
 
     refresh(){
@@ -154,48 +170,44 @@ class Board extends React.Component{
             });
         }
 
-
-
-
-
         // check if click is for dropping a piece or initializing a move of a piece
         else{
             if(this.isDrop()){
                 original_state = JSON.parse(JSON.stringify(this.state.drop));
                 original_state.destination = [i,j]
                 let piece_dropped = this.handleDrop(i, j);
+                if(piece_dropped){
+                    this.setState({
+                        drop: original_state
+                    });
+                }
+            }
+            else{
+                original_state = JSON.parse(JSON.stringify(this.state.move));
+                // initial click
+                if(this.state.move.click1.length === 0 && this.state.move.click2.length === 0) {
+                    if (this.state.board[i][j] !== ''){  // check if square is empty
+                        original_state.click1 = [i,j];
+                    }
+                }
+
+                //second click
+                else{
+                    let piece_moved = this.handleMove(i, j);
+
+                    if (piece_moved) {
+                        original_state.click2 = [i,j];
+                    }
+                    else{
+                        original_state.click1 = [];
+                        original_state.click2 = [];
+                    }
+
+                }
                 this.setState({
-                    drop: original_state
+                    move: original_state
                 });
             }
-
-
-
-
-            original_state = JSON.parse(JSON.stringify(this.state.move));
-            // initial click
-            if(this.state.move.click1.length === 0 && this.state.move.click2.length === 0) {
-                if (this.state.board[i][j] !== ''){  // check if square is empty
-                    original_state.click1 = [i,j];
-                }
-            }
-
-            //second click
-            else{
-                let piece_moved = this.handleMove(i, j);
-
-                if (piece_moved) {
-                    original_state.click2 = [i,j];
-                }
-                else{
-                    original_state.click1 = [];
-                    original_state.click2 = [];
-                }
-
-            }
-            this.setState({
-                move: original_state
-            });
         }
     }
 
@@ -203,18 +215,25 @@ class Board extends React.Component{
 
     render() {
         return (
-            <div className="wrapper">
-                <div className="board">{this.renderBoard()} </div>
-                <div className="game-info">
-                    <div className='captured-column'>
-                        <div className="column-title">Upper Captures</div>
-                        {this.renderCapturedColumn('upper')}
-                    </div>
-                    <div className='captured-column'>
-                        <div className="column-title">Lower Captures</div>
-                        {this.renderCapturedColumn('lower')}
+
+            <div>
+                <div className="wrapper">
+                    <div className="board">{this.renderBoard()} </div>
+                    <div className="game-info">
+                        <div className='captured-column'>
+                            <div className="column-title">Upper Captures</div>
+                            {this.renderCapturedColumn('upper')}
+                        </div>
+                        <div className='captured-column'>
+                            <div className="column-title">Lower Captures</div>
+                            {this.renderCapturedColumn('lower')}
+                        </div>
                     </div>
                 </div>
+                <button 
+                    onClick={()=>{this.reset()}}
+                    >
+                    RESET</button>
             </div>
         );
     }
@@ -227,10 +246,11 @@ class Board extends React.Component{
 renderCapturedColumn(player) {
     let captured = player === 'lower' ? this.state.captured_lower : this.state.captured_upper;
     let column_idx = player === 'lower' ? LOWER_COLUMN_IDX : UPPER_COLUMN_IDX;
-    
-    captured.map((piece, idx) => {
+
+    return captured.map((piece, idx) => {
         return (
         <Piece
+            key={[column_idx, idx]}
             i = {column_idx}
             j = {idx}
             piece={piece}
@@ -252,6 +272,7 @@ renderSquare(rowIdx, colIdx){
         selected = true;
 
     return <Piece
+        key={[rowIdx, colIdx]}
         onClick={() => {this.handleClick(rowIdx, colIdx)}}
         i = {rowIdx}
         j = {colIdx}
