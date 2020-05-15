@@ -1,4 +1,5 @@
 import {BOARDSIZE} from "../config";
+import { capturedPieces } from "./endpoints";
 
 export let initializeBoard;
 initializeBoard = (size) => {
@@ -35,4 +36,12 @@ export function board_to_array(boardObj){
     }
     return boardToReturn;
 
+}
+
+export function capturedToPieces(capturedObj){
+    let pieces = [];
+    for(let i = 0; i < capturedObj.length; i++){
+        pieces.push(capturedObj[i]['name']);
+    }
+    return pieces;
 }

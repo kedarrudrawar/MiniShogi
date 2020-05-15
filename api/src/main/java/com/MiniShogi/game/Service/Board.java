@@ -60,6 +60,20 @@ public class Board {
         return this.upper;
     }
 
+
+    /**
+     * This function returns the desired player
+     * @param player - "lower" or "upper"
+     * @return the designated player
+     */
+    @JsonIgnore
+    public Player getPlayer(String player) {
+        if(player.equals("lower"))
+            return this.getLower();
+        return this.getUpper();
+    }
+
+
     /**
      * This function returns the 2D Piece array stored as a field of the class
      * @return a 2D array of Pieces

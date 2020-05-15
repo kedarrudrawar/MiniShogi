@@ -1,3 +1,11 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+
 .square {
     background: #fff;
     border: 1px solid #999;
@@ -21,8 +29,39 @@
     outline: none;
 }
 
-.board-row:after {
-    clear: both;
-    content: "";
-    display: table;
+.board-row {
+    display: flex;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+    /* border: 1px solid red; */
+}
+
+.board {
+    display: flex;
+    flex-direction: column;
+    margin-left: 5px;
+}
+
+.game-info {
+    display: flex;
+    /* border: 1px solid blue; */
+}
+
+.captured-column {
+    display: flex;
+    flex-direction: column;
+    margin-left: 20px;
+    border: 1px solid green;
+}
+
+.piece {
+    border: 1px solid red;
+}
+
+.column-title {
+    display: flex;
 }

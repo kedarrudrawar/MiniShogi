@@ -127,6 +127,7 @@ public class myShogi {
         this.currentPlayer = this.opponentPlayer;
         this.opponentPlayer = temp;
 
+        this.printBoardAndStats();
         return success;
     }
 
